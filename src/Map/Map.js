@@ -1,22 +1,23 @@
 import "./Map.css"
 import React, { useRef, useState, useEffect } from "react"
 import MapContext from "./MapContext";
-import * as ol from "ol";
+import { View as olView, Map as olMap } from "ol";
+import { Box } from "@material-ui/core"
 
 const Map = ({ children, zoom, center }) => {
 	const mapRef = useRef();
 	const [map, setMap] = useState(null);
 
+
 	// on component mount
 	useEffect(() => {
 		let options = {
-			view: new ol.View({ zoom, center }),
+			view: new olView({ zoom, center }),
 			layers: [],
 			controls: [],
 			overlays: []
 		};
-
-		let mapObject = new ol.Map(options);
+		let mapObject = new olMap(options);
 		mapObject.setTarget(mapRef.current);
 		setMap(mapObject);
 
@@ -39,9 +40,9 @@ const Map = ({ children, zoom, center }) => {
 
 	return (
 		<MapContext.Provider value={{ map }}>
-			<div ref={mapRef} className="ol-map">
+			<Box ref={mapRef} className="ol-map">
 				{children}
-			</div>
+			</Box>
 		</MapContext.Provider>
 	)
 }

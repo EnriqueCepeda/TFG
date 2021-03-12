@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import "ol/ol.css"
 import './App.css';
 import Map from "./Map";
 import { Layers, TileLayer, VectorLayer } from "./Layers";
-import { Circle as CircleStyle, Fill, Stroke, Style } from 'ol/style';
 import { osm } from "./Source";
-import { fromLonLat } from 'ol/proj';
 import { Controls, FullScreenControl, ZoomControl } from "./Controls";
-import { BuildingCard, BuildingContainer } from './BuildingMenu';
+import { BuildingContainer, BuildingListContext } from './BuildingMenu';
+import 'fontsource-roboto';
+import { fromLonLat } from 'ol/proj';
+import { Fill, Stroke, Style } from 'ol/style';
 
 
 let styles = {
@@ -31,30 +32,36 @@ let styles = {
 	}),
 };
 
+
 const App = () => {
-	const [center, setCenter] = useState([]);
+
+	const [center, setCenter] = useState([-3.92907, 38.98626]);
 	const [zoom, setZoom] = useState(18);
+	//{'1234': { latitude: "38.98626", longitude: "-3.92907", area: "200 m2" }}
+	let [buildingList, setBuildingList] = useState({});
+
 	return (
-		<div className="app">
-			<Map center={fromLonLat(center)} zoom={zoom}>
-				<Layers>
-					<TileLayer
-						source={osm()}
-						zIndex={0}
-					/>
-					<VectorLayer
-						style={styles.Default}
-					/>
-				</Layers>
-				<Controls>
-					<FullScreenControl />
-					<ZoomControl />
-				</Controls>
-			</Map>
-			<BuildingContainer>
-				<BuildingCard />
-			</BuildingContainer>
-		</div>
+		<BuildingListContext.Provider value={[buildingList, setBuildingList]}>
+			<div className="app">
+				<Map center={fromLonLat(center)} zoom={zoom}>
+					<Layers>
+						<TileLayer
+							source={osm()}
+							zIndex={0}
+						/>
+						<VectorLayer
+							defaultStyle={styles.Default} highlightStyle={styles.BuildingHighlight}
+						/>
+					</Layers>
+					<Controls>
+						<FullScreenControl />
+						<ZoomControl />
+					</Controls>
+				</Map>
+				<BuildingContainer>
+				</BuildingContainer>
+			</div>
+		</BuildingListContext.Provider >
 	)
 };
 

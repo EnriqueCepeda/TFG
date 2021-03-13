@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useContext } from "react";
 import house from "../assets/house.svg"
 import locationImg from "../assets/location.svg"
 import areaImg from "../assets/area.svg"
@@ -10,6 +10,7 @@ import { Typography } from '@material-ui/core/';
 import { makeStyles } from '@material-ui/core/styles';
 import { ToggleButtonGroup } from '@material-ui/lab';
 import { ToggleButton } from '@material-ui/lab';
+import BuildingListContext from "./BuildingListContext";
 
 
 const useStyles = makeStyles(() => ({
@@ -27,7 +28,7 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-function BuildingCard({ latitude, longitude, area }) {
+function BuildingCard({ ol_uid, latitude, longitude, area, type }) {
 
     const [buildingType, setBuildingType] = React.useState('Producer');
     const classes = useStyles();
@@ -41,7 +42,7 @@ function BuildingCard({ latitude, longitude, area }) {
     return (
         <Card variant="outlined" style={{ display: "flex", marginTop: 5 }}>
             <div style={{ flex: 1 }}>
-                <CardHeader title="Edificio" avatar={<Avatar variant="square" className={classes.sizeBuilding} src={house} />}> </CardHeader>
+                <CardHeader title={ol_uid} avatar={<Avatar variant="square" className={classes.sizeBuilding} src={house} />}> </CardHeader>
 
                 <CardContent>
                     <ToggleButtonGroup

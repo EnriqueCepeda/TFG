@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from "react";
+import React, { useContext } from "react";
 import { makeStyles } from '@material-ui/core/styles';
 import { Box } from "@material-ui/core"
 import { Typography } from '@material-ui/core/';
@@ -26,12 +26,10 @@ function BuildingContainer() {
     const [buildingList, setBuildingList] = useContext(BuildingListContext);
 
     return (
-        <Box className={classes.buildingContainer}>
+        <Box className={classes.buildingContainer} overflow="auto">
             <Typography variant="h5" align="center"> Edificios seleccionados</Typography>
             {Object.keys(buildingList).map((dictkey, index) => (
-                <React.Fragment key={dictkey}>
-                    <BuildingCard latitude={buildingList[dictkey].latitude} longitude={buildingList[dictkey].longitude} area={buildingList[dictkey].area} />
-                </React.Fragment>
+                <BuildingCard ol_uid={dictkey} latitude={buildingList[dictkey].latitude} longitude={buildingList[dictkey].longitude} area={buildingList[dictkey].area} type={buildingList[dictkey].type} />
             ))}
         </Box >
     )

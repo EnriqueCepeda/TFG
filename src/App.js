@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router } from 'react-router-dom'
 import "ol/ol.css"
 import './App.css';
 import Map from "./Map";
@@ -13,8 +14,9 @@ import { Fill, Stroke, Style } from 'ol/style';
 
 let styles = {
 	'Default': new Style({
+		zIndex: 100,
 		stroke: new Stroke({
-			color: 'red',
+			color: 'rgba(246, 207, 101, 1.0)',
 			width: 1,
 		}),
 		fill: new Fill({
@@ -50,7 +52,7 @@ const App = () => {
 							zIndex={0}
 						/>
 						<VectorLayer
-							defaultStyle={styles.Default} highlightStyle={styles.BuildingHighlight}
+							defaultStyle={styles.Default} highlightStyle={styles.BuildingHighlight} renderZoom={17} centerSetter={setCenter}
 						/>
 					</Layers>
 					<Controls>

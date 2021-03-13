@@ -6,8 +6,9 @@ import { transformExtent } from 'ol/proj';
 import OSMXML from 'ol/format/OSMXML';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 import BuildingListContext from "../BuildingMenu/BuildingListContext";
+import { toLonLat } from 'ol/proj';
 
-const VectorLayer = ({ defaultStyle, highlightStyle, zIndex = 1 }) => {
+const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, zIndex = 1 }) => {
 	const { map } = useContext(MapContext);
 	let [buildingList, setBuildingList] = useContext(BuildingListContext);
 
@@ -38,7 +39,8 @@ const VectorLayer = ({ defaultStyle, highlightStyle, zIndex = 1 }) => {
 
 		let vectorLayer = new OLVectorLayer({
 			source: source,
-			style: defaultStyle
+			style: defaultStyle,
+			minZoom: renderZoom
 		});
 
 		map.addLayer(vectorLayer);
@@ -55,14 +57,17 @@ const VectorLayer = ({ defaultStyle, highlightStyle, zIndex = 1 }) => {
 	function modifyBuildingListListener(e) {
 		map.forEachFeatureAtPixel(e.pixel, function (f) {
 			var keys = Object.keys(buildingList);
-			var buildingOlId = f.ol_uid;
+			var buildingOlId = "Building " + f.ol_uid;
 			var selIndex = keys.indexOf(buildingOlId);
 			var buildingListClone = Object.assign({}, buildingList);
+			centerSetter(toLonLat(map.getView().getCenter()));
 			if (selIndex < 0) {
-				var latitude = f.getGeometry().getInteriorPoint().getCoordinates()[0];
-				var longitude = f.getGeometry().getInteriorPoint().getCoordinates()[1];
-				var area = f.getGeometry().getArea();
-				buildingListClone[buildingOlId] = { 'latitude': latitude, 'longitude': longitude, 'area': area };
+				var coordinates = f.getGeometry().getInteriorPoint().getCoordinates();
+				var lonLatCoordinates = toLonLat([coordinates[0], coordinates[1]]);
+				var latitude = lonLatCoordinates[0].toFixed(4);
+				var longitude = lonLatCoordinates[1].toFixed(4);
+				var area = f.getGeometry().getArea().toFixed(2);
+				buildingListClone[buildingOlId] = { 'latitude': latitude, 'longitude': longitude, 'area': area, 'type': 'Both' };
 				f.setStyle(highlightStyle);
 				setBuildingList(buildingListClone);
 			} else {

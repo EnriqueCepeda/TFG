@@ -5,12 +5,14 @@ import { Vector as VectorSource } from 'ol/source';
 import { transformExtent } from 'ol/proj';
 import OSMXML from 'ol/format/OSMXML';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
-import BuildingListContext from "../BuildingMenu/BuildingListContext";
 import { toLonLat } from 'ol/proj';
+import { useSelector, useDispatch } from 'react-redux'
+import { addBuilding, removeBuilding } from '../redux/actions/buildingActions'
 
 const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, zIndex = 1 }) => {
 	const { map } = useContext(MapContext);
-	let [buildingList, setBuildingList] = useContext(BuildingListContext);
+	const buildings = useSelector(state => state.buildings);
+	const dispatch = useDispatch();
 
 	useEffect(() => {
 		if (!map) return;
@@ -56,10 +58,9 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 
 	function modifyBuildingListListener(e) {
 		map.forEachFeatureAtPixel(e.pixel, function (f) {
-			var keys = Object.keys(buildingList);
+			var keys = Object.keys(buildings);
 			var buildingOlId = "Building " + f.ol_uid;
 			var selIndex = keys.indexOf(buildingOlId);
-			var buildingListClone = Object.assign({}, buildingList);
 			centerSetter(toLonLat(map.getView().getCenter()));
 			if (selIndex < 0) {
 				var coordinates = f.getGeometry().getInteriorPoint().getCoordinates();
@@ -67,18 +68,17 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 				var latitude = lonLatCoordinates[0].toFixed(4);
 				var longitude = lonLatCoordinates[1].toFixed(4);
 				var area = f.getGeometry().getArea().toFixed(2);
-				buildingListClone[buildingOlId] = { 'latitude': latitude, 'longitude': longitude, 'area': area, 'type': 'Both' };
+				dispatch(addBuilding(buildingOlId, latitude, longitude, area));
 				f.setStyle(highlightStyle);
-				setBuildingList(buildingListClone);
 			} else {
+				dispatch(removeBuilding(buildingOlId));
 				f.setStyle(defaultStyle);
-				delete buildingListClone[buildingOlId]
-				setBuildingList(buildingListClone);
 
 			}
 		});
 
 	}
+
 
 	useEffect(() => {
 		if (!map) return;
@@ -88,7 +88,7 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 				map.removeEventListener('singleclick', modifyBuildingListListener);
 			}
 		};
-	}, [map, buildingList]);
+	}, [map, buildings]);
 
 	return null;
 };

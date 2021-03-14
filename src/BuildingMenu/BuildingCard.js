@@ -1,5 +1,7 @@
 import React, { useContext } from "react";
-import house from "../assets/house.svg"
+import consumer from "../assets/house.svg"
+import producer from "../assets/panel-solar.svg"
+import both from "../assets/solar-house.svg"
 import locationImg from "../assets/location.svg"
 import areaImg from "../assets/area.svg"
 import { Avatar } from '@material-ui/core';
@@ -10,7 +12,8 @@ import { Typography } from '@material-ui/core/';
 import { makeStyles } from '@material-ui/core/styles';
 import { ToggleButtonGroup } from '@material-ui/lab';
 import { ToggleButton } from '@material-ui/lab';
-import BuildingListContext from "./BuildingListContext";
+import { useSelector, useDispatch } from 'react-redux'
+import { updateBuildingType } from '../redux/actions/buildingActions.js'
 
 
 const useStyles = makeStyles(() => ({
@@ -28,50 +31,59 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-function BuildingCard({ ol_uid, latitude, longitude, area, type }) {
+function BuildingCard({ ol_uid }) {
 
-    const [buildingType, setBuildingType] = React.useState('Producer');
+
     const classes = useStyles();
+    const building = useSelector(state => state.buildings[ol_uid]);
+    const dispatch = useDispatch();
 
-    const handleBuildingType = (event, newAlignment) => {
-        if (newAlignment != null) {
-            setBuildingType(newAlignment);
+    const renderBuildingAvatar = (building_type) => {
+        switch (building_type) {
+            case "Producer":
+                return <Avatar variant="square" className={classes.sizeBuilding} src={producer} />
+            case "Consumer":
+                return <Avatar variant="square" className={classes.sizeBuilding} src={consumer} />
+            case "Both":
+                return <Avatar variant="square" className={classes.sizeBuilding} src={both} />
+        }
+    };
+
+    const handleBuildingType = (event, value) => {
+        if (value != null) {
+            dispatch(updateBuildingType(ol_uid, value));
         }
     };
 
     return (
         <Card variant="outlined" style={{ display: "flex", marginTop: 5 }}>
             <div style={{ flex: 1 }}>
-                <CardHeader title={ol_uid} avatar={<Avatar variant="square" className={classes.sizeBuilding} src={house} />}> </CardHeader>
-
+                <CardHeader title={ol_uid} avatar={renderBuildingAvatar(building.type)}> </CardHeader>
                 <CardContent>
                     <ToggleButtonGroup
                         exclusive
-                        value={buildingType}
+                        value={building.type}
                         onChange={handleBuildingType}
                         aria-label="building type"
                     >
-                        <ToggleButton value="Producer" aria-label="left aligned" variant="text" />
-                        <ToggleButton value="Consumer" aria-label="centered" />
+                        <ToggleButton value="Consumer" aria-label="left aligned" variant="text" />
+                        <ToggleButton value="Producer" aria-label="centered" />
                         <ToggleButton value="Both" aria-label="right aligned" />
                     </ToggleButtonGroup>
                 </CardContent >
-
             </div >
 
 
             <div style={{ display: "flex", "flexDirection": "column", flex: 3, justifyContent: 'space-evenly' }}>
                 <div style={{ display: "flex", "flexDirection": "row", margin: "5px" }}>
                     <Avatar className={classes.sizeAvatar} variant="square" src={locationImg} />
-                    <Typography> {latitude} {longitude} </Typography>
+                    <Typography> {building.latitude} {building.longitude} </Typography>
                 </div>
                 <div style={{ display: "flex", "flexDirection": "row", margin: "5px" }}>
                     <Avatar className={classes.sizeAvatar} variant="square" src={areaImg} />
-                    <Typography> {area} </Typography>
+                    <Typography> {building.area} </Typography>
                 </div>
             </div>
-
-
         </Card >);
 }
 

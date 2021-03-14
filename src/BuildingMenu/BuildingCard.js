@@ -16,6 +16,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { updateBuildingType } from '../redux/actions/buildingActions.js'
 
 
+
 const useStyles = makeStyles(() => ({
     sizeBuilding: {
         height: 50,
@@ -40,12 +41,14 @@ function BuildingCard({ ol_uid }) {
 
     const renderBuildingAvatar = (building_type) => {
         switch (building_type) {
-            case "Producer":
-                return <Avatar variant="square" className={classes.sizeBuilding} src={producer} />
             case "Consumer":
                 return <Avatar variant="square" className={classes.sizeBuilding} src={consumer} />
+            case "Producer":
+                return <Avatar variant="square" className={classes.sizeBuilding} src={producer} />
             case "Both":
                 return <Avatar variant="square" className={classes.sizeBuilding} src={both} />
+            default:
+                return <Avatar variant="square" className={classes.sizeBuilding} src={consumer} />
         }
     };
 
@@ -56,7 +59,7 @@ function BuildingCard({ ol_uid }) {
     };
 
     return (
-        <Card variant="outlined" style={{ display: "flex", marginTop: 5 }}>
+        <Card variant="outlined" style={{ display: "flex", marginTop: 10, marginLeft: 10, marginRight: 20 }}>
             <div style={{ flex: 1 }}>
                 <CardHeader title={ol_uid} avatar={renderBuildingAvatar(building.type)}> </CardHeader>
                 <CardContent>

@@ -56,6 +56,16 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 	}, [map]);
 
 
+	useEffect(() => {
+		if (!map) return;
+		map.addEventListener('singleclick', modifyBuildingListListener);
+		return () => {
+			if (map) {
+				map.removeEventListener('singleclick', modifyBuildingListListener);
+			}
+		};
+	}, [map, buildings]);
+
 	function modifyBuildingListListener(e) {
 		map.forEachFeatureAtPixel(e.pixel, function (f) {
 			var keys = Object.keys(buildings);
@@ -78,17 +88,6 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 		});
 
 	}
-
-
-	useEffect(() => {
-		if (!map) return;
-		map.addEventListener('singleclick', modifyBuildingListListener);
-		return () => {
-			if (map) {
-				map.removeEventListener('singleclick', modifyBuildingListListener);
-			}
-		};
-	}, [map, buildings]);
 
 	return null;
 };

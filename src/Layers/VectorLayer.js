@@ -2,6 +2,7 @@ import { useContext, useEffect } from "react";
 import MapContext from "../Map/MapContext";
 import OLVectorLayer from "ol/layer/Vector";
 import { Vector as VectorSource } from 'ol/source';
+import { getFeatureById } from 'ol/source/Vector';
 import { transformExtent } from 'ol/proj';
 import OSMXML from 'ol/format/OSMXML';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
@@ -28,6 +29,7 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 						featureProjection: map.getView().getProjection(),
 					});
 					source.addFeatures(features);
+					reloadSelectedItems(source)
 				});
 				var extended_load_percentage = 0.02;
 				var stringExtent = (epsg4326Extent[1] - epsg4326Extent[1] * extended_load_percentage) + ',' + (epsg4326Extent[0] * extended_load_percentage + epsg4326Extent[0]) + ',' +
@@ -44,7 +46,6 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 			style: defaultStyle,
 			minZoom: renderZoom
 		});
-
 		map.addLayer(vectorLayer);
 		vectorLayer.setZIndex(zIndex);
 
@@ -66,17 +67,27 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 		};
 	}, [map, buildings]);
 
+	function reloadSelectedItems(source) {
+		Object.keys(buildings).map((dictkey, index) => (
+			source.getFeatureById(getOriginalId(dictkey)).setStyle(highlightStyle)
+		))
+	}
+
+	function getOriginalId(string) {
+		return string.replace("Building ", "")
+	}
+
 	function modifyBuildingListListener(e) {
 		map.forEachFeatureAtPixel(e.pixel, function (f) {
 			var keys = Object.keys(buildings);
-			var buildingOlId = "Building " + f.ol_uid;
+			var buildingOlId = "Building " + f.getId();
 			var selIndex = keys.indexOf(buildingOlId);
 			centerSetter(toLonLat(map.getView().getCenter()));
 			if (selIndex < 0) {
 				var coordinates = f.getGeometry().getInteriorPoint().getCoordinates();
 				var lonLatCoordinates = toLonLat([coordinates[0], coordinates[1]]);
-				var latitude = lonLatCoordinates[0].toFixed(4);
-				var longitude = lonLatCoordinates[1].toFixed(4);
+				var latitude = lonLatCoordinates[1];
+				var longitude = lonLatCoordinates[0];
 				var area = f.getGeometry().getArea().toFixed(2);
 				dispatch(addBuilding(buildingOlId, latitude, longitude, area));
 				f.setStyle(highlightStyle);

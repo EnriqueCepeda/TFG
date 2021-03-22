@@ -1,7 +1,14 @@
 
 import { ADD_BUILDING, REMOVE_BUILDING, UPDATE_BUILDING_TYPE } from '../actions/types'
 
-const initialState = { 'Building 1234': { latitude: "38.98626", longitude: "-3.92907", area: "200 m2", type: 'Both' } };
+const initialState = {
+    "Building 562077433": {
+        "longitude": 38.98679890008654,
+        "latitude": -3.9270577033021428,
+        "area": "884.28",
+        "type": "Consumer & Producer"
+    }
+};
 
 const reducer = (state = initialState, action) => {
     switch (action.type) {

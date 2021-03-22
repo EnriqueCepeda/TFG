@@ -12,8 +12,9 @@ code {
     monospace;
 }
 
-body,
-#root {
-    height: 98vh;
-    width: 98vw;
+html, body, #root {
+  margin:0;
+  padding:0;
+  height: 100%;
+  width: 100%;
 }

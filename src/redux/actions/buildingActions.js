@@ -14,7 +14,7 @@ export const addBuilding = (id, longitude, latitude, area) => ({
         longitude: longitude,
         latitude: latitude,
         area: area,
-        type: "Both"
+        type: "Consumer & Producer"
     }
 });
 

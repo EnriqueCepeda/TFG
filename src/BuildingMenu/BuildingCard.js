@@ -4,7 +4,7 @@ import producer from "../assets/panel-solar.svg"
 import both from "../assets/solar-house.svg"
 import locationImg from "../assets/location.svg"
 import areaImg from "../assets/area.svg"
-import { Avatar } from '@material-ui/core';
+import { Avatar, CardActionArea } from '@material-ui/core';
 import { Card } from '@material-ui/core';
 import { CardContent } from '@material-ui/core';
 import { CardHeader } from '@material-ui/core';
@@ -21,18 +21,38 @@ const useStyles = makeStyles(() => ({
     sizeBuilding: {
         height: 50,
         width: 50,
-        marginLeft: 10,
-        marginRight: 5
     },
     sizeAvatar: {
         height: 30,
         width: 30,
-        marginLeft: 10,
-        marginRight: 5
+        marginRight: 5,
     },
+    card: {
+        display: "flex",
+        marginLeft: '10px',
+        marginRight: '10px',
+        marginTop: '10px',
+        marginBottom: '10px'
+    },
+    leftContent: {
+        flex: 1
+    },
+
+    rightContent: {
+        display: "flex",
+        flexDirection: "column",
+        flex: 3,
+        justifyContent: 'space-evenly'
+    },
+
+    cardContentRow: {
+        display: "flex",
+        flexDirection: "row",
+        margin: "5px"
+    }
 }));
 
-function BuildingCard({ ol_uid }) {
+function BuildingCard({ ol_uid, centerSetter, zoomSetter }) {
 
 
     const classes = useStyles();
@@ -45,7 +65,7 @@ function BuildingCard({ ol_uid }) {
                 return <Avatar variant="square" className={classes.sizeBuilding} src={consumer} />
             case "Producer":
                 return <Avatar variant="square" className={classes.sizeBuilding} src={producer} />
-            case "Both":
+            case "Consumer & Producer":
                 return <Avatar variant="square" className={classes.sizeBuilding} src={both} />
             default:
                 return <Avatar variant="square" className={classes.sizeBuilding} src={consumer} />
@@ -58,10 +78,14 @@ function BuildingCard({ ol_uid }) {
         }
     };
 
+    function changeMapCenter() {
+        centerSetter([building.latitude, building.longitude])
+    }
+
     return (
-        <Card variant="outlined" style={{ display: "flex", marginTop: 10, marginLeft: 10, marginRight: 20 }}>
-            <div style={{ flex: 1 }}>
-                <CardHeader title={ol_uid} avatar={renderBuildingAvatar(building.type)}> </CardHeader>
+        <Card variant="outlined" className={classes.card}>
+            <div className={classes.leftContent}>
+                <CardHeader avatar={renderBuildingAvatar(building.type)}> </CardHeader>
                 <CardContent>
                     <ToggleButtonGroup
                         exclusive
@@ -69,24 +93,29 @@ function BuildingCard({ ol_uid }) {
                         onChange={handleBuildingType}
                         aria-label="building type"
                     >
-                        <ToggleButton value="Consumer" aria-label="left aligned" variant="text" />
+                        <ToggleButton value="Consumer" aria-label="left aligned" />
                         <ToggleButton value="Producer" aria-label="centered" />
-                        <ToggleButton value="Both" aria-label="right aligned" />
+                        <ToggleButton value="Consumer & Producer" aria-label="right aligned" />
                     </ToggleButtonGroup>
                 </CardContent >
-            </div >
-
-
-            <div style={{ display: "flex", "flexDirection": "column", flex: 3, justifyContent: 'space-evenly' }}>
-                <div style={{ display: "flex", "flexDirection": "row", margin: "5px" }}>
-                    <Avatar className={classes.sizeAvatar} variant="square" src={locationImg} />
-                    <Typography> {building.latitude} {building.longitude} </Typography>
-                </div>
-                <div style={{ display: "flex", "flexDirection": "row", margin: "5px" }}>
-                    <Avatar className={classes.sizeAvatar} variant="square" src={areaImg} />
-                    <Typography> {building.area} </Typography>
-                </div>
             </div>
+
+            <CardActionArea onClick={changeMapCenter}>
+                <CardContent className={classes.rightContent}>
+                    <div className={classes.cardContentRow}>
+                        <Avatar className={classes.sizeAvatar} variant="square" src={locationImg} />
+                        <Typography> Lat {building.latitude.toFixed(4)}, Lon {building.longitude.toFixed(4)} </Typography>
+                    </div>
+                    <div className={classes.cardContentRow}>
+                        <Avatar className={classes.sizeAvatar} variant="square" src={areaImg} />
+                        <Typography> {building.area} m² </Typography>
+                    </div>
+                    <div className={classes.cardContentRow}>
+                        <Typography> {building.type} </Typography>
+                    </div>
+                </CardContent>
+            </CardActionArea>
+
         </Card >);
 }
 

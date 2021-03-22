@@ -3,13 +3,12 @@ import MapContext from "./MapContext";
 import { View as olView, Map as olMap } from "ol";
 import { Box } from "@material-ui/core"
 import { makeStyles } from '@material-ui/core/styles';
+import { Mouse } from "@material-ui/icons";
 
 const useStyles = makeStyles(() => ({
 	olMap: {
-		minWidth: '600px',
-		minHeight: '500px',
-		marginRight: '10px',
 		flex: 7,
+		overflow: "hidden"
 	},
 }));
 
@@ -25,7 +24,6 @@ const Map = ({ children, zoom, center }) => {
 			view: new olView({ zoom, center }),
 			layers: [],
 			controls: [],
-			overlays: []
 		};
 		let mapObject = new olMap(options);
 		mapObject.setTarget(mapRef.current);

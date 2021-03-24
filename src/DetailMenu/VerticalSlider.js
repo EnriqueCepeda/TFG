@@ -8,16 +8,20 @@ const useStyles = makeStyles(theme => ({
     root: {
         display: "flex",
         flexDirection: "column",
-        height: "25vh",
         width: "3vw"
     },
     slider: {
-        height: "20vh",
+        height: "19vh",
+        marginTop: 12.5,
+    },
+    input: {
+        marginTop: 5,
+        marginLeft: 4
     }
 
 }));
 
-const PrettoSlider = withStyles({
+const CustomSlider = withStyles({
     root: {
         color: "#5F468A",
         height: 8,
@@ -47,7 +51,7 @@ const PrettoSlider = withStyles({
 
 export default function VerticalSlider({ hour }) {
     const classes = useStyles();
-    const [value, setValue] = React.useState(30);
+    const [value, setValue] = React.useState(hour * 1.5);
 
     const handleSliderChange = (event, newValue) => {
         setValue(newValue);
@@ -69,8 +73,8 @@ export default function VerticalSlider({ hour }) {
 
         <div className={classes.root}>
             <Typography> {hour}h </Typography>
-            <div className={classes.slider} marginTop={1.5}>
-                <PrettoSlider
+            <div className={classes.slider} >
+                <CustomSlider
                     orientation="vertical"
                     aria-label="pretto slider"
                     defaultValue={20}
@@ -78,7 +82,7 @@ export default function VerticalSlider({ hour }) {
                     onChange={handleSliderChange}
                 />
             </div>
-            <div marginTop={1} marginLeft={4}>
+            <div className={classes.input} >
                 <Input
                     className={classes.input}
                     value={value}

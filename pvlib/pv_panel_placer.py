@@ -1,6 +1,7 @@
 
 from math import sin, cos, sqrt, atan2, radians
-import geopy.distance
+from geopy.distance import geodesic
+import pyproj
 
 
 coordinates = [[-437216.72885145224, 4719567.302408283],
@@ -30,7 +31,7 @@ dislon1 = coordinates[0][1]
 dislat2 = coordinates[1][0]
 dislon2 = coordinates[1][1]
 
-print(geopy.distance.distance((dislon1, dislat1), (dislon2, dislat2)))
+print(geodesic((dislon1, dislat1), (dislon2, dislat2)).meters)
 
 '''
 lat1 = radians(dislon1)

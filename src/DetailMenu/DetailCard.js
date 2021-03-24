@@ -1,6 +1,6 @@
 import React, { useContext, useMemo } from "react";
-import { Box, CardContent, Typography } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
+import { Box, Button, CardContent, Typography } from '@material-ui/core';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import VerticalSlider from "./VerticalSlider";
 import { Card } from '@material-ui/core';
 import { useSelector } from 'react-redux'
@@ -10,6 +10,7 @@ import locationImg from "../assets/location.svg"
 import areaImg from "../assets/area.svg"
 import consumer from "../assets/house.svg"
 import both from "../assets/solar-house.svg"
+import { green, purple } from '@material-ui/core/colors';
 
 
 
@@ -48,21 +49,31 @@ const useStyles = makeStyles(() => ({
 
 }));
 
+const ColorButton = withStyles((theme) => ({
+    root: {
+        justifyContent: 'center',
+        color: theme.palette.getContrastText(purple[500]),
+        backgroundColor: purple[500],
+        '&:hover': {
+            backgroundColor: purple[700],
+        },
+    },
+}))(Button);
+
+function getHourSliders() {
+    let sliders = [];
+    for (let i = 0; i <= 24; i++) {
+
+        sliders.push(<React.Fragment key={i}> <VerticalSlider hour={i} /> </React.Fragment >)
+    }
+    return sliders
+
+}
+
 function DetailCard({ ol_uid }) {
 
     const building = useSelector(state => state.buildings[ol_uid]);
-
-
-    function getHourSliders() {
-        let sliders = [];
-        for (let i = 0; i <= 24; i++) {
-
-            sliders.push(<React.Fragment key={i}> <VerticalSlider hour={i} /> </React.Fragment >)
-        }
-        return sliders
-
-    }
-
+    const classes = useStyles();
 
     const renderBuildingAvatar = (building_type) => {
         switch (building_type) {
@@ -74,8 +85,6 @@ function DetailCard({ ol_uid }) {
                 return <Avatar variant="square" className={classes.sizeBuilding} src={consumer} />
         }
     };
-
-    const classes = useStyles();
 
     return (
         <Card variant="outlined" className={classes.detailCard}>
@@ -92,9 +101,14 @@ function DetailCard({ ol_uid }) {
                             <Avatar className={classes.sizeAvatar} variant="square" src={areaImg} />
                             <Typography> {building.area} m² </Typography>
                         </div>
+                        <Box marginTop={5} textAlign="center" >
+                            <ColorButton variant="contained" color="primary">
+                                Save
+                            </ColorButton>
+                        </Box>
                     </CardContent>
                 </Card >
-                <CardContent style={{ display: "flex" }}>
+                <CardContent style={{ display: "flex", height: "25vh", }}>
                     {getHourSliders()
                     }
                 </CardContent>
@@ -102,6 +116,8 @@ function DetailCard({ ol_uid }) {
 
 
         </Card >);
+
+
 }
 
 export default DetailCard

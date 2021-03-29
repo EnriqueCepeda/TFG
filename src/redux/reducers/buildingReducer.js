@@ -3,9 +3,9 @@ import { ADD_BUILDING, REMOVE_BUILDING, UPDATE_BUILDING_TYPE } from '../actions/
 
 const initialState = {
     "Building 562077433": {
-        "longitude": 38.98679890008654,
-        "latitude": -3.9270577033021428,
-        "area": "884.28",
+        "latitude": 38.98679890008654,
+        "longitude": -3.9270577033021428,
+        "area": "533.07",
         "type": "Consumer & Producer"
     }
 };

@@ -12,6 +12,7 @@
     "dev-tools": "^0.1.6",
     "fontsource-roboto": "^4.0.0",
     "ol": "^6.4.3",
+    "proj4": "^2.7.2",
     "react": "^16.13.1",
     "react-custom-scrollbars": "^4.2.1",
     "react-dom": "^16.13.1",
@@ -19,6 +20,7 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "3.4.3",
     "redux": "^4.0.5",
+    "redux-immutable-state-invariant": "^2.1.0",
     "redux-thunk": "^2.3.0"
   },
   "scripts": {

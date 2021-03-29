@@ -10,5 +10,6 @@
         "statusBar.background": "#31dad2",
         "statusBarItem.hoverBackground": "#00caaf",
         "statusBar.foreground": "#15202b"
-    }
+    },
+    "python.pythonPath": "/home/enrique/.virtualenvs/tfg/bin/python"
 }

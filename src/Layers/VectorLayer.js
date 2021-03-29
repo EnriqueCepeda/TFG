@@ -2,13 +2,14 @@ import { useContext, useEffect } from "react";
 import MapContext from "../Map/MapContext";
 import OLVectorLayer from "ol/layer/Vector";
 import { Vector as VectorSource } from 'ol/source';
-import { getFeatureById } from 'ol/source/Vector';
 import { transformExtent } from 'ol/proj';
+import { getArea } from 'ol/sphere';
 import OSMXML from 'ol/format/OSMXML';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 import { toLonLat } from 'ol/proj';
 import { useSelector, useDispatch } from 'react-redux'
 import { addBuilding, removeBuilding } from '../redux/actions/buildingActions'
+import proj4 from "proj4";
 
 const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, zIndex = 1 }) => {
 	const { map } = useContext(MapContext);
@@ -77,19 +78,31 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 		return string.replace("Building ", "")
 	}
 
+	function getPolygonCoordinates(coordinates) {
+		var newCoordinates = [];
+		coordinates.map(element => {
+			var latloncoordinates = proj4('EPSG:3857', 'WGS84', [element[0], element[1]])
+			//var latloncoordinates = [element[1], element[0]]
+			newCoordinates.push(latloncoordinates);
+		})
+		return newCoordinates;
+	}
+
 	function modifyBuildingListListener(e) {
 		map.forEachFeatureAtPixel(e.pixel, function (f) {
 			var keys = Object.keys(buildings);
 			var buildingOlId = "Building " + f.getId();
 			var selIndex = keys.indexOf(buildingOlId);
 			centerSetter(toLonLat(map.getView().getCenter()));
+			debugger;
 			if (selIndex < 0) {
 				var coordinates = f.getGeometry().getInteriorPoint().getCoordinates();
 				var lonLatCoordinates = toLonLat([coordinates[0], coordinates[1]]);
-				var latitude = lonLatCoordinates[1];
-				var longitude = lonLatCoordinates[0];
-				var area = f.getGeometry().getArea().toFixed(2);
-				dispatch(addBuilding(buildingOlId, latitude, longitude, area));
+				var latitude = lonLatCoordinates[0];
+				var longitude = lonLatCoordinates[1];
+				var area = getArea(f.getGeometry()).toFixed(2);
+				var polygonCoordinates = getPolygonCoordinates(f.getGeometry().getCoordinates()[0])
+				dispatch(addBuilding(buildingOlId, latitude, longitude, area, polygonCoordinates));
 				f.setStyle(highlightStyle);
 			} else {
 				dispatch(removeBuilding(buildingOlId));

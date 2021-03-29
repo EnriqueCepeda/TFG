@@ -2,7 +2,7 @@ import pandas as pd
 import pvlib
 import matplotlib.pyplot as plt
 
-naive_times = pd.date_range(start='2015', end='2016', freq='1h')
+naive_times = pd.date_range(start='2015', end='2016', freq='15min')
 
 # very approximate
 # latitude, longitude, name, altitude, timezone
@@ -76,11 +76,9 @@ energies.plot(kind='bar', rot=0)
 
 plt.ylabel('Yearly energy yield (W hr)')
 
-'''
+
 times = naive_times.tz_localize(timezone, True, nonexistent='shift_forward')
 altitude = 628
 pressure = pvlib.atmosphere.alt2pres(altitude)
 result = pvlib.modelchain.basic_chain(times, 38.98626, -3.92907, module, inverter, temperature_model_parameters,  orientation_strategy='flat', altitude=altitude, pressure=pressure) 
 print(result)
-
-'''

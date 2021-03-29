@@ -7,14 +7,15 @@ export const updateBuildingType = (id, type) => ({
     building_type: type
 });
 
-export const addBuilding = (id, longitude, latitude, area) => ({
+export const addBuilding = (id, longitude, latitude, area, polygonCoordinates) => ({
     type: ADD_BUILDING,
     building_id: id,
     building_data: {
         longitude: longitude,
         latitude: latitude,
         area: area,
-        type: "Consumer & Producer"
+        type: "Consumer & Producer",
+        polygonCoordinates: polygonCoordinates
     }
 });
 

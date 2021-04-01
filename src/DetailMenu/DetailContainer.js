@@ -1,4 +1,4 @@
-import { useSelector } from "react-redux"
+import { useSelector, useDispatch } from "react-redux"
 import React from "react"
 import { getProducerBuildings } from "../redux/selectors"
 import DetailCard from "./DetailCard";

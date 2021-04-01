@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import MapContext from "../Map/MapContext";
 import OLVectorLayer from "ol/layer/Vector";
 import { Vector as VectorSource } from 'ol/source';
@@ -9,11 +9,12 @@ import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 import { toLonLat } from 'ol/proj';
 import { useSelector, useDispatch } from 'react-redux'
 import { addBuilding, removeBuilding } from '../redux/actions/buildingActions'
+import { getBuildings } from '../redux/selectors'
 import proj4 from "proj4";
 
 const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, zIndex = 1 }) => {
 	const { map } = useContext(MapContext);
-	const buildings = useSelector(state => state.buildings);
+	const buildings = useSelector(getBuildings);
 	const dispatch = useDispatch();
 
 	useEffect(() => {
@@ -82,7 +83,6 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 		var newCoordinates = [];
 		coordinates.map(element => {
 			var latloncoordinates = proj4('EPSG:3857', 'WGS84', [element[0], element[1]])
-			//var latloncoordinates = [element[1], element[0]]
 			newCoordinates.push(latloncoordinates);
 		})
 		return newCoordinates;

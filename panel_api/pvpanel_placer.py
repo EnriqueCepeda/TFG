@@ -3,7 +3,7 @@ from shapely.geometry import Polygon, MultiPolygon
 from descartes.patch import PolygonPatch
 from matplotlib import pyplot
 import numpy as np
-from .figures import BLUE, SIZE, set_limits, plot_coords, color_isvalid
+from .figures import BLUE, YELLOW, PURPLE, plot_coords
 
 def panel_placer(coordinates, panel_height, panel_width):
   building_polygon = Polygon(coordinates)
@@ -36,19 +36,29 @@ def panel_placer(coordinates, panel_height, panel_width):
 
     x = minx
     y = y2 + coordinate_panel_height * 0.5
-  
-  building_with_panels = [building_polygon] + correctly_placed_panels
-  mp = MultiPolygon(building_with_panels)
-  plot_building(mp)
 
-def plot_building(multipolygon):
+  panels_polygons = MultiPolygon(correctly_placed_panels)
+  plot_building(panels_polygons, building_polygon)
+
+
+def add_polygon_to_plot(polygon, subplot, facecolor=BLUE, edgecolor=BLUE):
+    plot_coords(subplot, polygon.exterior)
+    patch = PolygonPatch(polygon, facecolor=facecolor, edgecolor=edgecolor, alpha=0.5, zorder=2)
+    subplot.add_patch(patch)
+    return subplot
+
+
+def plot_building(panels_polygons, building_polygon):
   fig = pyplot.figure()
-  ax = fig.add_subplot(111)
-  for polygon in multipolygon:
-    plot_coords(ax, polygon.exterior)
-    patch = PolygonPatch(polygon, facecolor=color_isvalid(multipolygon), edgecolor=color_isvalid(multipolygon, valid=BLUE), alpha=0.5, zorder=2)
-    ax.add_patch(patch)
-  ax.set_title('Building')
+  subplot = fig.add_subplot(111)
+  subplot = add_polygon_to_plot(building_polygon, subplot, PURPLE, PURPLE)
+  for polygon in panels_polygons:
+    subplot= add_polygon_to_plot(polygon, subplot)
+  #subplot.set(yticklabels=[], xticklabels=[])  # remove the tick labels
+  #subplot.tick_params(left=False, bottom=False)  # remove the ticks
+  #subplot.set_frame_on(False)
+  #subplot.set_title('Building')
+  subplot.axis("off")
   pyplot.show()
 
 

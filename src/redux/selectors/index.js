@@ -1,5 +1,8 @@
-import { getProducerBuildings } from "./selectors.js"
+import { getBuildings, getBuilding, getProducerBuildings, getBuildingConsumption } from "./selectors.js"
 
 export {
-    getProducerBuildings
+    getBuildings,
+    getBuilding,
+    getProducerBuildings,
+    getBuildingConsumption
 }

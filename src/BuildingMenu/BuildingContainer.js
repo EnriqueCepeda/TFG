@@ -9,6 +9,7 @@ import { Divider } from '@material-ui/core';
 import {
     Link
 } from "react-router-dom";
+import { getBuildings } from '../redux/selectors';
 
 
 const useStyles = makeStyles(() => ({
@@ -46,7 +47,7 @@ const CustomScrollbars = props => (
 function BuildingContainer({ centerSetter, zoomSetter }) {
 
     const classes = useStyles();
-    const buildingList = useSelector(state => state.buildings);
+    const buildingList = useSelector(getBuildings);
 
     return (
         <div className={classes.buildingContainer}>

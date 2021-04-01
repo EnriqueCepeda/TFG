@@ -14,6 +14,7 @@ import { ToggleButtonGroup } from '@material-ui/lab';
 import { ToggleButton } from '@material-ui/lab';
 import { useSelector, useDispatch } from 'react-redux'
 import { updateBuildingType } from '../redux/actions/buildingActions.js'
+import { getBuilding } from '../redux/selectors'
 
 
 
@@ -56,7 +57,7 @@ function BuildingCard({ ol_uid, centerSetter, zoomSetter }) {
 
 
     const classes = useStyles();
-    const building = useSelector(state => state.buildings[ol_uid]);
+    const building = useSelector(state => getBuilding(state, ol_uid));
     const dispatch = useDispatch();
 
     const renderBuildingAvatar = (building_type) => {
@@ -93,12 +94,12 @@ function BuildingCard({ ol_uid, centerSetter, zoomSetter }) {
                         onChange={handleBuildingType}
                         aria-label="building type"
                     >
-                        <ToggleButton value="Consumer" aria-label="left aligned" />
-                        <ToggleButton value="Producer" aria-label="centered" />
-                        <ToggleButton value="Consumer & Producer" aria-label="right aligned" />
+                        <ToggleButton value="Consumer" aria-label="left aligned" > {""} </ToggleButton>
+                        <ToggleButton value="Producer" aria-label="centered" > {""} </ToggleButton>
+                        <ToggleButton value="Consumer & Producer" aria-label="right aligned" > {""} </ToggleButton>
                     </ToggleButtonGroup>
                 </CardContent >
-            </div>
+            </div >
 
             <CardActionArea onClick={changeMapCenter}>
                 <CardContent className={classes.rightContent}>

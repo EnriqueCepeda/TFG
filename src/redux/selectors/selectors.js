@@ -1,5 +1,7 @@
 
-const getBuildings = state => state.buildings;
+export const getBuildings = state => state.buildings;
+
+export const getBuilding = (state, ol_uid) => getBuildings(state)[ol_uid]
 
 export const getProducerBuildings = (state) => {
     const buildings = getBuildings(state);
@@ -10,4 +12,9 @@ export const getProducerBuildings = (state) => {
         }
     })
     return filteredItems;
+}
+
+export const getBuildingConsumption = (state, building_id) => {
+    const buildings = getBuildings(state);
+    return buildings[building_id].consumption
 }

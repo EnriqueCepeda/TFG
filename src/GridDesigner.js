@@ -36,7 +36,7 @@ const useStyles = makeStyles((theme) => ({
 
 let styles = {
     'Default': new Style({
-        zIndex: 100,
+        zIndex: 1,
         stroke: new Stroke({
             color: 'rgba(246, 207, 101, 1.0)',
             width: 1,
@@ -46,12 +46,13 @@ let styles = {
         }),
     }),
     'BuildingHighlight': new Style({
+        zIndex: 2,
+        stroke: new Stroke({
+            color: 'rgb(95,70,138)',
+            width: 2,
+        }),
         fill: new Fill({
             color: 'rgba(255,255,255,0.7)',
-        }),
-        stroke: new Stroke({
-            color: '#3399CC',
-            width: 3,
         }),
     }),
 };

@@ -2,6 +2,9 @@ import React from "react";
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Slider from "@material-ui/core/Slider";
 import { Input, Typography } from '@material-ui/core';
+import { useDispatch, useSelector } from 'react-redux'
+import { updateBuildingConsumption } from '../redux/actions/buildingActions.js'
+
 
 
 const useStyles = makeStyles(theme => ({
@@ -25,54 +28,67 @@ const CustomSlider = withStyles({
     root: {
         color: "#5F468A",
         height: 8,
-
     },
     thumb: {
-        height: 20,
-        width: "20px !important",
+        width: "23px !important",
+        height: "23px !important",
         backgroundColor: "#fff",
-        border: "4px solid currentColor",
-        "&:focus,&:hover,&:active": {
-            boxShadow: "inherit"
+        border: "2px solid currentColor",
+        "&:focus, &:hover,&:active": {
+            boxShadow: "none !important",
         }
     },
     track: {
-        height: 20,
-        width: "10px !important",
-        borderRadius: 24
+        width: "12.5px !important",
+        borderRadius: "0 0 24px 24px",
+        marginBottom: "-2px",
     },
     rail: {
         width: "10px !important",
-        borderRadius: 240,
+        borderRadius: 24,
         opacity: 1,
-        color: "#c257be"
+        color: "rgba(255, 242, 175)",
+        border: "1px solid rgba(246, 207, 101)",
+
     }
 })(Slider);
 
-export default function VerticalSlider({ hour }) {
+export default function VerticalSlider({ ol_uid, hour, marginTitle, initialValue }) {
     const classes = useStyles();
-    const [value, setValue] = React.useState(hour * 1.5);
+    const [value, setValue] = React.useState(initialValue);
+    const dispatch = useDispatch();
 
     const handleSliderChange = (event, newValue) => {
         setValue(newValue);
     };
 
+    const handleSliderCommit = (event, newValue) => {
+        dispatch(updateBuildingConsumption(ol_uid, hour, newValue));
+    }
+
     const handleInputChange = (event) => {
-        setValue(event.target.value === '' ? '' : Number(event.target.value));
+        var value = '';
+        if (event.target.value !== '') {
+            value = Number(event.target.value);
+        }
+        setValue(value)
+        dispatch(updateBuildingConsumption(ol_uid, hour, value));
     };
 
     const handleBlur = () => {
         if (value < 0) {
             setValue(0);
+            dispatch(updateBuildingConsumption(ol_uid, hour, 0));
         } else if (value > 100) {
             setValue(100);
+            dispatch(updateBuildingConsumption(ol_uid, hour, 100));
         }
     };
 
     return (
 
         <div className={classes.root}>
-            <Typography> {hour}h </Typography>
+            <Typography style={{ marginLeft: marginTitle }}> {hour}h </Typography>
             <div className={classes.slider} >
                 <CustomSlider
                     orientation="vertical"
@@ -80,6 +96,7 @@ export default function VerticalSlider({ hour }) {
                     defaultValue={20}
                     value={typeof value === 'number' ? value : 0}
                     onChange={handleSliderChange}
+                    onChangeCommitted={handleSliderCommit}
                 />
             </div>
             <div className={classes.input} >
@@ -90,7 +107,7 @@ export default function VerticalSlider({ hour }) {
                     onChange={handleInputChange}
                     onBlur={handleBlur}
                     inputProps={{
-                        step: 10,
+                        step: 1,
                         min: 0,
                         max: 100,
                         type: 'number',

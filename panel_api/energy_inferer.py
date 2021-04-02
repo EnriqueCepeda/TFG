@@ -6,7 +6,7 @@ import datetime
 import pvlib
 import pandas as pd
 from math import cos
-from .pvpanel_placer import panel_placer 
+from .pvpanel_placer import PanelPlacer
 
 
 def infere_energy_production(building_coordinates):
@@ -18,6 +18,7 @@ def infere_energy_production(building_coordinates):
     module['m_length'] = 1.586
     module['m_width'] = 1.056
     inverter = sapm_inverters['ABB__MICRO_0_25_I_OUTD_US_208__208V_']
+    print(inverter)
     temperature_model_parameters = pvlib.temperature.TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
 
     tz = 'Europe/Madrid'
@@ -38,12 +39,14 @@ def infere_energy_production(building_coordinates):
 
     mc = ModelChain(system, location, orientation_strategy='south_at_latitude_tilt')
     surface_tilt, surface_azimuth = system.surface_tilt, system.surface_azimuth
-    module["mm_projected_width"] = cos(surface_tilt) * module["mm_width"] #module of projection vector
-    module["mm_projected_length"] = module["mm_length"]
-    print(module["mm_projected_width"], module["mm_projected_length"])
+    module["m_projected_width"] = cos(surface_tilt) * module["m_width"] #module of projection vector
+    module["m_projected_length"] = module["m_length"]
+    print(module["m_projected_width"], module["m_projected_length"])
+    rows, panels_per_row = PanelPlacer.run(building_coordinates, module["m_projected_length"],  module["m_projected_width"])
+    system.modules_per_string = panels_per_row
+    system.strings_per_inverter = rows
+    print(system.modules_per_string, system.strings_per_inverter)
 
- 
-    panel_placer(building_coordinates, module["mm_projected_length"],  module["mm_projected_width"])
     '''
     forecast_model = GFS()
     forecast_data = forecast_model.get_processed_data(latitude, longitude, start, end)

@@ -11,5 +11,6 @@
         "statusBarItem.hoverBackground": "#00caaf",
         "statusBar.foreground": "#15202b"
     },
-    "python.pythonPath": "/home/enrique/.virtualenvs/tfg/bin/python"
+    "python.pythonPath": "/home/enrique/.virtualenvs/tfg/bin/python",
+    "git.ignoreLimitWarning": true
 }

@@ -1,18 +1,15 @@
 import React, { useContext, useMemo } from "react";
-import { Box, Button, CardContent, Typography } from '@material-ui/core';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { CardContent, Typography } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 import VerticalSlider from "./VerticalSlider";
 import { Card } from '@material-ui/core';
-import { useSelector, useDispatch } from 'react-redux'
-import { CardHeader } from '@material-ui/core';
-import { Avatar, CardActionArea } from '@material-ui/core';
+import { useSelector } from 'react-redux'
+import { Avatar } from '@material-ui/core';
 import locationImg from "../assets/location.svg"
 import areaImg from "../assets/area.svg"
 import consumer from "../assets/house.svg"
 import both from "../assets/solar-house.svg"
-import { green, purple } from '@material-ui/core/colors';
 import { getBuilding, getBuildingConsumption } from "../redux/selectors"
-
 
 
 const useStyles = makeStyles(() => ({
@@ -33,41 +30,27 @@ const useStyles = makeStyles(() => ({
         marginRight: '10px',
         marginTop: '10px',
         marginBottom: '10px',
-        display: "inline-block"
+        display: "inline-block",
 
     },
     cardHeader: {
-        flexGrow: 1
+        flexGrow: 1,
     },
     cardContent: {
-        display: "flex"
+        display: "flex",
     },
     cardContentRow: {
         display: "flex",
         margin: "5px",
-        marginBottom: "15px"
+        marginBottom: "15px",
     },
     typographyStyle: {
-        flexGrow: 1
+        flexGrow: 1,
     },
-    header: {
-        display: "flex"
+    sliders: {
+        display: "flex", height: "25vh",
     }
-
 }));
-
-/*
-const ColorButton = withStyles((theme) => ({
-    root: {
-        justifyContent: 'center',
-        color: theme.palette.getContrastText(purple[500]),
-        backgroundColor: '#7658a9',
-        '&:hover': {
-            backgroundColor: '#5F468A',
-        },
-    },
-}))(Button);
-*/
 
 function DetailCard({ ol_uid }) {
 
@@ -119,16 +102,14 @@ function DetailCard({ ol_uid }) {
 
                     </CardContent>
                 </Card >
-                <CardContent style={{ display: "flex", height: "25vh", }}>
+                <CardContent className={classes.sliders}>
                     {getHourSliders()
                     }
                 </CardContent>
             </div>
-
-
         </Card >);
 
 
 }
 
-export default DetailCard
+export default DetailCard = React.memo(DetailCard)

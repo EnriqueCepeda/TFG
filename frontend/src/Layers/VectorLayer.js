@@ -70,9 +70,12 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 	}, [map, buildings]);
 
 	function reloadSelectedItems(source) {
-		Object.keys(buildings).map((dictkey, index) => (
-			source.getFeatureById(getOriginalId(dictkey)).setStyle(highlightStyle)
-		))
+		Object.keys(buildings).map((dictkey, index) => {
+			var feature = source.getFeatureById(getOriginalId(dictkey));
+			if (feature !== null) {
+				feature.setStyle(highlightStyle);
+			}
+		});
 	}
 
 	function getOriginalId(string) {

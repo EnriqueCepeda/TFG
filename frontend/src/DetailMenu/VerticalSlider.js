@@ -2,7 +2,7 @@ import React from "react";
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Slider from "@material-ui/core/Slider";
 import { Input, Typography } from '@material-ui/core';
-import { useDispatch, useSelector } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { updateBuildingConsumption } from '../redux/actions/buildingActions.js'
 
 
@@ -27,7 +27,6 @@ const useStyles = makeStyles(theme => ({
 const CustomSlider = withStyles({
     root: {
         color: "#5F468A",
-        height: 8,
     },
     thumb: {
         width: "23px !important",
@@ -86,14 +85,13 @@ export default function VerticalSlider({ ol_uid, hour, marginTitle, initialValue
     };
 
     return (
-
         <div className={classes.root}>
             <Typography style={{ marginLeft: marginTitle }}> {hour}h </Typography>
             <div className={classes.slider} >
                 <CustomSlider
                     orientation="vertical"
-                    aria-label="pretto slider"
-                    defaultValue={20}
+                    aria-label="consumption slider"
+                    defaultValue={0}
                     value={typeof value === 'number' ? value : 0}
                     onChange={handleSliderChange}
                     onChangeCommitted={handleSliderCommit}

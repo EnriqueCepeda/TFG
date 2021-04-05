@@ -1,5 +1,6 @@
 
 import { ADD_BUILDING, REMOVE_BUILDING, UPDATE_BUILDING_TYPE, UPDATE_BUILDING_CONSUMPTION } from '../actions/types'
+import _ from "lodash";
 
 const initialState = {
     'Building 558237030': {
@@ -7,7 +8,7 @@ const initialState = {
         longitude: -3.928070645675773,
         area: '995.25',
         type: 'Consumer & Producer',
-        polygonCoordinates: [
+        coordinates: [
             [
                 -3.9282782000000003,
                 38.9868703
@@ -73,55 +74,55 @@ const initialState = {
                 38.9868703
             ]
         ],
-        consumption: {
-            '0': 45,
-            '1': 37,
-            '2': 29,
-            '3': 25,
-            '4': 23,
-            '5': 21,
-            '6': 20,
-            '7': 19,
-            '8': 18,
-            '9': 17,
-            '10': 16,
-            '11': 15,
-            '12': 15.5,
-            '13': 14.5,
-            '14': 15,
-            '15': 16,
-            '16': 17,
-            '17': 18,
-            '18': 19,
-            '19': 20,
-            '20': 21,
-            '21': 24.5,
-            '22': 28,
-            '23': 38,
-            '24': 43
-        }
+        consumption: [
+            4.5,
+            3.7,
+            2.9,
+            2.5,
+            2.3,
+            2.1,
+            2.0,
+            1.9,
+            1.8,
+            1.7,
+            1.6,
+            1.5,
+            1.5,
+            1.4,
+            1.5,
+            1.6,
+            1.7,
+            1.8,
+            1.9,
+            2.1,
+            2.3,
+            2.6,
+            3.2,
+            3.7,
+        ]
     }
 };
 
 const reducer = (state = initialState, action) => {
     switch (action.type) {
         case UPDATE_BUILDING_TYPE: {
-            let stateCloned = Object.assign({}, state);
+            let stateCloned = _.cloneDeep(state);
             stateCloned[action.building_id].type = action.building_type;
             return stateCloned;
         }
         case UPDATE_BUILDING_CONSUMPTION: {
-            let stateCloned = Object.assign({}, state);
+            debugger;
+            let stateCloned = _.cloneDeep(state);
             stateCloned[action.building_id].consumption[action.hour] = action.value;
             return stateCloned;
         }
         case ADD_BUILDING: {
-            let stateCloned = Object.assign({}, state);
+            let stateCloned = _.cloneDeep(state);
             stateCloned[action.building_id] = action.building_data;
             return stateCloned;
         }
         case REMOVE_BUILDING: {
-            let stateCloned = Object.assign({}, state);
+            let stateCloned = _.cloneDeep(state);
             delete stateCloned[action.building_id]
             return stateCloned;
         }

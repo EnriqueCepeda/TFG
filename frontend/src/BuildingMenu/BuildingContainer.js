@@ -31,12 +31,12 @@ const useStyles = makeStyles(() => ({
 const renderThumb = ({ style, ...props }) => {
     const thumbStyle = {
         borderRadius: 6,
-        backgroundColor: 'rgba(35, 49, 86, 0.8)'
+        backgroundColor: "#5F468A"
     };
     return <div style={{ ...style, ...thumbStyle }} {...props} />;
 };
 
-const CustomScrollbars = props => (
+const CustomScrollbar = props => (
     <Scrollbars
         renderThumbHorizontal={renderThumb}
         renderThumbVertical={renderThumb}
@@ -52,17 +52,17 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
     return (
         <div className={classes.buildingContainer}>
             <div className={classes.buildingList}>
-                <CustomScrollbars autoHide autoHideTimeout={500} autoHideDuration={200}>
+                <CustomScrollbar autoHide autoHideTimeout={500} autoHideDuration={200}>
                     <Typography variant="h5" align="center"> SELECTED BUILDINGS </Typography>
                     <Divider variant="middle" />
                     {
                         Object.keys(buildingList).map((dictkey, index) => (
                             <React.Fragment key={dictkey}>
-                                <BuildingCard ol_uid={dictkey} centerSetter={centerSetter} zoomSetter={zoomSetter} />
+                                <BuildingCard ol_uid={dictkey} centerSetter={centerSetter} />
                             </React.Fragment>
                         ))
                     }
-                </CustomScrollbars>
+                </CustomScrollbar>
             </div>
             <div className={classes.buildingDetailButton}>
                 <Button color="primary" component={Link} to="/detail" fullWidth={true}>

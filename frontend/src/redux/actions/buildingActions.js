@@ -24,7 +24,7 @@ export const addBuilding = (id, longitude, latitude, area, polygonCoordinates) =
         longitude: longitude,
         area: area,
         type: "Consumer & Producer",
-        polygonCoordinates: polygonCoordinates,
+        coordinates: polygonCoordinates,
         consumption: defaultBuildingConsumption
     }
 });
@@ -34,31 +34,30 @@ export const removeBuilding = (id) => ({
     building_id: id
 });
 
-const defaultBuildingConsumption = {
-    0: 45,
-    1: 37,
-    2: 29,
-    3: 25,
-    4: 23,
-    5: 21,
-    6: 20,
-    7: 19,
-    8: 18,
-    9: 17,
-    10: 16,
-    11: 15,
-    12: 15.5,
-    13: 14.5,
-    14: 15,
-    15: 16,
-    16: 17,
-    17: 18,
-    18: 19,
-    19: 20,
-    20: 21,
-    21: 24.5,
-    22: 28,
-    23: 38,
-    24: 43,
-}
+const defaultBuildingConsumption = [
+    4.5,
+    3.7,
+    2.9,
+    2.5,
+    2.3,
+    2.1,
+    2.0,
+    1.9,
+    1.8,
+    1.7,
+    1.6,
+    1.5,
+    1.5,
+    1.4,
+    1.5,
+    1.6,
+    1.7,
+    1.8,
+    1.9,
+    2.1,
+    2.3,
+    2.6,
+    3.2,
+    3.7,
+]
 

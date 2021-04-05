@@ -53,7 +53,7 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
-function BuildingCard({ ol_uid, centerSetter, zoomSetter }) {
+function BuildingCard({ ol_uid, centerSetter }) {
 
 
     const classes = useStyles();
@@ -79,7 +79,7 @@ function BuildingCard({ ol_uid, centerSetter, zoomSetter }) {
         }
     };
 
-    function changeMapCenter() {
+    function clickCardHandler() {
         centerSetter([building.longitude, building.latitude])
     }
 
@@ -101,7 +101,7 @@ function BuildingCard({ ol_uid, centerSetter, zoomSetter }) {
                 </CardContent >
             </div >
 
-            <CardActionArea onClick={changeMapCenter}>
+            <CardActionArea onClick={clickCardHandler}>
                 <CardContent className={classes.rightContent}>
                     <div className={classes.cardContentRow}>
                         <Avatar className={classes.sizeAvatar} variant="square" src={locationImg} />

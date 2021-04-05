@@ -15,6 +15,6 @@ export default function App() {
 				<Route path="/detail" component={GridDetail} />
 				<Route path="/" component={GridDesigner} />
 			</Switch>
-		</Router>
+		</Router >
 	);
 }

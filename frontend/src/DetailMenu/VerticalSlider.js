@@ -4,6 +4,7 @@ import Slider from "@material-ui/core/Slider";
 import { Input, Typography } from '@material-ui/core';
 import { useDispatch } from 'react-redux'
 import { updateBuildingConsumption } from '../redux/actions/buildingActions.js'
+import ValueLabel from "@material-ui/core/Slider/ValueLabel";
 
 
 
@@ -15,7 +16,7 @@ const useStyles = makeStyles(theme => ({
     },
     slider: {
         height: "19vh",
-        marginTop: 12.5,
+        marginTop: 20,
     },
     input: {
         marginTop: 5,
@@ -49,7 +50,11 @@ const CustomSlider = withStyles({
         color: "rgba(255, 242, 175)",
         border: "1px solid rgba(246, 207, 101)",
 
+    },
+    valueLabel: {
+        left: 'calc(-50% + 2px)',
     }
+
 })(Slider);
 
 export default function VerticalSlider({ ol_uid, hour, marginTitle, initialValue }) {
@@ -62,27 +67,11 @@ export default function VerticalSlider({ ol_uid, hour, marginTitle, initialValue
     };
 
     const handleSliderCommit = (event, newValue) => {
+        setValue(newValue);
         dispatch(updateBuildingConsumption(ol_uid, hour, newValue));
     }
 
-    const handleInputChange = (event) => {
-        var value = '';
-        if (event.target.value !== '') {
-            value = Number(event.target.value);
-        }
-        setValue(value)
-        dispatch(updateBuildingConsumption(ol_uid, hour, value));
-    };
-
-    const handleBlur = () => {
-        if (value < 0) {
-            setValue(0);
-            dispatch(updateBuildingConsumption(ol_uid, hour, 0));
-        } else if (value > 100) {
-            setValue(100);
-            dispatch(updateBuildingConsumption(ol_uid, hour, 100));
-        }
-    };
+    const getLabelFormatted = (value) => `${value}Kw`
 
     return (
         <div className={classes.root}>
@@ -90,29 +79,21 @@ export default function VerticalSlider({ ol_uid, hour, marginTitle, initialValue
             <div className={classes.slider} >
                 <CustomSlider
                     orientation="vertical"
-                    aria-label="consumption slider"
+                    valueLabelDisplay='auto'
                     defaultValue={0}
+                    min={0}
+                    step={0.1}
+                    max={10}
                     value={typeof value === 'number' ? value : 0}
                     onChange={handleSliderChange}
                     onChangeCommitted={handleSliderCommit}
-                />
-            </div>
-            <div className={classes.input} >
-                <Input
-                    className={classes.input}
-                    value={value}
-                    margin="dense"
-                    onChange={handleInputChange}
-                    onBlur={handleBlur}
-                    inputProps={{
-                        step: 1,
-                        min: 0,
-                        max: 100,
-                        type: 'number',
-                        'aria-labelledby': 'input-slider',
-                    }}
-                />
+                    aria-label="consumption slider"
+                    getAriaValueText={(value, index) => getLabelFormatted(value)}
 
+                    valueLabelFormat={(value) => getLabelFormatted(value)}
+
+
+                />
             </div>
         </div >
     );

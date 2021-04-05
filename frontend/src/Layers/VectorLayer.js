@@ -93,6 +93,7 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 
 	function modifyBuildingListListener(e) {
 		map.forEachFeatureAtPixel(e.pixel, function (f) {
+			debugger;
 			var keys = Object.keys(buildings);
 			var buildingOlId = "Building " + f.getId();
 			var selIndex = keys.indexOf(buildingOlId);

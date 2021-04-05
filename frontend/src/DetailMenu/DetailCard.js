@@ -1,5 +1,5 @@
 import React, { useContext, useMemo } from "react";
-import { CardContent, Typography } from '@material-ui/core';
+import { CardContent, Divider, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import VerticalSlider from "./VerticalSlider";
 import { Card } from '@material-ui/core';
@@ -10,7 +10,7 @@ import areaImg from "../assets/area.svg"
 import consumer from "../assets/house.svg"
 import both from "../assets/solar-house.svg"
 import { getBuilding, getBuildingConsumption } from "../redux/selectors"
-
+import _ from "lodash";
 
 const useStyles = makeStyles(() => ({
     sizeBuilding: {
@@ -48,11 +48,17 @@ const useStyles = makeStyles(() => ({
         flexGrow: 1,
     },
     sliders: {
-        display: "flex", height: "25vh",
+        display: "flex",
+        height: "25vh",
+        margin: "15px 0px 15px 25px",
+
+    },
+    graph: {
+        width: 200
     }
 }));
 
-function DetailCard({ ol_uid }) {
+export default function DetailCard({ ol_uid }) {
 
     const building = useSelector(state => getBuilding(state, ol_uid));
     const buildingConsumption = useSelector((state) => getBuildingConsumption(state, ol_uid));
@@ -60,7 +66,7 @@ function DetailCard({ ol_uid }) {
 
     function getHourSliders() {
         let sliders = [];
-        for (let i = 0; i <= 24; i++) {
+        for (let i = 0; i <= 23; i++) {
             var marginTitle = 3;
             if (i <= 9) {
                 marginTitle = 8;
@@ -85,7 +91,7 @@ function DetailCard({ ol_uid }) {
     return (
         <Card variant="outlined" className={classes.detailCard}>
             <div className={classes.cardContent}>
-                <Card>
+                <Card >
                     {renderBuildingAvatar(building.type)}
                     <CardContent>
                         <div className={classes.cardContentRow}>
@@ -102,14 +108,19 @@ function DetailCard({ ol_uid }) {
 
                     </CardContent>
                 </Card >
-                <CardContent className={classes.sliders}>
+                <div className={classes.sliders}>
                     {getHourSliders()
                     }
-                </CardContent>
+                </div>
+                <Divider orientation="vertical" flexItem variant="middle" />
+                <div className={classes.graph}>
+                    <Typography variant="h6" align="center" > ENERGY CONSUMPTION </ Typography >
+                    <Divider variant="middle" />
+                    <div>
+                        <Typography variant="h3" align="center"> {_.sum(buildingConsumption).toFixed(2)} </ Typography >
+                        <Typography variant="h3" align="center"> Kw </Typography >
+                    </div>
+                </div>
             </div>
         </Card >);
-
-
 }
-
-export default DetailCard = React.memo(DetailCard)

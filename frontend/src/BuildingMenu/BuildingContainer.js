@@ -1,15 +1,19 @@
 import React, { useContext } from "react";
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core/';
 import BuildingCard from './BuildingCard'
 import { useSelector, useDispatch } from 'react-redux'
 import { Scrollbars } from 'react-custom-scrollbars';
 import Button from '@material-ui/core/Button';
 import { Divider } from '@material-ui/core';
+import { Box } from '@material-ui/core';
 import {
     Link
 } from "react-router-dom";
 import { getBuildings } from '../redux/selectors';
+import { purple } from '@material-ui/core/colors';
+
+
 
 
 const useStyles = makeStyles(() => ({
@@ -44,6 +48,16 @@ const CustomScrollbar = props => (
     />
 );
 
+const ColorButton = withStyles((theme) => ({
+    root: {
+        color: theme.palette.getContrastText('rgb(95,70,138)'),
+        backgroundColor: 'rgb(95, 70, 138)',
+        '&:hover': {
+            backgroundColor: purple[900],
+        },
+    },
+}))(Button);
+
 function BuildingContainer({ centerSetter, zoomSetter }) {
 
     const classes = useStyles();
@@ -65,9 +79,11 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
                 </CustomScrollbar>
             </div>
             <div className={classes.buildingDetailButton}>
-                <Button color="primary" component={Link} to="/detail" fullWidth={true}>
-                    grid detail
-                </Button>
+                <Box textAlign='center'>
+                    <ColorButton color="primary" component={Link} to="/detail" >
+                        grid detail
+                </ColorButton>
+                </ Box>
             </div>
 
         </div >

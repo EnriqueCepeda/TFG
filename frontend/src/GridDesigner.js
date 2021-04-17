@@ -10,7 +10,7 @@ import { BuildingContainer, } from './BuildingMenu';
 import { fromLonLat } from 'ol/proj';
 import { Fill, Stroke, Style } from 'ol/style';
 import { makeStyles } from '@material-ui/core/styles';
-import Header from "./Header"
+import { Header } from "./Common"
 
 
 

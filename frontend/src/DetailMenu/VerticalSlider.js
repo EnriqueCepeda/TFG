@@ -1,10 +1,9 @@
 import React from "react";
 import { withStyles, makeStyles } from "@material-ui/core/styles";
 import Slider from "@material-ui/core/Slider";
-import { Input, Typography } from '@material-ui/core';
-import { useDispatch } from 'react-redux'
-import { updateBuildingConsumption } from '../redux/actions/buildingActions.js'
-import ValueLabel from "@material-ui/core/Slider/ValueLabel";
+import { Typography } from '@material-ui/core';
+import { useDispatch } from 'react-redux';
+import { updateBuildingConsumption } from '../redux/actions/buildingActions.js';
 
 
 

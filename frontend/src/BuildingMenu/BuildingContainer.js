@@ -1,8 +1,8 @@
-import React, { useContext } from "react";
+import React from "react";
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core/';
-import BuildingCard from './BuildingCard'
-import { useSelector, useDispatch } from 'react-redux'
+import BuildingCard from './BuildingCard';
+import { useSelector } from 'react-redux';
 import { Scrollbars } from 'react-custom-scrollbars';
 import Button from '@material-ui/core/Button';
 import { Divider } from '@material-ui/core';

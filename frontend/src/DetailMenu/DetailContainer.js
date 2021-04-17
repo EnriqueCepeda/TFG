@@ -1,7 +1,7 @@
-import { useSelector, useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
 import { Pagination } from '@material-ui/lab';
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { getProducerBuildings } from "../redux/selectors";
 import DetailCard from "./DetailCard";
 
@@ -30,7 +30,6 @@ export default function DetailContainer() {
 
 
     function handlePageClick(event, newPage) {
-        debugger;
         setCurrentPage(newPage);
     }
 

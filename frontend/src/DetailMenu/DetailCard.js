@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react";
+import React from "react";
 import { CardContent, Divider, Typography } from '@material-ui/core';
 import { makeStyles } from '@material-ui/core/styles';
 import VerticalSlider from "./VerticalSlider";
@@ -54,7 +54,9 @@ const useStyles = makeStyles(() => ({
 
     },
     graph: {
-        width: 200
+        width: 200,
+        display: "flex",
+        flexDirection: "column"
     }
 }));
 
@@ -116,10 +118,8 @@ export default function DetailCard({ ol_uid }) {
                 <div className={classes.graph}>
                     <Typography variant="h6" align="center" > ENERGY CONSUMPTION </ Typography >
                     <Divider variant="middle" />
-                    <div>
-                        <Typography variant="h3" align="center"> {_.sum(buildingConsumption).toFixed(2)} </ Typography >
-                        <Typography variant="h3" align="center"> Kw </Typography >
-                    </div>
+                    <Typography variant="h3" align="center"> {_.sum(buildingConsumption).toFixed(2)} </ Typography >
+                    <Typography variant="h3" align="center"> Kw </Typography >
                 </div>
             </div>
         </Card >);

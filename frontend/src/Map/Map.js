@@ -3,7 +3,6 @@ import MapContext from "./MapContext";
 import { View as olView, Map as olMap } from "ol";
 import { Box } from "@material-ui/core"
 import { makeStyles } from '@material-ui/core/styles';
-import { Mouse } from "@material-ui/icons";
 
 const useStyles = makeStyles(() => ({
 	olMap: {

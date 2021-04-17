@@ -1,5 +1,5 @@
 
-import { UPDATE_BUILDING_TYPE, UPDATE_BUILDING_CONSUMPTION, ADD_BUILDING, REMOVE_BUILDING } from './types'
+import { UPDATE_BUILDING_TYPE, UPDATE_BUILDING_CONSUMPTION, ADD_BUILDING, REMOVE_BUILDING } from './types';
 
 export const updateBuildingType = (id, type) => ({
     type: UPDATE_BUILDING_TYPE,

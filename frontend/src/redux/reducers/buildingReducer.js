@@ -1,5 +1,5 @@
 
-import { ADD_BUILDING, REMOVE_BUILDING, UPDATE_BUILDING_TYPE, UPDATE_BUILDING_CONSUMPTION } from '../actions/types'
+import { ADD_BUILDING, REMOVE_BUILDING, UPDATE_BUILDING_TYPE, UPDATE_BUILDING_CONSUMPTION } from '../actions/types';
 import _ from "lodash";
 
 const initialState = {

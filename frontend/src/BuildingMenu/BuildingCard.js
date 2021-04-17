@@ -1,9 +1,9 @@
-import React, { useContext } from "react";
-import consumer from "../assets/house.svg"
-import producer from "../assets/panel-solar.svg"
-import both from "../assets/solar-house.svg"
-import locationImg from "../assets/location.svg"
-import areaImg from "../assets/area.svg"
+import React from "react";
+import consumer from "../assets/house.svg";
+import producer from "../assets/panel-solar.svg";
+import both from "../assets/solar-house.svg";
+import locationImg from "../assets/location.svg";
+import areaImg from "../assets/area.svg";
 import { Avatar, CardActionArea } from '@material-ui/core';
 import { Card } from '@material-ui/core';
 import { CardContent } from '@material-ui/core';
@@ -12,9 +12,9 @@ import { Typography } from '@material-ui/core/';
 import { makeStyles } from '@material-ui/core/styles';
 import { ToggleButtonGroup } from '@material-ui/lab';
 import { ToggleButton } from '@material-ui/lab';
-import { useSelector, useDispatch } from 'react-redux'
-import { updateBuildingType } from '../redux/actions/buildingActions.js'
-import { getBuilding } from '../redux/selectors'
+import { useSelector, useDispatch } from 'react-redux';
+import { updateBuildingType } from '../redux/actions/buildingActions.js';
+import { getBuilding } from '../redux/selectors';
 
 
 

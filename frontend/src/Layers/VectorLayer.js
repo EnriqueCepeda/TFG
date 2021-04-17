@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo } from "react";
+import { useContext, useEffect } from "react";
 import MapContext from "../Map/MapContext";
 import OLVectorLayer from "ol/layer/Vector";
 import { Vector as VectorSource } from 'ol/source';
@@ -7,9 +7,9 @@ import { getArea } from 'ol/sphere';
 import OSMXML from 'ol/format/OSMXML';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 import { toLonLat } from 'ol/proj';
-import { useSelector, useDispatch } from 'react-redux'
-import { addBuilding, removeBuilding } from '../redux/actions/buildingActions'
-import { getBuildings } from '../redux/selectors'
+import { useSelector, useDispatch } from 'react-redux';
+import { addBuilding, removeBuilding } from '../redux/actions/buildingActions';
+import { getBuildings } from '../redux/selectors';
 import proj4 from "proj4";
 
 const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, zIndex = 1 }) => {

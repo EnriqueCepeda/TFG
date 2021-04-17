@@ -72,4 +72,4 @@ if __name__ == "__main__":
     [42.39895182115834,-3.9239797040199833]
     ]
 
-    infere_energy_production(coordinates, 38.98626, -3.92907, 'Europe/Madrid', 'Building 32498324')
+    production = infere_energy_production(coordinates, 38.98626, -3.92907)

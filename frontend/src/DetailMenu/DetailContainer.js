@@ -4,12 +4,28 @@ import { Pagination } from '@material-ui/lab';
 import React, { useState } from "react";
 import { getProducerBuildings } from "../redux/selectors";
 import DetailCard from "./DetailCard";
+import { ContainerScrollbar } from "../Common"
+import { makeStyles } from '@material-ui/core';
+import { Divider } from '@material-ui/core';
 
+const useStyles = makeStyles((theme) => ({
+    cardContainer: {
+        display: 'flex',
+        flexDirection: 'column'
+    },
+    pagination: {
+        marginTop: 10,
+        marginBottom: 10
+
+    }
+}));
 
 
 export default function DetailContainer() {
     const [currentPage, setCurrentPage] = useState(1);
     const producerBuildings = useSelector(getProducerBuildings);
+    const classes = useStyles();
+
 
     const COMPONENTS_PER_PAGE = 4;
 
@@ -34,20 +50,24 @@ export default function DetailContainer() {
     }
 
     return (
-        <div style={{ marginTop: 10 }}>
+        <React.Fragment>
+            <Divider variant="middle" />
+            <ContainerScrollbar autoHide autoHideTimeout={500} autoHideDuration={200} >
+                {
+                    currentPageData()
+                }
+            </ContainerScrollbar >
+            <Divider variant="middle" />
             <Pagination
                 count={pageCount}
                 page={currentPage}
                 siblingCount={1}
                 onChange={handlePageClick}
                 shape="rounded"
+                className={classes.pagination}
             />
 
-            {
-                currentPageData()
-            }
-
-        </div >
+        </React.Fragment>
     )
 }
 

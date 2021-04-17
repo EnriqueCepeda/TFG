@@ -23,10 +23,9 @@ const useStyles = makeStyles((theme) => ({
     Content: {
         height: '92%',
         width: '98%',
-        marginTop: '1vh',
-        marginBottom: '1vh',
-        marginLeft: '1vw',
-        marginRight: '1vw',
+        marginTop: 10,
+        marginLeft: 10,
+        marginRight: 10,
         overflow: "hidden",
         display: 'flex',
         flexDirection: 'row'

@@ -38,6 +38,7 @@ const useStyles = makeStyles(() => ({
     },
     cardContent: {
         display: "flex",
+        marginRight: 10,
     },
     cardContentRow: {
         display: "flex",
@@ -54,7 +55,11 @@ const useStyles = makeStyles(() => ({
 
     },
     graph: {
-        width: 200,
+        alignItems: "center",
+        marginTop: 10,
+        marginLeft: 10,
+        marginRight: 10,
+        width: 160,
         display: "flex",
         flexDirection: "column"
     }

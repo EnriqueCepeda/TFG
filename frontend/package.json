@@ -10,6 +10,7 @@
     "@testing-library/react": "^9.3.2",
     "@testing-library/user-event": "^7.1.2",
     "canvasjs": "^1.8.3",
+    "clsx": "^1.1.1",
     "dev-tools": "^0.1.6",
     "fontsource-roboto": "^4.0.0",
     "framer-motion": "^4.1.2",

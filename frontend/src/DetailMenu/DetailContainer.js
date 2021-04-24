@@ -4,19 +4,21 @@ import { Pagination } from '@material-ui/lab';
 import React, { useState } from "react";
 import { getProducerBuildings } from "../redux/selectors";
 import DetailCard from "./DetailCard";
-import { ContainerScrollbar } from "../Common"
+import { ContainerScrollbar, ThemeButton } from "../Common"
 import { makeStyles } from '@material-ui/core';
 import { Divider } from '@material-ui/core';
+import { Link } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
-    cardContainer: {
-        display: 'flex',
-        flexDirection: 'column'
-    },
     pagination: {
         marginTop: 10,
         marginBottom: 10
-
+    },
+    footer: {
+        display: 'flex',
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between'
     }
 }));
 
@@ -57,15 +59,21 @@ export default function DetailContainer() {
                     currentPageData()
                 }
             </ContainerScrollbar >
-            <Divider variant="middle" />
-            <Pagination
-                count={pageCount}
-                page={currentPage}
-                siblingCount={1}
-                onChange={handlePageClick}
-                shape="rounded"
-                className={classes.pagination}
-            />
+            <div className={classes.footer}>
+                <Pagination
+                    count={pageCount}
+                    page={currentPage}
+                    siblingCount={1}
+                    onChange={handlePageClick}
+                    shape="rounded"
+                    className={classes.pagination}
+                    style={{ marginRight: 10 }}
+                />
+                <ThemeButton color="primary" component={Link} to="/dashboard" style={{ marginRight: 75 }} >
+                    Launch Grid
+                </ThemeButton>
+            </div>
+
 
         </React.Fragment>
     )

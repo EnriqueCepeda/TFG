@@ -16,7 +16,7 @@ export const updateBuildingConsumption = (id, hour, value) => (
     }
 );
 
-export const addBuilding = (id, longitude, latitude, area, polygonCoordinates) => ({
+export const addBuilding = (id, longitude, latitude, area, coordinates, flatCoordinates) => ({
     type: ADD_BUILDING,
     building_id: id,
     building_data: {
@@ -24,7 +24,8 @@ export const addBuilding = (id, longitude, latitude, area, polygonCoordinates) =
         longitude: longitude,
         area: area,
         type: "Consumer & Producer",
-        coordinates: polygonCoordinates,
+        coordinates: coordinates,
+        flatCoordinates: flatCoordinates,
         consumption: defaultBuildingConsumption
     }
 });

@@ -1,9 +1,11 @@
 import Layers from "./Layers";
-import VectorLayer from "./VectorLayer";
+import DesignLayer from "./DesignLayer";
 import TileLayer from "./TileLayer";
+import DashboardLayer from "./DashboardLayer"
 
 export {
 	Layers,
-	VectorLayer,
-	TileLayer
+	DesignLayer,
+	TileLayer,
+	DashboardLayer
 }

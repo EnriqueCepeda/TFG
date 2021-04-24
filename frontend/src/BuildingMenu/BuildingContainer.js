@@ -1,17 +1,15 @@
 import React from "react";
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 import { Typography } from '@material-ui/core/';
 import BuildingCard from './BuildingCard';
 import { useSelector } from 'react-redux';
-import Button from '@material-ui/core/Button';
 import { Divider } from '@material-ui/core';
 import { Box } from '@material-ui/core';
 import {
     Link
 } from "react-router-dom";
 import { getBuildings } from '../redux/selectors';
-import { purple } from '@material-ui/core/colors';
-import { ContainerScrollbar } from '../Common'
+import { ContainerScrollbar, ThemeButton } from '../Common'
 
 
 
@@ -31,15 +29,6 @@ const useStyles = makeStyles(() => ({
     }
 }));
 
-const ColorButton = withStyles((theme) => ({
-    root: {
-        color: theme.palette.getContrastText('rgb(95,70,138)'),
-        backgroundColor: 'rgb(95, 70, 138)',
-        '&:hover': {
-            backgroundColor: purple[900],
-        },
-    },
-}))(Button);
 
 function BuildingContainer({ centerSetter, zoomSetter }) {
 
@@ -62,9 +51,9 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
             <Divider variant="middle" />
             <div className={classes.buildingDetailButton}>
                 <Box textAlign='center'>
-                    <ColorButton color="primary" component={Link} to="/detail" >
+                    <ThemeButton color="primary" component={Link} to="/detail" >
                         grid detail
-                </ColorButton>
+                </ThemeButton>
                 </ Box>
             </div>
 

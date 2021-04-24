@@ -3,12 +3,11 @@ import "ol/ol.css"
 
 import React, { useState } from 'react';
 import Map from "./Map";
-import { Layers, TileLayer, VectorLayer } from "./Layers";
+import { Layers, TileLayer, DesignLayer } from "./Layers";
 import { osm } from "./Source";
 import { Controls, FullScreenControl, ZoomControl } from "./Controls";
 import { BuildingContainer, } from './BuildingMenu';
 import { fromLonLat } from 'ol/proj';
-import { Fill, Stroke, Style } from 'ol/style';
 import { makeStyles } from '@material-ui/core/styles';
 import { Header } from "./Common"
 
@@ -29,33 +28,12 @@ const useStyles = makeStyles((theme) => ({
         overflow: "hidden",
         display: 'flex',
         flexDirection: 'row'
-    }
+    },
+    olMap: {
+        flex: 7,
+        overflow: "hidden"
+    },
 }));
-
-
-let styles = {
-    'Default': new Style({
-        zIndex: 1,
-        stroke: new Stroke({
-            color: 'rgba(246, 207, 101, 1.0)',
-            width: 1,
-        }),
-        fill: new Fill({
-            color: 'rgba(255, 242, 175, 0.5)',
-        }),
-    }),
-    'BuildingHighlight': new Style({
-        zIndex: 2,
-        stroke: new Stroke({
-            color: 'rgb(95,70,138)',
-            width: 2,
-        }),
-        fill: new Fill({
-            color: 'rgba(255,255,255,0.7)',
-        }),
-    }),
-};
-
 
 const GridDesigner = () => {
 
@@ -67,15 +45,13 @@ const GridDesigner = () => {
         <div className={classes.GridDesigner}>
             <Header title="Grid designer" > </Header>
             <div className={classes.Content}>
-                <Map center={fromLonLat(center)} zoom={zoom}>
+                <Map center={fromLonLat(center)} zoom={zoom} style={classes.olMap}>
                     <Layers>
                         <TileLayer
                             source={osm()}
                             zIndex={0}
                         />
-                        <VectorLayer
-                            defaultStyle={styles.Default} highlightStyle={styles.BuildingHighlight} renderZoom={17} centerSetter={setCenter}
-                        />
+                        <DesignLayer renderZoom={17} centerSetter={setCenter} />
                     </Layers>
                     <Controls>
                         <FullScreenControl />

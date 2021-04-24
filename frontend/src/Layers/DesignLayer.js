@@ -11,11 +11,39 @@ import { useSelector, useDispatch } from 'react-redux';
 import { addBuilding, removeBuilding } from '../redux/actions/buildingActions';
 import { getBuildings } from '../redux/selectors';
 import proj4 from "proj4";
+import { Fill, Stroke, Style } from 'ol/style';
 
-const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, zIndex = 1 }) => {
+
+
+let styles = {
+	'default': new Style({
+		zIndex: 1,
+		stroke: new Stroke({
+			color: 'rgba(246, 207, 101, 1.0)',
+			width: 1,
+		}),
+		fill: new Fill({
+			color: 'rgba(255, 242, 175, 0.5)',
+		}),
+	}),
+	'highlight': new Style({
+		zIndex: 2,
+		stroke: new Stroke({
+			color: 'rgb(95,70,138)',
+			width: 2,
+		}),
+		fill: new Fill({
+			color: 'rgba(255,255,255,0.7)',
+		}),
+	}),
+};
+
+const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 	const { map } = useContext(MapContext);
 	const buildings = useSelector(getBuildings);
 	const dispatch = useDispatch();
+	let defaultStyle = styles.default;
+	let highlightStyle = styles.highlight;
 
 	useEffect(() => {
 		if (!map) return;
@@ -50,6 +78,7 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 		});
 		map.addLayer(vectorLayer);
 		vectorLayer.setZIndex(zIndex);
+
 
 		return () => {
 			if (map) {
@@ -92,25 +121,25 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 	}
 
 	function modifyBuildingListListener(e) {
-		map.forEachFeatureAtPixel(e.pixel, function (f) {
-			debugger;
+		map.forEachFeatureAtPixel(e.pixel, function (feature) {
 			var keys = Object.keys(buildings);
-			var buildingOlId = "Building " + f.getId();
+			var buildingOlId = "Building " + feature.getId();
 			var selIndex = keys.indexOf(buildingOlId);
-			centerSetter(toLonLat(map.getView().getCenter()));
 			debugger;
+			centerSetter(toLonLat(map.getView().getCenter()));
 			if (selIndex < 0) {
-				var coordinates = f.getGeometry().getInteriorPoint().getCoordinates();
+				var coordinates = feature.getGeometry().getInteriorPoint().getCoordinates();
 				var lonLatCoordinates = toLonLat([coordinates[0], coordinates[1]]);
 				var latitude = lonLatCoordinates[0];
 				var longitude = lonLatCoordinates[1];
-				var area = getArea(f.getGeometry()).toFixed(2);
-				var polygonCoordinates = getPolygonCoordinates(f.getGeometry().getCoordinates()[0])
-				dispatch(addBuilding(buildingOlId, latitude, longitude, area, polygonCoordinates));
-				f.setStyle(highlightStyle);
+				var area = getArea(feature.getGeometry()).toFixed(2);
+				var Coordinates = getPolygonCoordinates(feature.getGeometry().getCoordinates()[0])
+				var FlatCoordinates = feature.getGeometry().getCoordinates()[0]
+				dispatch(addBuilding(buildingOlId, latitude, longitude, area, Coordinates, FlatCoordinates));
+				feature.setStyle(highlightStyle);
 			} else {
 				dispatch(removeBuilding(buildingOlId));
-				f.setStyle(defaultStyle);
+				feature.setStyle(defaultStyle);
 
 			}
 		});
@@ -121,4 +150,4 @@ const VectorLayer = ({ defaultStyle, highlightStyle, renderZoom, centerSetter, z
 };
 
 
-export default VectorLayer;
+export default DesignLayer;

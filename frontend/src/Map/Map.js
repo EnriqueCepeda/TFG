@@ -2,17 +2,10 @@ import React, { useRef, useState, useEffect } from "react"
 import MapContext from "./MapContext";
 import { View as olView, Map as olMap } from "ol";
 import { Box } from "@material-ui/core"
-import { makeStyles } from '@material-ui/core/styles';
 
-const useStyles = makeStyles(() => ({
-	olMap: {
-		flex: 7,
-		overflow: "hidden"
-	},
-}));
 
-const Map = ({ children, zoom, center }) => {
-	const classes = useStyles();
+
+const Map = ({ style, children, zoom, center }) => {
 	const mapRef = useRef();
 	const [map, setMap] = useState(null);
 
@@ -47,7 +40,7 @@ const Map = ({ children, zoom, center }) => {
 
 	return (
 		<MapContext.Provider value={{ map }}>
-			<Box ref={mapRef} className={classes.olMap}>
+			<Box ref={mapRef} className={style}>
 				{children}
 			</Box>
 		</MapContext.Provider>

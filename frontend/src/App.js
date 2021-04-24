@@ -1,5 +1,6 @@
 import React from 'react';
 import GridDesigner from './GridDesigner'
+import GridDashboard from './GridDashboard'
 import GridDetail from './GridDetail'
 import {
 	BrowserRouter as Router,
@@ -13,6 +14,7 @@ export default function App() {
 		<Router>
 			<Switch>
 				<Route path="/detail" component={GridDetail} />
+				<Route path="/dashboard" component={GridDashboard} />
 				<Route path="/" component={GridDesigner} />
 			</Switch>
 		</Router >

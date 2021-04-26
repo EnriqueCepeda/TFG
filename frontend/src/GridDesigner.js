@@ -15,23 +15,20 @@ import { Header } from "./Common"
 
 
 const useStyles = makeStyles((theme) => ({
-    GridDesigner: {
-        height: '100%',
-        width: '100%',
-    },
-    Content: {
-        height: '92%',
-        width: '98%',
+
+    content: {
         marginTop: 10,
         marginLeft: 10,
         marginRight: 10,
-        overflow: "hidden",
+        marginBottom: 10,
         display: 'flex',
-        flexDirection: 'row'
+        flexDirection: 'row',
+        height: 'calc(100% - 84px)',
+        flex: 1,
     },
     olMap: {
         flex: 7,
-        overflow: "hidden"
+        alignItems: 'stretch'
     },
 }));
 
@@ -42,9 +39,9 @@ const GridDesigner = () => {
     const classes = useStyles();
 
     return (
-        <div className={classes.GridDesigner}>
+        <React.Fragment>
             <Header title="Grid designer" > </Header>
-            <div className={classes.Content}>
+            <div className={classes.content}>
                 <Map center={fromLonLat(center)} zoom={zoom} style={classes.olMap}>
                     <Layers>
                         <TileLayer
@@ -60,7 +57,7 @@ const GridDesigner = () => {
                 </Map>
                 <BuildingContainer centerSetter={setCenter} zoomSetter={setZoom} />
             </div>
-        </div >
+        </React.Fragment >
     )
 };
 

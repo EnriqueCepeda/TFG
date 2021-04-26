@@ -16,19 +16,21 @@ export const updateBuildingConsumption = (id, hour, value) => (
     }
 );
 
-export const addBuilding = (id, longitude, latitude, area, coordinates, flatCoordinates) => ({
-    type: ADD_BUILDING,
-    building_id: id,
-    building_data: {
-        latitude: latitude,
-        longitude: longitude,
-        area: area,
-        type: "Consumer & Producer",
-        coordinates: coordinates,
-        flatCoordinates: flatCoordinates,
-        consumption: defaultBuildingConsumption
-    }
-});
+export const addBuilding = (id, longitude, latitude, address, area, coordinates, flatCoordinates) => (
+    {
+        type: ADD_BUILDING,
+        building_id: id,
+        building_data: {
+            latitude: latitude,
+            longitude: longitude,
+            address: address,
+            area: area,
+            type: "Consumer & Producer",
+            coordinates: coordinates,
+            flatCoordinates: flatCoordinates,
+            consumption: defaultBuildingConsumption
+        }
+    });
 
 export const removeBuilding = (id) => ({
     type: REMOVE_BUILDING,

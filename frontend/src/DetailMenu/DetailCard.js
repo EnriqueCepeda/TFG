@@ -106,7 +106,7 @@ export default function DetailCard({ ol_uid }) {
                         </div>
                         <div className={classes.cardContentRow}>
                             <Avatar className={classes.sizeAvatar} variant="square" src={locationImg} />
-                            <Typography> Lat {building.latitude.toFixed(4)}, Lon {building.longitude.toFixed(4)} </Typography>
+                            <Typography> {building.address} </Typography>
                         </div>
                         <div className={classes.cardContentRow}>
                             <Avatar className={classes.sizeAvatar} variant="square" src={areaImg} />

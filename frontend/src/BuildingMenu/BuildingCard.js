@@ -15,7 +15,7 @@ import { ToggleButton } from '@material-ui/lab';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateBuildingType } from '../redux/actions/buildingActions.js';
 import { getBuilding } from '../redux/selectors';
-
+import LocationOnIcon from '@material-ui/icons/LocationOn';
 
 
 const useStyles = makeStyles(() => ({
@@ -80,7 +80,7 @@ function BuildingCard({ ol_uid, centerSetter }) {
     };
 
     function clickCardHandler() {
-        centerSetter([building.longitude, building.latitude])
+        centerSetter([building.latitude, building.longitude])
     }
 
     return (
@@ -94,9 +94,9 @@ function BuildingCard({ ol_uid, centerSetter }) {
                         onChange={handleBuildingType}
                         aria-label="building type"
                     >
-                        <ToggleButton value="Consumer" aria-label="left aligned" > {""} </ToggleButton>
-                        <ToggleButton value="Producer" aria-label="centered" > {""} </ToggleButton>
-                        <ToggleButton value="Consumer & Producer" aria-label="right aligned" > {""} </ToggleButton>
+                        <ToggleButton value="Consumer" aria-label="Consumer" title="Consumer"> {""} </ToggleButton>
+                        <ToggleButton value="Producer" aria-label="Producer" title="Producer"> {""} </ToggleButton>
+                        <ToggleButton value="Consumer & Producer" aria-label="Consumer & Producer" title="Consumer & Producer"> {""} </ToggleButton>
                     </ToggleButtonGroup>
                 </CardContent >
             </div >
@@ -105,7 +105,7 @@ function BuildingCard({ ol_uid, centerSetter }) {
                 <CardContent className={classes.rightContent}>
                     <div className={classes.cardContentRow}>
                         <Avatar className={classes.sizeAvatar} variant="square" src={locationImg} />
-                        <Typography> Lat {building.latitude.toFixed(4)}, Lon {building.longitude.toFixed(4)} </Typography>
+                        <Typography> {building.address} </Typography>
                     </div>
                     <div className={classes.cardContentRow}>
                         <Avatar className={classes.sizeAvatar} variant="square" src={areaImg} />

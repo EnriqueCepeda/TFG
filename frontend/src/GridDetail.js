@@ -10,16 +10,10 @@ import { DetailContainer } from './DetailMenu';
 const useStyles = makeStyles((theme) => ({
     GridDesigner: {
         height: '100%',
-        width: '100%',
         display: 'flex',
-        flexDirection: 'column'
-    },
-    Content: {
-        height: '93%',
-        width: '100%',
-        overflow: "hidden",
-        display: 'flex',
-    },
+        flexDirection: 'column',
+        flex: 1
+    }
 }));
 
 const GridDetail = () => {

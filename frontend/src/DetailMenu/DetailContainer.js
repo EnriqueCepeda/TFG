@@ -67,7 +67,6 @@ export default function DetailContainer() {
                     onChange={handlePageClick}
                     shape="rounded"
                     className={classes.pagination}
-                    style={{ marginRight: 10 }}
                 />
                 <ThemeButton color="primary" component={Link} to="/dashboard" style={{ marginRight: 75 }} >
                     Launch Grid

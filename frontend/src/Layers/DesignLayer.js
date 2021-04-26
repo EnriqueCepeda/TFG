@@ -14,7 +14,6 @@ import proj4 from "proj4";
 import { Fill, Stroke, Style } from 'ol/style';
 
 
-
 let styles = {
 	'default': new Style({
 		zIndex: 1,
@@ -120,27 +119,40 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 		return newCoordinates;
 	}
 
+	function getBuildingAddress(latitude, longitude) {
+		let request_url = `http://localhost:8000/building_address?latitude=${latitude}&longitude=${longitude}`
+		var request = new XMLHttpRequest();
+		request.open('GET', request_url, false);  // `false` makes the request synchronous
+		request.send(null);
+		if (request.status === 200) {
+			return request.responseText.replace("\"", "")
+		} else {
+			return `Latitude: ${latitude}, Longitude: ${longitude}`
+		}
+
+	}
+
 	function modifyBuildingListListener(e) {
 		map.forEachFeatureAtPixel(e.pixel, function (feature) {
 			var keys = Object.keys(buildings);
 			var buildingOlId = "Building " + feature.getId();
 			var selIndex = keys.indexOf(buildingOlId);
-			debugger;
 			centerSetter(toLonLat(map.getView().getCenter()));
 			if (selIndex < 0) {
 				var coordinates = feature.getGeometry().getInteriorPoint().getCoordinates();
 				var lonLatCoordinates = toLonLat([coordinates[0], coordinates[1]]);
-				var latitude = lonLatCoordinates[0];
-				var longitude = lonLatCoordinates[1];
+				var latitude = lonLatCoordinates[1];
+				var longitude = lonLatCoordinates[0];
 				var area = getArea(feature.getGeometry()).toFixed(2);
-				var Coordinates = getPolygonCoordinates(feature.getGeometry().getCoordinates()[0])
-				var FlatCoordinates = feature.getGeometry().getCoordinates()[0]
-				dispatch(addBuilding(buildingOlId, latitude, longitude, area, Coordinates, FlatCoordinates));
+				var coordinates = getPolygonCoordinates(feature.getGeometry().getCoordinates()[0]);
+				let address = getBuildingAddress(latitude, longitude);
+				console.log(address);
+				var flatCoordinates = feature.getGeometry().getCoordinates()[0];
+				dispatch(addBuilding(buildingOlId, latitude, longitude, address, area, coordinates, flatCoordinates));
 				feature.setStyle(highlightStyle);
 			} else {
 				dispatch(removeBuilding(buildingOlId));
 				feature.setStyle(defaultStyle);
-
 			}
 		});
 

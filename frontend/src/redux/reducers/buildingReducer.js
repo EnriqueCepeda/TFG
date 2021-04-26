@@ -2,7 +2,7 @@
 import { ADD_BUILDING, REMOVE_BUILDING, UPDATE_BUILDING_TYPE, UPDATE_BUILDING_CONSUMPTION } from '../actions/types';
 import _ from "lodash";
 
-const initialState = {
+/*const initialState = {
     'Building 558237034': {
         latitude: 38.987269850290346,
         longitude: -3.9281868126457096,
@@ -527,7 +527,10 @@ const initialState = {
             3.7
         ]
     }
-}
+}*/
+
+let initialState = {}
+
 
 const reducer = (state = initialState, action) => {
     switch (action.type) {
@@ -537,7 +540,6 @@ const reducer = (state = initialState, action) => {
             return stateCloned;
         }
         case UPDATE_BUILDING_CONSUMPTION: {
-            debugger;
             let stateCloned = _.cloneDeep(state);
             stateCloned[action.building_id].consumption[action.hour] = action.value;
             return stateCloned;

@@ -11,13 +11,10 @@ import { fromLonLat } from 'ol/proj'
 
 
 const useStyles = makeStyles((theme) => ({
-    GridDashboard: {
-        height: '100%',
-        width: '100%',
-    },
     olMap: {
-        height: '92%',
-        width: '98%',
+        display: 'flex',
+        flexDirection: 'row',
+        height: 'calc(100% - 84px)',
         marginTop: 10,
         marginLeft: 10,
         marginRight: 10,
@@ -32,9 +29,8 @@ const GridDashboard = () => {
     const [zoom, setZoom] = useState(18);
 
     return (
-        <div className={classes.GridDashboard}>
+        <React.Fragment>
             <Header title="Dashboard" > </Header>
-
             <Map style={classes.olMap} center={fromLonLat(center)} zoom={zoom}>
                 <Layers>
                     <TileLayer
@@ -48,7 +44,7 @@ const GridDashboard = () => {
                     <ZoomControl />
                 </Controls>
             </Map>
-        </div >
+        </React.Fragment >
     )
 };
 

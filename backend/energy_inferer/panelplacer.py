@@ -2,6 +2,7 @@ from haversine import haversine, Unit
 from shapely.geometry import Polygon, MultiPolygon
 from descartes.patch import PolygonPatch
 from matplotlib import pyplot
+import math
 from .figures import BLUE, PURPLE, plot_coords
 
 
@@ -44,8 +45,9 @@ class PanelPlacer:
       x = minx
       y = y2 + cartesian_panel_height * 0.5
 
-    panels_per_row = 10
-    rows = panels / panels_per_row
+    ''' TO-DO: Find the optimum number for the inverter and remove the rest of the division'''
+    panels_per_row = 10 
+    rows = math.floor(panels / panels_per_row)
     return rows, panels_per_row 
 
   @classmethod

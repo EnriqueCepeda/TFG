@@ -1,9 +1,9 @@
-from typing import Dict
+from typing import Dict, List, Tuple
 from fastapi import FastAPI, HTTPException
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 import aiohttp
-from energy_inferer.energy_inferer import infere_energy_production
+from energy_inferer.energy_inferer import infere_energy_production, get_panels_configuration
 from fastapi.middleware.cors import CORSMiddleware
 import os
 
@@ -20,28 +20,24 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
     return PlainTextResponse(str(exc), status_code=400)
 
-def infere_building_production(building_parameters):
-    latitude, longitude = float(building_parameters['latitude']), float(building_parameters['longitude'])
-    building_name, coordinates =  building_parameters['name'], building_parameters['coordinates'],
-    return {building_name: infere_energy_production(coordinates, latitude, longitude)}
+@app.post("/building/module_configuration")
+def get_building_module_configuration(polygon_coordinates: List[Tuple[float, float]], latitude:float, longitude:float):
+    return get_panels_configuration(polygon_coordinates, latitude, longitude)
 
-@app.post("/infere")
-def infere_building_view(building_parameters: Dict):
-    return infere_building_production(building_parameters)
+@app.post("/building/infere_consumption")
+def infere_building_view(modules_per_string:int, strings_per_inverter:int, latitude:float, longitude:float):
+    '''
+    Returns the energy produced on an hour on a certain location with a certain panel config
+    '''
 
-@app.post("/bulk_infere")
-def infere_buildings_view(building_parameters: Dict):
-    response = {}
-    for building in building_parameters:
-        building_dict = infere_building_production(building)
-        response.update(building_dict)
-    return response
+    return {'result' : infere_energy_production(modules_per_string, strings_per_inverter, latitude, longitude)}
 
-@app.get("/building_address")
+@app.get("/building/address")
 async def get_building_address(latitude: float, longitude: float):
   maps_api_key = os.getenv('GOOGLE_MAPS_APIKEY', '')
   base_url = 'https://maps.googleapis.com/maps/api/geocode/json'
@@ -56,7 +52,6 @@ async def get_building_address(latitude: float, longitude: float):
         result = await response.json()
         if len(result) == 0:
             raise HTTPException(status_code=404, detail="Address not found")
-        print(result["results"][0]["formatted_address"])
         return result["results"][0]["formatted_address"]
       except Exception:
           raise HTTPException(status_code=500, detail="Server error")

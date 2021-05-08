@@ -3,7 +3,7 @@ from math import cos
 import pandas as pd
 from pvlib.pvsystem import PVSystem, retrieve_sam
 from pvlib.location import Location
-from pvlib.modelchain import ModelChain
+from pvlib.modelchain import ModelChain, get_orientation
 from pvlib.forecast import GFS, OWM
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from .altitude import AltitudeAPI
@@ -24,8 +24,11 @@ def get_inverter():
     inverter = sapm_inverters['ABB__MICRO_0_25_I_OUTD_US_208__208V_']
     return inverter
 
-def get_panels_organization(building_coordinates):
+def get_panels_configuration(building_coordinates, latitude, longitude):
     module = get_module()
+    module["m_projected_width"] = cos(surface_tilt) * module["m_width"] #module of projection vector
+    module["m_projected_length"] = module["m_length"]
+    surface_tilt, surface_azimuth = get_orientation('south_at_latitude_tilt', latitude=latitude)
     modules_per_string, strings_per_inverter = PanelPlacer.run(building_coordinates, module["m_projected_length"],  module["m_projected_width"])
     return {"modules_per_string" : modules_per_string,
             "strings_per_inverter" : strings_per_inverter}
@@ -41,19 +44,13 @@ def infere_energy_production(modules_per_string=2, strings_per_inverter=1, latit
                     temperature_model_parameters=temperature_model_parameters)
     location = Location(latitude, longitude, altitude=altitude)
     mc = ModelChain(system, location, orientation_strategy='south_at_latitude_tilt')
-    
-    surface_tilt, surface_azimuth = system.surface_tilt, system.surface_azimuth
-    module["m_projected_width"] = cos(surface_tilt) * module["m_width"] #module of projection vector
-    module["m_projected_length"] = module["m_length"]
-
-    #rows, panels_per_row = PanelPlacer.run(building_coordinates, module["m_projected_length"],  module["m_projected_width"])
     system.modules_per_string = modules_per_string
     system.strings_per_inverter = string_per_inverter
 
     start = pd.Timedelta.now(tz="UTC")
-    end = start + pd.Timedelta(hours=1)
+
     #manage error from OWM model
-    forecast_data = forecast_model.get_processed_data(latitude=latitude, longitude=longitude, start=start, end=end)
+    forecast_data = forecast_model.get_processed_data(latitude=latitude, longitude=longitude, start=start)
     mc.run_model(forecast_data)
     weekly_energy = mc.ac.to_dict()
     return weekly_energy

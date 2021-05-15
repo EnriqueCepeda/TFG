@@ -15,7 +15,6 @@ import { ToggleButton } from '@material-ui/lab';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateBuildingType } from '../redux/actions/buildingActions.js';
 import { getBuilding } from '../redux/selectors';
-import LocationOnIcon from '@material-ui/icons/LocationOn';
 
 
 const useStyles = makeStyles(() => ({
@@ -66,7 +65,7 @@ function BuildingCard({ ol_uid, centerSetter }) {
                 return <Avatar variant="square" className={classes.sizeBuilding} src={consumer} />
             case "Producer":
                 return <Avatar variant="square" className={classes.sizeBuilding} src={producer} />
-            case "Consumer & Producer":
+            case "Prosumer":
                 return <Avatar variant="square" className={classes.sizeBuilding} src={both} />
             default:
                 return <Avatar variant="square" className={classes.sizeBuilding} src={consumer} />
@@ -96,7 +95,7 @@ function BuildingCard({ ol_uid, centerSetter }) {
                     >
                         <ToggleButton value="Consumer" aria-label="Consumer" title="Consumer"> {""} </ToggleButton>
                         <ToggleButton value="Producer" aria-label="Producer" title="Producer"> {""} </ToggleButton>
-                        <ToggleButton value="Consumer & Producer" aria-label="Consumer & Producer" title="Consumer & Producer"> {""} </ToggleButton>
+                        <ToggleButton value="Prosumer" aria-label="Prosumer" title="Prosumer"> {""} </ToggleButton>
                     </ToggleButtonGroup>
                 </CardContent >
             </div >

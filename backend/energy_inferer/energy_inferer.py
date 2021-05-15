@@ -11,12 +11,15 @@ from .panelplacer import PanelPlacer
 
 
 
-def get_module():
+def get_module(latitude):
     sandia_modules = retrieve_sam('SandiaMod')
     #http://www.solardesigntool.com/components/module-panel-solar/Silevo/2272/Triex-U300-Black/specification-data-sheet.html
     module = sandia_modules['Silevo_Triex_U300_Black__2014_'] #1.68 square meters
     module['m_length'] = 1.586
     module['m_width'] = 1.056
+    module["m_projected_length"] = module["m_length"]
+    surface_tilt, surface_azimuth = get_orientation('south_at_latitude_tilt', latitude=latitude)
+    module["m_projected_width"] = cos(surface_tilt) * module["m_width"] #module of projection vector
     return module
 
 def get_inverter():
@@ -25,15 +28,12 @@ def get_inverter():
     return inverter
 
 def get_panels_configuration(building_coordinates, latitude, longitude):
-    module = get_module()
-    module["m_projected_width"] = cos(surface_tilt) * module["m_width"] #module of projection vector
-    module["m_projected_length"] = module["m_length"]
-    surface_tilt, surface_azimuth = get_orientation('south_at_latitude_tilt', latitude=latitude)
+    module = get_module(latitude)
     modules_per_string, strings_per_inverter = PanelPlacer.run(building_coordinates, module["m_projected_length"],  module["m_projected_width"])
     return {"modules_per_string" : modules_per_string,
             "strings_per_inverter" : strings_per_inverter}
 
-def infere_energy_production(modules_per_string=2, strings_per_inverter=1, latitude, longitude):
+def infere_energy_production(latitude, longitude, modules_per_string=2, strings_per_inverter=1) :
     module = get_module()
     inverter = get_inverter()
     temperature_model_parameters = TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
@@ -45,9 +45,10 @@ def infere_energy_production(modules_per_string=2, strings_per_inverter=1, latit
     location = Location(latitude, longitude, altitude=altitude)
     mc = ModelChain(system, location, orientation_strategy='south_at_latitude_tilt')
     system.modules_per_string = modules_per_string
-    system.strings_per_inverter = string_per_inverter
+    system.strings_per_inverter = strings_per_inverter
 
     start = pd.Timedelta.now(tz="UTC")
+    forecast_model = OWM()
 
     #manage error from OWM model
     forecast_data = forecast_model.get_processed_data(latitude=latitude, longitude=longitude, start=start)

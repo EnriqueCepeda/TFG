@@ -1,4 +1,5 @@
-package multiagent_system.src;
+
+package com.multiagent;
 
 import jade.core.Agent;
 import jade.proto.ContractNetResponder;

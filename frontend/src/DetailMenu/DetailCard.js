@@ -88,7 +88,7 @@ export default function DetailCard({ ol_uid }) {
         switch (building_type) {
             case "Consumer":
                 return <Avatar variant="square" className={classes.sizeBuilding} src={consumer} />
-            case "Consumer & Producer":
+            case "Prosumer":
                 return <Avatar variant="square" className={classes.sizeBuilding} src={both} />
             default:
                 return <Avatar variant="square" className={classes.sizeBuilding} src={consumer} />

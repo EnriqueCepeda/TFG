@@ -1,4 +1,4 @@
-package multiagent_system.src;
+package com.multiagent;
 
 import java.security.acl.Acl;
 import java.util.Collections;

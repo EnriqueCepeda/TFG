@@ -162,7 +162,7 @@ const DashboardLayer = () => {
 
             ]
         }
-
+        console.log(JSON.stringify(buildings));
         Object.keys(buildings).map((dictkey, index) => {
             var feature = {
                 'id': dictkey,
@@ -235,7 +235,7 @@ const DashboardLayer = () => {
                 case "Producer":
                     feature.setStyle(buildingStyles.profit);
                     break;
-                case "Consumer & Producer":
+                case "Prosumer":
                     feature.setStyle(buildingStyles.brokeEven);
                     break;
                 default:

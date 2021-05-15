@@ -12,5 +12,6 @@
         "statusBar.foreground": "#15202b"
     },
     "python.pythonPath": "/home/enrique/.virtualenvs/tfg/bin/python",
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "java.configuration.updateBuildConfiguration": "automatic"
 }

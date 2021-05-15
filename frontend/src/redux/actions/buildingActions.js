@@ -25,7 +25,7 @@ export const addBuilding = (id, longitude, latitude, address, area, coordinates,
             longitude: longitude,
             address: address,
             area: area,
-            type: "Consumer & Producer",
+            type: "Prosumer",
             coordinates: coordinates,
             flatCoordinates: flatCoordinates,
             consumption: defaultBuildingConsumption

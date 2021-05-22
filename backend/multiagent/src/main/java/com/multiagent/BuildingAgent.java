@@ -1,30 +1,48 @@
 package com.multiagent;
 
-import java.security.acl.Acl;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.Math;
+import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import java.util.Collections;
 import java.util.Date;
-import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
-import java.util.Comparator;
-import java.lang.Math;
 
+import java.util.Comparator;
+
+import jade.core.Agent;
+import jade.core.behaviours.*;
 import jade.domain.DFService;
-import jade.domain.FIPAAgentManagement.*;
+import jade.domain.FIPAAgentManagement.DFAgentDescription;
 import jade.domain.FIPAAgentManagement.FailureException;
 import jade.domain.FIPAAgentManagement.NotUnderstoodException;
+import jade.domain.FIPAAgentManagement.Property;
 import jade.domain.FIPAAgentManagement.RefuseException;
+import jade.domain.FIPAAgentManagement.ServiceDescription;
 import jade.domain.FIPAException;
 import jade.domain.FIPANames;
 import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetInitiator;
 import jade.proto.ContractNetResponder;
-import jade.core.Agent;
-import jade.core.AID;
-import jade.core.behaviours.*;
-import jade.domain.FIPAAgentManagement.Property;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 public class BuildingAgent extends Agent {
 
@@ -39,40 +57,142 @@ public class BuildingAgent extends Agent {
 }
 
 class RefreshDataBehaviour extends TickerBehaviour {
-	public RefreshDataBehaviour(Agent agent, long period) {
+	JSONObject data;
+
+	public RefreshDataBehaviour(Agent agent, long period, JSONObject data) {
 		super(agent, period);
+		this.data = data;
 	}
 
 	protected void onTick() {
-		this.myAgent.addBehaviour(new BuildingAgentInitiator(this.myAgent));
+		this.myAgent.addBehaviour(new BuildingAgentInitiator(this.myAgent, this.data));
 
 	}
 
 }
 
 class BuildingAgentInitiator extends OneShotBehaviour {
+	private JSONObject data = null;
+	private final String BUILDING_CONFIGURATION_URI = "http://localhost:8000/building/configuration";
+	private final String ENERGY_CONSUMPTION_URI = "http://localhost:8000/building/production";
+
 	public BuildingAgentInitiator(Agent agent) {
 		super(agent);
 	}
 
-	public double requestEstimatedEnergy(Object[] args) {
-		// Placeholder from a value obtained from the API
-		Double productionEstimation = Double.parseDouble((String) args[0]);
-		return productionEstimation;
+	public BuildingAgentInitiator(Agent agent, JSONObject data) {
+		super(agent);
+		this.data = data;
+	}
+
+	public JSONObject getBuildingData(Object[] args) {
+		Double latitude = Double.parseDouble((String) args[0]);
+		Double longitude = Double.parseDouble((String) args[1]);
+		String type = ((String) args[2]);
+		String coordinates = ((String) args[3]).replace("?", ",");
+		String consumption = ((String) args[4]).replace("?", ",");
+		String buildingRoles = ((String) args[5]).replace("?", ",");
+		JSONArray jsonCoordinates = new JSONArray(coordinates);
+		JSONArray jsonConsumption = new JSONArray(consumption);
+		JSONObject jsonBuildingRoles = new JSONObject(buildingRoles);
+		JSONObject data = new JSONObject();
+		data.put("latitude", latitude);
+		data.put("longitude", longitude);
+		data.put("type", type);
+		data.put("coordinates", jsonCoordinates);
+		data.put("consumption", jsonConsumption);
+		data.put("buildingRoles", jsonBuildingRoles);
+
+		if (BuildingType.PRODUCER.name().equalsIgnoreCase(type)
+				|| BuildingType.PROSUMER.name().equalsIgnoreCase(type)) {
+			try {
+				JSONObject configurationResponse = getPanelConfiguration(latitude, jsonCoordinates);
+				data.put("modules_per_string", configurationResponse.getInt("modules_per_string"));
+				data.put("strings_per_inverter", configurationResponse.getInt("strings_per_inverter"));
+			} catch (IOException | URISyntaxException e) {
+				System.out.println(e);
+			}
+		}
+
+		return data;
+	}
+
+	public JSONObject getPanelConfiguration(Double latitude, JSONArray coordinates)
+			throws IOException, ClientProtocolException, URISyntaxException {
+		URIBuilder uriBuilder = new URIBuilder(this.BUILDING_CONFIGURATION_URI);
+		uriBuilder.addParameter("latitude", latitude.toString());
+		URI requestURI = uriBuilder.build();
+
+		StringEntity requestEntity = new StringEntity(coordinates.toString(), ContentType.APPLICATION_JSON);
+		HttpPost httpPost = new HttpPost(requestURI);
+		httpPost.setEntity(requestEntity);
+
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
+		InputStream responseStream = httpResponse.getEntity().getContent();
+		JSONObject response = new JSONObject(IOUtils.toString(responseStream));
+		return response;
+
+	}
+
+	public Double getBuildingProduction(Integer modules_per_string, Integer strings_per_inverter, Double latitude,
+			Double longitude) throws URISyntaxException, ClientProtocolException, IOException {
+		URIBuilder uriBuilder = new URIBuilder(this.ENERGY_CONSUMPTION_URI);
+		uriBuilder.addParameter("latitude", latitude.toString());
+		uriBuilder.addParameter("longitude", longitude.toString());
+		uriBuilder.addParameter("strings_per_inverter", strings_per_inverter.toString());
+		uriBuilder.addParameter("modules_per_string", modules_per_string.toString());
+		URI requestURI = uriBuilder.build();
+		HttpPost httpPost = new HttpPost(requestURI);
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
+		InputStream responseStream = httpResponse.getEntity().getContent();
+		JSONArray response = new JSONArray(IOUtils.toString(responseStream));
+		System.out.println(response);
+		return response.getJSONArray(0).getDouble(1);
+	}
+
+	public Double getEstimatedEnergy(JSONObject buildingData) {
+		Double hourProduction = 0.0;
+		int hour = Instant.now().atZone(ZoneOffset.UTC).getHour();
+		Double hourConsumption = ((BigDecimal) (((JSONArray) (buildingData.get("consumption"))).get(hour)))
+				.doubleValue();
+		if (BuildingType.CONSUMER.name().equalsIgnoreCase(buildingData.getString("type"))) {
+			hourProduction = -hourConsumption;
+		} else {
+			Integer modules_per_string = this.data.getInt("modules_per_string");
+			Integer strings_per_inverter = this.data.getInt("strings_per_inverter");
+			Double latitude = this.data.getDouble("latitude");
+			Double longitude = this.data.getDouble("longitude");
+			try {
+				hourProduction = getBuildingProduction(modules_per_string, strings_per_inverter, latitude, longitude);
+			} catch (URISyntaxException | IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			if (BuildingType.PROSUMER.name().equalsIgnoreCase(buildingData.getString("type"))) {
+				hourProduction = hourProduction - hourConsumption;
+			}
+		}
+		return hourProduction;
 	}
 
 	public void action() {
 		Object[] args = this.myAgent.getArguments();
 		if (args != null && args.length > 0) {
-			Double estimationOneHour = requestEstimatedEnergy(args);
-			if (estimationOneHour > 0) {
-				this.myAgent.addBehaviour(new ProducerInitiatiorBehaviour(this.myAgent, estimationOneHour, args));
-			} else {
+			if (this.data == null) {
+				this.data = getBuildingData(args);
+			}
+			Double estimatedConsumedEnergy = getEstimatedEnergy(this.data);
+			if (estimatedConsumedEnergy > 0) {
 				this.myAgent.addBehaviour(
-						new ConsumerInitiatorBehaviour(this.myAgent, Math.abs(estimationOneHour), "Producer", args));
+						new ProducerInitiatiorBehaviour(this.myAgent, estimatedConsumedEnergy, this.data));
+			} else {
+				this.myAgent.addBehaviour(new ConsumerInitiatorBehaviour(this.myAgent,
+						Math.abs(estimatedConsumedEnergy), "Producer", this.data));
 			}
 		} else {
-			System.out.println("Agent" + this.myAgent.getLocalName() + ": There are no arguments, shuting down agent");
+			System.out.println("Agent" + this.myAgent.getLocalName() + ": There are no arguments, shutting down agent");
 			this.myAgent.doDelete();
 		}
 
@@ -82,14 +202,14 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 class ProducerInitiatiorBehaviour extends OneShotBehaviour {
 
 	Double estimation = 0.0;
-	Object[] data;
+	JSONObject data = null;
 	String producerType = null;
 
-	public ProducerInitiatiorBehaviour(Agent agent, Double estimation, Object[] data) {
+	public ProducerInitiatiorBehaviour(Agent agent, Double estimation, JSONObject data) {
 		super(agent);
 		this.estimation = estimation;
 		this.producerType = "Producer";
-		this.data = data; // The data from the frontend
+		this.data = data;
 	}
 
 	public ProducerInitiatiorBehaviour(Agent agent, Double estimation) {
@@ -99,14 +219,13 @@ class ProducerInitiatiorBehaviour extends OneShotBehaviour {
 	}
 
 	public void action() {
-		System.out.println("Agent " + this.myAgent.getLocalName() + ": Energy ->" + this.estimation);
+		System.out.println("Agent " + this.myAgent.getLocalName() + ": Energy -> " + this.estimation + " Kw");
 		DFAgentDescription description = new DFAgentDescription();
 		description.setName(this.myAgent.getAID());
 
 		ServiceDescription service = new ServiceDescription();
 		service.setType(this.producerType);
-		// From data when integrated
-		service.setName("Openlayers building id");
+		service.setName(this.myAgent.getLocalName());
 		Property p = new Property("Energy production", this.estimation);
 		service.addProperties(p);
 		description.addServices(service);
@@ -121,7 +240,7 @@ class ProducerInitiatiorBehaviour extends OneShotBehaviour {
 		MessageTemplate template = MessageTemplate.and(
 				MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
 				MessageTemplate.MatchPerformative(ACLMessage.CFP));
-		this.myAgent.addBehaviour(new ProducerBehaviour(this.myAgent, template, this.estimation));
+		this.myAgent.addBehaviour(new ProducerBehaviour(this.myAgent, template, this.estimation, this.data));
 	}
 
 }
@@ -129,10 +248,12 @@ class ProducerInitiatiorBehaviour extends OneShotBehaviour {
 class ProducerBehaviour extends ContractNetResponder {
 
 	Double remainingEnergy = 0.0;
+	JSONObject data = null;
 
-	public ProducerBehaviour(Agent agente, MessageTemplate plantilla, Double estimation) {
+	public ProducerBehaviour(Agent agente, MessageTemplate plantilla, Double estimation, JSONObject data) {
 		super(agente, plantilla);
 		this.remainingEnergy = estimation;
+		this.data = data;
 	}
 
 	@Override
@@ -189,14 +310,14 @@ class ProducerBehaviour extends ContractNetResponder {
 class ConsumerInitiatorBehaviour extends OneShotBehaviour {
 
 	Double energyNeed = 0.0;
-	Object[] data;
+	JSONObject data = null;
 	String producerType = null;
 
-	public ConsumerInitiatorBehaviour(Agent agent, Double energyNeed, String producerType, Object[] data) {
+	public ConsumerInitiatorBehaviour(Agent agent, Double energyNeed, String producerType, JSONObject data) {
 		super(agent);
 		this.energyNeed = energyNeed;
 		this.producerType = producerType;
-		this.data = data; // The data from the frontend
+		this.data = data;
 	}
 
 	public void action() {
@@ -204,6 +325,8 @@ class ConsumerInitiatorBehaviour extends OneShotBehaviour {
 		service.setType(this.producerType);
 		DFAgentDescription description = new DFAgentDescription();
 		description.addServices(service);
+		description.addOntologies("Producer");
+		description.addOntologies("Prosumer");
 		ACLMessage msgInitiator = new ACLMessage(ACLMessage.CFP);
 
 		try {
@@ -211,8 +334,10 @@ class ConsumerInitiatorBehaviour extends OneShotBehaviour {
 			if (resultados.length == 0) {
 				System.out.println("Agent " + this.myAgent.getLocalName()
 						+ ": No agent offers the required energy, asking the Grid Agent for energy");
-				this.myAgent.addBehaviour(
-						new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, "Grid agent", this.data));
+				/*
+				 * this.myAgent.addBehaviour( new ConsumerInitiatorBehaviour(this.myAgent,
+				 * this.energyNeed, "Grid agent", this.data));
+				 */
 				// Here is where it communicates with the Grid Agent looking for energy
 			} else {
 				for (int i = 0; i < resultados.length; ++i) {
@@ -245,9 +370,9 @@ class ConsumerBehaviour extends ContractNetInitiator {
 
 	Double energyNeed = 0.0;
 	Hashtable<Integer, Double> uncommitedEnergy = new Hashtable<Integer, Double>();
-	Object[] data;
+	JSONObject data = null;
 
-	public ConsumerBehaviour(Agent agent, ACLMessage message, Double energyNeed, Object[] data) {
+	public ConsumerBehaviour(Agent agent, ACLMessage message, Double energyNeed, JSONObject data) {
 		super(agent, message);
 		this.energyNeed = energyNeed;
 		this.data = data;
@@ -279,7 +404,7 @@ class ConsumerBehaviour extends ContractNetInitiator {
 		if (this.energyNeed == 0) {
 			// Initializes the BuildingAgentInitiatorBehaviour in an hour
 			int time = 3600000;
-			this.myAgent.addBehaviour(new RefreshDataBehaviour(this.myAgent, time));
+			this.myAgent.addBehaviour(new RefreshDataBehaviour(this.myAgent, time, this.data));
 			this.myAgent.removeBehaviour(this);
 
 		}
@@ -346,8 +471,10 @@ class ConsumerBehaviour extends ContractNetInitiator {
 
 		if (this.energyNeed > 0) {
 			System.out.println("Asking grid agent for: " + this.energyNeed + " Kw");
-			this.myAgent.addBehaviour(
-					new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, "Grid agent", this.data));
+			/*
+			 * this.myAgent.addBehaviour( new ConsumerInitiatorBehaviour(this.myAgent,
+			 * this.energyNeed, "Grid agent", this.data));
+			 */
 		}
 
 	}

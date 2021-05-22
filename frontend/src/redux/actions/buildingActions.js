@@ -16,7 +16,7 @@ export const updateBuildingConsumption = (id, hour, value) => (
     }
 );
 
-export const addBuilding = (id, longitude, latitude, address, area, coordinates, flatCoordinates) => (
+export const addBuilding = (id, latitude, longitude, address, area, coordinates, flatCoordinates) => (
     {
         type: ADD_BUILDING,
         building_id: id,

@@ -79,7 +79,7 @@ function BuildingCard({ ol_uid, centerSetter }) {
     };
 
     function clickCardHandler() {
-        centerSetter([building.latitude, building.longitude])
+        centerSetter([building.longitude, building.latitude])
     }
 
     return (

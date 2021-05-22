@@ -62,7 +62,8 @@ const useStyles = makeStyles(() => ({
         width: 160,
         display: "flex",
         flexDirection: "column"
-    }
+    },
+
 }));
 
 export default function DetailCard({ ol_uid }) {
@@ -123,6 +124,7 @@ export default function DetailCard({ ol_uid }) {
                 <div className={classes.graph}>
                     <Typography variant="h6" align="center" > ENERGY CONSUMPTION </ Typography >
                     <Divider variant="middle" />
+
                     <Typography variant="h3" align="center"> {_.sum(buildingConsumption).toFixed(2)} </ Typography >
                     <Typography variant="h3" align="center"> Kw </Typography >
                 </div>

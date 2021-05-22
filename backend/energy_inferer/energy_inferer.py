@@ -8,8 +8,9 @@ from pvlib.forecast import GFS, OWM
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from .altitude import AltitudeAPI
 from .panelplacer import PanelPlacer
+import debugpy
 
-
+debugpy.listen(5500)
 
 def get_module(latitude):
     sandia_modules = retrieve_sam('SandiaMod')
@@ -27,14 +28,14 @@ def get_inverter():
     inverter = sapm_inverters['ABB__MICRO_0_25_I_OUTD_US_208__208V_']
     return inverter
 
-def get_panels_configuration(building_coordinates, latitude, longitude):
+def get_panels_configuration(building_coordinates, latitude):
     module = get_module(latitude)
     modules_per_string, strings_per_inverter = PanelPlacer.run(building_coordinates, module["m_projected_length"],  module["m_projected_width"])
     return {"modules_per_string" : modules_per_string,
             "strings_per_inverter" : strings_per_inverter}
 
 def infere_energy_production(latitude, longitude, modules_per_string=2, strings_per_inverter=1) :
-    module = get_module()
+    module = get_module(latitude)
     inverter = get_inverter()
     temperature_model_parameters = TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
     
@@ -47,36 +48,19 @@ def infere_energy_production(latitude, longitude, modules_per_string=2, strings_
     system.modules_per_string = modules_per_string
     system.strings_per_inverter = strings_per_inverter
 
-    start = pd.Timedelta.now(tz="UTC")
+    start = datetime.now()
     forecast_model = OWM()
 
     #manage error from OWM model
     forecast_data = forecast_model.get_processed_data(latitude=latitude, longitude=longitude, start=start)
     mc.run_model(forecast_data)
     weekly_energy = mc.ac.to_dict()
-    return weekly_energy
+    result = [[key, value] for key, value in weekly_energy.items()]
+    return result
 
 if __name__ == "__main__":
-    coordinates = [
-    [42.39895182115834, -3.9239797040199833],
-    [42.39892596199394, -3.924040860313712],
-    [42.39893908455404, -3.92404524999857],
-    [42.39904149204892, -3.9240792700554348],
-    [42.3990214222293, -3.9241246633843017],
-    [42.39902065031322, -3.9241507021937996],
-    [42.39901756264913, -3.9242452799318532],
-    [42.39908767838139,-3.9242498691467227],
-    [42.399107748215656,-3.9242483726636084],
-    [42.39913090572214,-3.9242437834487394],
-    [42.39937110087334,-3.924006241661851],
-    [42.39928670443304,-3.923953166377263],
-    [42.39925428387012,-3.9239328141995804],
-    [42.39916088183658,-3.923874152037573],
-    [42.39904689546264,-3.9239794047232612],
-    [42.39898990232922,-3.923995566745869],
-    [42.39896674485852,-3.9239854904231657],
-    [42.39895182115834,-3.9239797040199833]
-    ]
-
-    production = infere_energy_production(coordinates, 38.98626, -3.92907)
+    coordinates = [[-3.9257092,38.98680649999998],[-3.9257349000000006,38.987052500000004],[-3.9258518000000002,38.98705109999998],[-3.9258518000000002,38.9870466],[-3.9258518000000002,38.98702580000002],[-3.925874100000001,38.98702580000002],[-3.9258751999999997,38.9870464],[-3.9259189000000014,38.9870464],[-3.9259178,38.9870084],[-3.9259555,38.987007699999985],[-3.9259595000000003,38.9868852],[-3.925937200000001,38.98688599999999],[-3.9259382,38.986861499999975],[-3.9259107,38.98686229999996],[-3.92591,38.98682209999996],[-3.9259098000000003,38.986808199999984],[-3.925869,38.98680790000002],[-3.9258711000000006,38.98683149999999],[-3.9258426000000006,38.98683149999999],[-3.925843700000001,38.986807699999964],[-3.9257092,38.98680649999998]]
+    config = get_panels_configuration(coordinates, 38.98626)
+    production = infere_energy_production(38.98626, -3.92907, config["modules_per_string"], config["strings_per_inverter"])
+    print(config)
     print(production)

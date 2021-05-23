@@ -8,11 +8,17 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Vector;
+import java.util.stream.Collectors;
+
+import com.google.gson.Gson;
 
 import java.util.Comparator;
 
@@ -31,7 +37,6 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetInitiator;
 import jade.proto.ContractNetResponder;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -188,7 +193,7 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 				this.myAgent.addBehaviour(
 						new ProducerInitiatiorBehaviour(this.myAgent, estimatedConsumedEnergy, this.data));
 			} else {
-				this.myAgent.addBehaviour(new ConsumerInitiatorBehaviour(this.myAgent,
+				this.myAgent.addBehaviour(new ConsumerRegistrationBehaviour(this.myAgent,
 						Math.abs(estimatedConsumedEnergy), "Producer", this.data));
 			}
 		} else {
@@ -222,8 +227,10 @@ class ProducerInitiatiorBehaviour extends OneShotBehaviour {
 		System.out.println("Agent " + this.myAgent.getLocalName() + ": Energy -> " + this.estimation + " Kw");
 		DFAgentDescription description = new DFAgentDescription();
 		description.setName(this.myAgent.getAID());
+		description.addOntologies("FProducer");
 
 		ServiceDescription service = new ServiceDescription();
+		// Producer or grid agent, to identify the true role of the agent
 		service.setType(this.producerType);
 		service.setName(this.myAgent.getLocalName());
 		Property p = new Property("Energy production", this.estimation);
@@ -250,8 +257,8 @@ class ProducerBehaviour extends ContractNetResponder {
 	Double remainingEnergy = 0.0;
 	JSONObject data = null;
 
-	public ProducerBehaviour(Agent agente, MessageTemplate plantilla, Double estimation, JSONObject data) {
-		super(agente, plantilla);
+	public ProducerBehaviour(Agent agente, MessageTemplate template, Double estimation, JSONObject data) {
+		super(agente, template);
 		this.remainingEnergy = estimation;
 		this.data = data;
 	}
@@ -277,13 +284,7 @@ class ProducerBehaviour extends ContractNetResponder {
 			propose.setContent(String.valueOf(offeredEnergy));
 			return propose;
 		} else {
-			// We refuse to provide a proposal and unregister from the DFService until de
-			// next iteration
-			try {
-				DFService.deregister(this.myAgent);
-			} catch (FIPAException e) {
-			}
-			throw new RefuseException("No availability of Energy");
+			throw new RefuseException("No availability of energy");
 		}
 	}
 
@@ -307,11 +308,48 @@ class ProducerBehaviour extends ContractNetResponder {
 	}
 }
 
-class ConsumerInitiatorBehaviour extends OneShotBehaviour {
+class ConsumerRegistrationBehaviour extends OneShotBehaviour {
 
 	Double energyNeed = 0.0;
 	JSONObject data = null;
 	String producerType = null;
+
+	public ConsumerRegistrationBehaviour(Agent agent, Double energyNeed, String producerType, JSONObject data) {
+		super(agent);
+		this.energyNeed = energyNeed;
+		this.producerType = producerType;
+		this.data = data;
+	}
+
+	public void action() {
+		DFAgentDescription description = new DFAgentDescription();
+		description.setName(this.myAgent.getAID());
+		if (this.data.getString("type").equals("Prosumer")) {
+			description.addOntologies("FProducer");
+		} else {
+			description.addOntologies("Consumer");
+		}
+		// It can be prosumer and consumer
+		ServiceDescription service = new ServiceDescription();
+		service.setType("Consumer");
+		try {
+			DFService.register(this.myAgent, description);
+		} catch (FIPAException e) {
+			e.printStackTrace();
+		}
+
+		this.myAgent.addBehaviour(
+				new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, this.producerType, this.data));
+
+	}
+}
+
+class ConsumerInitiatorBehaviour extends Behaviour {
+
+	Double energyNeed = 0.0;
+	JSONObject data = null;
+	String producerType = null;
+	Boolean finish = false;
 
 	public ConsumerInitiatorBehaviour(Agent agent, Double energyNeed, String producerType, JSONObject data) {
 		super(agent);
@@ -321,47 +359,74 @@ class ConsumerInitiatorBehaviour extends OneShotBehaviour {
 	}
 
 	public void action() {
-		ServiceDescription service = new ServiceDescription();
-		service.setType(this.producerType);
+
 		DFAgentDescription description = new DFAgentDescription();
-		description.addServices(service);
-		description.addOntologies("Producer");
-		description.addOntologies("Prosumer");
-		ACLMessage msgInitiator = new ACLMessage(ACLMessage.CFP);
+		description.addOntologies("FProducer");
+
+		DFAgentDescription[] dfProducersAndProsumers = null;
 
 		try {
-			DFAgentDescription[] resultados = DFService.search(this.myAgent, description);
-			if (resultados.length == 0) {
-				System.out.println("Agent " + this.myAgent.getLocalName()
-						+ ": No agent offers the required energy, asking the Grid Agent for energy");
-				/*
-				 * this.myAgent.addBehaviour( new ConsumerInitiatorBehaviour(this.myAgent,
-				 * this.energyNeed, "Grid agent", this.data));
-				 */
-				// Here is where it communicates with the Grid Agent looking for energy
-			} else {
-				for (int i = 0; i < resultados.length; ++i) {
-					System.out.println("Agent " + this.myAgent.getLocalName() + ": Sending energy request to "
-							+ resultados[i].getName());
-					msgInitiator.addReceiver(resultados[i].getName());
-					Iterator services = resultados[i].getAllServices();
-					service = (ServiceDescription) services.next(); // It only has one service
-					Property p = ((Iterator<Property>) service.getAllProperties()).next(); // It only has one property
-				}
-
-				int waitForOffersMilliseconds = 10000;
-				msgInitiator.setReplyByDate(new Date(System.currentTimeMillis() + waitForOffersMilliseconds));
-				msgInitiator.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
-				msgInitiator.setContent(Double.toString(this.energyNeed));
-				this.myAgent
-						.addBehaviour(new ConsumerBehaviour(this.myAgent, msgInitiator, this.energyNeed, this.data));
-
-			}
-
+			dfProducersAndProsumers = DFService.search(this.myAgent, description);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
+		int producersAndProsumersRoles = 0;
+
+		Collection<String> roles = (Collection<String>) (new Gson()
+				.fromJson(this.data.getJSONObject("buildingRoles").toString(), Map.class).values());
+
+		for (String role : roles) {
+			if (role.equals("Prosumer") || role.equals("Producer")) {
+				producersAndProsumersRoles++;
+			}
+		}
+
+		System.out.println(producersAndProsumersRoles);
+		System.out.println(dfProducersAndProsumers.length);
+
+		// Future +1 for the grid agent
+		if (dfProducersAndProsumers != null && producersAndProsumersRoles == dfProducersAndProsumers.length) {
+			// The description + the service finds the real producers and the prosumers
+			// which produces, as they have a service.
+			ServiceDescription service = new ServiceDescription();
+			service.setType(this.producerType);
+			description.addServices(service);
+
+			DFAgentDescription[] dfProducersOrGrid = null;
+
+			try {
+				dfProducersOrGrid = DFService.search(this.myAgent, description);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			ACLMessage msgInitiator = new ACLMessage(ACLMessage.CFP);
+			// Only if all producers are ready
+			for (int i = 0; i < dfProducersOrGrid.length; ++i) {
+				System.out.println("Agent " + this.myAgent.getLocalName() + ": Sending energy request to "
+						+ dfProducersOrGrid[i].getName());
+				msgInitiator.addReceiver(dfProducersOrGrid[i].getName());
+				Iterator services = dfProducersOrGrid[i].getAllServices();
+				service = (ServiceDescription) services.next(); // It only has one service
+				Property p = ((Iterator<Property>) service.getAllProperties()).next(); // It only has one property
+			}
+
+			int waitForOffersMilliseconds = 10000;
+			msgInitiator.setReplyByDate(new Date(System.currentTimeMillis() + waitForOffersMilliseconds));
+			msgInitiator.setProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET);
+			msgInitiator.setContent(Double.toString(this.energyNeed));
+			this.finish = true;
+			this.myAgent.addBehaviour(new ConsumerBehaviour(this.myAgent, msgInitiator, this.energyNeed, this.data));
+
+		} else {
+			System.out.println("Blocking");
+			block(50000);
+		}
+	}
+
+	@Override
+	public boolean done() {
+		return this.finish;
 	}
 
 }
@@ -379,34 +444,42 @@ class ConsumerBehaviour extends ContractNetInitiator {
 	}
 
 	protected void handlePropose(ACLMessage propose, Vector v) {
-		System.out.println("Agent " + propose.getSender().getName() + ": Agent " + propose.getSender().getName()
+		System.out.println("Agent " + this.myAgent.getLocalName() + ": Agent " + propose.getSender().getName()
 				+ " proposed " + propose.getContent() + "Kw");
 	}
 
 	protected void handleRefuse(ACLMessage refuse) {
-		System.out.println("Agent " + refuse.getSender().getName() + ": Agent " + refuse.getSender().getName()
+		System.out.println("Agent " + this.myAgent.getLocalName() + ": Agent " + refuse.getSender().getName()
 				+ " refused to make an energy proposal");
 	}
 
 	protected void handleFailure(ACLMessage failure) {
 		// If any producer fails providing energy the consumer initiator behaviour must
-		// be launched with the remaining energy
+		// be launched with the remaining energy. This edge case won't be controlled
+		// at the moment
 		int senderHash = failure.getSender().hashCode();
 		this.energyNeed = this.energyNeed + uncommitedEnergy.get(senderHash);
-		System.out.println("Agent " + failure.getSender().getName() + ": Agent " + failure.getSender().getName()
+		System.out.println("Agent " + this.myAgent.getLocalName() + ": Agent " + failure.getSender().getName()
 				+ " failed providing the energy");
+
 	}
 
 	protected void handleInform(ACLMessage inform) {
 		Double energyTaken = Double.parseDouble(inform.getContent());
-		System.out.println("Agent " + inform.getSender().getName()
+		System.out.println("Agent " + this.myAgent.getLocalName()
 				+ ": Energy transaction have been completed succesfully: " + energyTaken + "Kw received");
+		// As the failure on handleFailure is not managed, in case of failure it won't
+		// deregister
 		if (this.energyNeed == 0) {
+			try {
+				DFService.deregister(this.myAgent);
+			} catch (FIPAException e) {
+				e.printStackTrace();
+			}
 			// Initializes the BuildingAgentInitiatorBehaviour in an hour
 			int time = 3600000;
 			this.myAgent.addBehaviour(new RefreshDataBehaviour(this.myAgent, time, this.data));
 			this.myAgent.removeBehaviour(this);
-
 		}
 	}
 
@@ -471,16 +544,15 @@ class ConsumerBehaviour extends ContractNetInitiator {
 
 		if (this.energyNeed > 0) {
 			System.out.println("Asking grid agent for: " + this.energyNeed + " Kw");
-			/*
-			 * this.myAgent.addBehaviour( new ConsumerInitiatorBehaviour(this.myAgent,
-			 * this.energyNeed, "Grid agent", this.data));
-			 */
+			this.myAgent.addBehaviour(
+					new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, "Grid agent", this.data));
+
 		}
 
 	}
 
 	public int onEnd() {
-		System.out.println("Agent " + this.myAgent.getLocalName() + "finished provisioning proccess");
+		System.out.println("Agent " + this.myAgent.getLocalName() + ": finished provisioning proccess");
 		return 0;
 	}
 

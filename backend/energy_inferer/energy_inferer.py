@@ -1,16 +1,13 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from math import cos
 import pandas as pd
 from pvlib.pvsystem import PVSystem, retrieve_sam
 from pvlib.location import Location
 from pvlib.modelchain import ModelChain, get_orientation
-from pvlib.forecast import GFS, OWM
+from pvlib.forecast import GFS
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 from .altitude import AltitudeAPI
 from .panelplacer import PanelPlacer
-import debugpy
-
-debugpy.listen(5500)
 
 def get_module(latitude):
     sandia_modules = retrieve_sam('SandiaMod')
@@ -38,6 +35,10 @@ def infere_energy_production(latitude, longitude, modules_per_string=2, strings_
     module = get_module(latitude)
     inverter = get_inverter()
     temperature_model_parameters = TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
+
+
+    start = pd.Timestamp.now(tz='UTC')
+    end = start + pd.Timedelta(hours=6)
     
     altitude = AltitudeAPI.get_altitude(latitude, longitude)
     system = PVSystem(module_parameters=module,
@@ -48,19 +49,18 @@ def infere_energy_production(latitude, longitude, modules_per_string=2, strings_
     system.modules_per_string = modules_per_string
     system.strings_per_inverter = strings_per_inverter
 
-    start = datetime.now()
-    forecast_model = OWM()
+    forecast_model = GFS()
+    data = forecast_model.get_processed_data(latitude, longitude, start, end)
+    weather = data.resample('1h').interpolate()
 
-    #manage error from OWM model
-    forecast_data = forecast_model.get_processed_data(latitude=latitude, longitude=longitude, start=start)
-    mc.run_model(forecast_data)
-    weekly_energy = mc.ac.to_dict()
-    result = [[key, value] for key, value in weekly_energy.items()]
-    return result
+    mc.run_model(weather)
+    energy = mc.ac.to_dict()
+    response = {str(key): value for key,value in energy.items()}
+    return response 
 
 if __name__ == "__main__":
-    coordinates = [[-3.9257092,38.98680649999998],[-3.9257349000000006,38.987052500000004],[-3.9258518000000002,38.98705109999998],[-3.9258518000000002,38.9870466],[-3.9258518000000002,38.98702580000002],[-3.925874100000001,38.98702580000002],[-3.9258751999999997,38.9870464],[-3.9259189000000014,38.9870464],[-3.9259178,38.9870084],[-3.9259555,38.987007699999985],[-3.9259595000000003,38.9868852],[-3.925937200000001,38.98688599999999],[-3.9259382,38.986861499999975],[-3.9259107,38.98686229999996],[-3.92591,38.98682209999996],[-3.9259098000000003,38.986808199999984],[-3.925869,38.98680790000002],[-3.9258711000000006,38.98683149999999],[-3.9258426000000006,38.98683149999999],[-3.925843700000001,38.986807699999964],[-3.9257092,38.98680649999998]]
-    config = get_panels_configuration(coordinates, 38.98626)
-    production = infere_energy_production(38.98626, -3.92907, config["modules_per_string"], config["strings_per_inverter"])
+    coordinates = [[-3.927226,38.9863099],[-3.9272596,38.98668819999999],[-3.9270083000000002,38.98672400000002],[-3.9269712000000006,38.98634019999999],[-3.9270596000000006,38.98633059999998],[-3.927226,38.9863099]]
+    config = get_panels_configuration(coordinates, 38.986516950302786)
+    production = infere_energy_production(38.986516950302786, -3.9271163376922886, config["modules_per_string"], config["strings_per_inverter"])
     print(config)
     print(production)

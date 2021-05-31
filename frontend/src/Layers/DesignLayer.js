@@ -120,12 +120,13 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 	}
 
 	function getBuildingAddress(latitude, longitude) {
-		let request_url = `http://localhost:8000/building/address?latitude=${latitude}&longitude=${longitude}`
+		let request_url = `http://localhost:8000/api/v1/building/address?latitude=${latitude}&longitude=${longitude}`
 		var request = new XMLHttpRequest();
 		request.open('GET', request_url, false);  // `false` makes the request synchronous
 		try {
 			request.send(null);
 			if (request.status === 200) {
+				console.log(request.responseText)
 				return request.responseText.replace("\"", "")
 			} else {
 				return `Latitude: ${latitude.toFixed(8)} \n Longitude: ${longitude.toFixed(8)}`

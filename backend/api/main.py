@@ -1,20 +1,26 @@
 import aiohttp
 import os
-from typing import Dict, List, Tuple
-from fastapi import FastAPI, HTTPException, WebSocket
+from typing import Dict, List
+from fastapi import FastAPI, HTTPException, Depends
+from starlette.websockets import WebSocket
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
+
+import json
 import subprocess
-from starlette.websockets import WebSocket
+import uvicorn 
+from .database import SessionLocal, engine
+from . import grid_operations, models, schemas
+from sqlalchemy.orm import Session
 from energy_inferer.energy_inferer import infere_energy_production, get_panels_configuration
 
-
 app = FastAPI()
-
 origins = [
     "*",
 ]
+
+models.Base.metadata.create_all(bind=engine)
 
 app.add_middleware(
     CORSMiddleware,
@@ -23,6 +29,14 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Dependency
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 _API_ROOT_ = "/api/v1"
 
@@ -67,21 +81,25 @@ async def get_building_address(latitude: float, longitude: float):
       except Exception:
           raise HTTPException(status_code=500, detail="Server error")
 
-@app.websocket(f"{_API_ROOT_}/grid/report")
-async def websocket_endpoint(sender, receiver, energy):
-    websocket = WebSocket()
-    await websocket.accept()
-    data = await websocket.receive_text()
-    print(data)
-    await websocket.send_text(f"Message text was: {data}")
-    await websocket.close()
+@app.websocket(f"{_API_ROOT_}/grid/open_connection")
+async def websocket_endpoint(websocket: WebSocket):
+  await websocket.accept()
+  app.status = websocket
+  while True: 
+    pass
+
+@app.post(f"{_API_ROOT_}/grid/report")
+async def send_data(sender, receiver, energy, timestamp):
+  pkg = {"type": "new_transaction","sender": sender, "receiver": receiver, "energy": energy, "timestamp": timestamp}
+  json_str = json.dumps(pkg)
+  await app.status.send_json(json_str)
+
 
 @app.post(f"{_API_ROOT_}/grid/launch")
 async def launch_grid(building_data: Dict):
     '''
     It launches the multiagent grid using the frontend data
     '''
-    
     
     building_roles = {}
     for building_id in building_data:
@@ -100,4 +118,3 @@ async def launch_grid(building_data: Dict):
       agents_str += ";"
     command_list.append(agents_str)
     subprocess.Popen(command_list)
-  

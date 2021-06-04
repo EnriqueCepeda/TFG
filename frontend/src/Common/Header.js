@@ -20,8 +20,8 @@ const headersData = [
         href: "/",
     },
     {
-        label: "GRID DETAIL",
-        href: "/detail",
+        label: "GRID CONSUMPTION",
+        href: "/consumption",
     },
 ];
 

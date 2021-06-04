@@ -2,7 +2,8 @@ import React, { useContext, useEffect, useState, useRef, useCallback } from "rea
 import MapContext from "../Map/MapContext";
 import OLVectorLayer from "ol/layer/Vector";
 import { Vector as VectorSource } from 'ol/source';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { wsConnect, wsDisconnect, } from '../redux/actions/buildingActions';
 import { getBuilding, getBuildings } from '../redux/selectors';
 import clsx from 'clsx';
 import { Fill, Stroke, Style } from 'ol/style';
@@ -141,10 +142,14 @@ const DashboardLayer = () => {
     const { map } = useContext(MapContext);
     const buildings = useSelector(getBuildings);
     const [selectedBuildingId, setSelectedBuildingId] = useState(null);
+    const host = "ws://127.0.0.1:8000/api/v1/grid/open_connection";
+    const dispatch = useDispatch();
 
     function popupCloseHandler() {
         overlay.setPosition(undefined);
     }
+
+
 
 
     useEffect(() => {
@@ -216,13 +221,24 @@ const DashboardLayer = () => {
             }
         });
         setOverlay(overlay)
+        connectToWebsocket();
         return () => {
             if (map) {
                 map.removeOverlay(overlay)
+                disconnectToWebsocket()
             }
         }
 
+
     }, [map])
+
+    function connectToWebsocket() {
+        dispatch(wsConnect(host));
+    }
+
+    function disconnectToWebsocket() {
+        dispatch(wsDisconnect(host));
+    }
 
 
     function setBuildingsStyle(source) {

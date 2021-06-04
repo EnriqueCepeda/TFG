@@ -23,7 +23,7 @@ const useStyles = makeStyles(() => ({
     buildingList: {
         flex: 12
     },
-    buildingDetailButton: {
+    buildingConsumptionButton: {
         flex: 1,
         marginTop: 20,
     }
@@ -49,10 +49,10 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
                 }
             </ContainerScrollbar>
             <Divider variant="middle" />
-            <div className={classes.buildingDetailButton}>
+            <div className={classes.buildingConsumptionButton}>
                 <Box textAlign='center'>
-                    <ThemeButton color="primary" component={Link} to="/detail" >
-                        grid detail
+                    <ThemeButton color="primary" component={Link} to="/consumption" >
+                        grid buildings consumption
                 </ThemeButton>
                 </ Box>
             </div>

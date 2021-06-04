@@ -25,7 +25,7 @@ const useStyles = makeStyles(() => ({
         width: 30,
         marginRight: 5,
     },
-    detailCard: {
+    consumptionCard: {
         marginLeft: '10px',
         marginRight: '10px',
         marginTop: '10px',
@@ -66,7 +66,7 @@ const useStyles = makeStyles(() => ({
 
 }));
 
-export default function DetailCard({ ol_uid }) {
+export default function ConsumptionCard({ ol_uid }) {
 
     const building = useSelector(state => getBuilding(state, ol_uid));
     const buildingConsumption = useSelector((state) => getBuildingConsumption(state, ol_uid));
@@ -97,7 +97,7 @@ export default function DetailCard({ ol_uid }) {
     };
 
     return (
-        <Card variant="outlined" className={classes.detailCard}>
+        <Card variant="outlined" className={classes.consumptionCard}>
             <div className={classes.cardContent}>
                 <Card >
                     {renderBuildingAvatar(building.type)}

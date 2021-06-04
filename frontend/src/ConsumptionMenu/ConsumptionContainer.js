@@ -3,7 +3,7 @@ import { Pagination } from '@material-ui/lab';
 
 import React, { useState } from "react";
 import { getProducerBuildings } from "../redux/selectors";
-import DetailCard from "./DetailCard";
+import ConsumptionCard from "./ConsumptionCard";
 import { ContainerScrollbar, ThemeButton } from "../Common"
 import { makeStyles } from '@material-ui/core';
 import { Divider } from '@material-ui/core';
@@ -23,7 +23,7 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-export default function DetailContainer() {
+export default function ConsumptionContainer() {
     const [currentPage, setCurrentPage] = useState(1);
     const producerBuildings = useSelector(getProducerBuildings);
     const classes = useStyles();
@@ -37,7 +37,7 @@ export default function DetailContainer() {
         let data = []
         Object.keys(producerBuildings).map((dictkey, index) => {
             if (index >= offset && index < offset + COMPONENTS_PER_PAGE) {
-                data.push(<React.Fragment key={dictkey}> <DetailCard ol_uid={dictkey} /> </React.Fragment>);
+                data.push(<React.Fragment key={dictkey}> <ConsumptionCard ol_uid={dictkey} /> </React.Fragment>);
             }
         });
         return data;

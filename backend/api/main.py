@@ -2,23 +2,23 @@ import aiohttp
 import os
 from typing import Dict, List
 from fastapi import FastAPI, HTTPException, Depends
-from starlette.websockets import WebSocket
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
-
-import json
-import subprocess
-import uvicorn 
-from .database import SessionLocal, engine
-from . import grid_operations, models, schemas
+from starlette.responses import HTMLResponse
+from . import grid_operations
 from sqlalchemy.orm import Session
+
+import subprocess
+from .database import SessionLocal, engine
+from . import  models
 from energy_inferer.energy_inferer import infere_energy_production, get_panels_configuration
 
 app = FastAPI()
 origins = [
     "*",
 ]
+
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -81,19 +81,22 @@ async def get_building_address(latitude: float, longitude: float):
       except Exception:
           raise HTTPException(status_code=500, detail="Server error")
 
-@app.websocket(f"{_API_ROOT_}/grid/open_connection")
-async def websocket_endpoint(websocket: WebSocket):
-  await websocket.accept()
-  app.status = websocket
-  while True: 
-    pass
+@app.post(f"{_API_ROOT_}/grid/transaction", status_code=201)
+def new_transaction(
+  sender_building_id: int, receiver_building_id: int, energy: float, db: Session = Depends(get_db)
+):
 
-@app.post(f"{_API_ROOT_}/grid/report")
-async def send_data(sender, receiver, energy, timestamp):
-  pkg = {"type": "new_transaction","sender": sender, "receiver": receiver, "energy": energy, "timestamp": timestamp}
-  json_str = json.dumps(pkg)
-  await app.status.send_json(json_str)
+  sender = grid_operations.get_building(db, sender_building_id)
+  print(sender)
+  receiver = grid_operations.get_building(db, receiver_building_id)
+  transaction = grid_operations.create_transaction(db, sender.id, receiver.id, energy)
 
+  return {"id": transaction.id}
+
+@app.get(_API_ROOT_ + "/grid/transactions/{timestamp}", status_code=200)
+def get_non_fetched_transactions(timestamp: int, db: Session = Depends(get_db)):
+  transactions = grid_operations.get_non_fetched_transactions(db, timestamp)
+  return {transaction.id : transaction.to_dict() for transaction in transactions}
 
 @app.post(f"{_API_ROOT_}/grid/launch")
 async def launch_grid(building_data: Dict):

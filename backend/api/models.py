@@ -1,28 +1,46 @@
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime
+from sqlalchemy import Float, Column, ForeignKey, Integer, String, TIMESTAMP, DateTime
 from sqlalchemy import func
 from sqlalchemy.orm import relationship
-from sqlalchemy.sql.visitors import ReplacingExternalTraversal
-from sqlalchemy.util.langhelpers import set_creation_order
+from sqlalchemy.ext.declarative import declarative_base
 
-from .database import Base
+Base = declarative_base()
 
 class Grid(Base):
     __tablename__ = "grids"
-    id = Column(Integer, primary_key=True, index=True)
-    buildings = relationship("Building")
 
+    id = Column(Integer, primary_key=True, index=True)
+    buildings = relationship("Building", back_populates="grid")
+
+class EnergyTransaction(Base):
+    __tablename__ = "energytransactions"
+
+    id = Column(Integer, primary_key=True, index=True)
+    sender_id = Column(Integer, ForeignKey('buildings.id'))
+    sender = relationship("Building", foreign_keys=[sender_id], back_populates="sent_transactions")
+    receiver_id = Column(Integer, ForeignKey('buildings.id'))
+    receiver = relationship("Building", foreign_keys=[receiver_id], back_populates="received_transactions")
+    energy = Column(Float)
+    timestamp = Column(TIMESTAMP, nullable=False, default=func.now())
+
+    def to_dict(self):
+        return {
+            'sender_id': self.sender_id,
+            'receiver': self.receiver_id,
+            'energy': self.energy,
+            'timestamp': self.timestamp
+        }
 
 class Building(Base):
     __tablename__ = "buildings"
+
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, index=True, nullable=False)
+    direction = Column(String, nullable=True)
+    type = Column(String, nullable=False)
+    grid_id = Column(Integer, ForeignKey('grids.id'))
     grid = relationship("Grid", back_populates="buildings")
-    transactions = relationship("EnergyTransaction")
+    sent_transactions = relationship("EnergyTransaction", foreign_keys=[EnergyTransaction.sender_id], back_populates="sender")
+    received_transactions = relationship("EnergyTransaction", foreign_keys=[EnergyTransaction.receiver_id], back_populates="receiver")
 
 
-class EnergyTransaction(Base):
-    __tablename__ = "energy transactions"
-    id = Column(Integer, primary_key=True, index=True)
-    sender = relationship("Building")
-    receiver = relationship("Building")
-    timestamp = Column('timestamp', DateTime, nullable=False, default=func.now())
+

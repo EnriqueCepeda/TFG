@@ -1,7 +1,7 @@
 import aiohttp
 import os
 from typing import Dict, List
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,7 +12,7 @@ from sqlalchemy.orm import Session
 import subprocess
 from .database import SessionLocal, engine
 from . import  models
-from energy_inferer.energy_inferer import infere_energy_production, get_panels_configuration
+from .energy_inferer.energy_inferer import infere_energy_production, get_panels_configuration
 
 app = FastAPI()
 origins = [
@@ -82,24 +82,19 @@ async def get_building_address(latitude: float, longitude: float):
           raise HTTPException(status_code=500, detail="Server error")
 
 @app.post(f"{_API_ROOT_}/grid/transaction", status_code=201)
-def new_transaction(
-  sender_building_id: int, receiver_building_id: int, energy: float, db: Session = Depends(get_db)
+def new_transaction(grid_id: int, sender_name: str, receiver_name: str, energy: float, db: Session = Depends(get_db)
 ):
-
-  sender = grid_operations.get_building(db, sender_building_id)
-  print(sender)
-  receiver = grid_operations.get_building(db, receiver_building_id)
-  transaction = grid_operations.create_transaction(db, sender.id, receiver.id, energy)
-
+  
+  transaction = grid_operations.create_transaction(db, grid_id, sender_name, receiver_name, energy)
   return {"id": transaction.id}
 
-@app.get(_API_ROOT_ + "/grid/transactions/{timestamp}", status_code=200)
-def get_non_fetched_transactions(timestamp: int, db: Session = Depends(get_db)):
-  transactions = grid_operations.get_non_fetched_transactions(db, timestamp)
+@app.get(_API_ROOT_ + "/grid/{grid_id}/transactions/{timestamp}", status_code=200)
+def get_non_fetched_transactions(grid_id: int, timestamp: float, db: Session = Depends(get_db)):
+  transactions = grid_operations.get_non_fetched_transactions(db, grid_id, timestamp)
   return {transaction.id : transaction.to_dict() for transaction in transactions}
 
-@app.post(f"{_API_ROOT_}/grid/launch")
-async def launch_grid(building_data: Dict):
+@app.post(f"{_API_ROOT_}/grid/launch", status_code=201)
+async def launch_grid(building_data: Dict , request: Request, db: Session = Depends(get_db)):
     '''
     It launches the multiagent grid using the frontend data
     '''
@@ -109,15 +104,30 @@ async def launch_grid(building_data: Dict):
       building_roles[building_id] = building_data[building_id]["type"]
     command_list = ["java", "jade.Boot", "-gui", "-agents" ]
     agents_str = 'grid_agent:com.multiagent.GridAgent;'
+    grid = grid_operations.create_grid(db)
     for building_id in building_data:
       building = building_data[building_id]
       latitude = building["latitude"]
       longitude = building["longitude"]
       btype = building["type"]
+      address = building["address"]
+      building_db = grid_operations.create_building(db, building_id, address, btype, grid.id)
       building_roles_str = str(building_roles).replace(",", "?")
       coordinates = str(building["coordinates"]).replace(",", "?")
       consumption = str(building["consumption"]).replace(",", "?")
       agents_str += f'{building_id.replace(" ", "_")}:com.multiagent.BuildingAgent({latitude}, {longitude}, {btype}, {coordinates}, {consumption}, {building_roles_str} )'
       agents_str += ";"
     command_list.append(agents_str)
-    subprocess.Popen(command_list)
+    if not request.app.state.TEST:
+      pid = subprocess.Popen(command_list)
+    return {"id": grid.id}
+
+@app.get(_API_ROOT_ + "/grid/{grid_id}/buildings/", status_code=200)
+def get_buildings(grid_id: int, db: Session = Depends(get_db)):
+  response = {}
+  buildings = grid_operations.get_grid_buildings(db, grid_id)
+  for building in buildings:
+    response[building.id] = building.to_dict()
+  return response
+
+

@@ -43,4 +43,12 @@ class Building(Base):
     received_transactions = relationship("EnergyTransaction", foreign_keys=[EnergyTransaction.receiver_id], back_populates="receiver")
 
 
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'direction': self.direction,
+            'type': self.type,
+        }
+
+
 

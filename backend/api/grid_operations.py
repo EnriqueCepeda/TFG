@@ -2,8 +2,10 @@ from sqlalchemy.orm import Session
 
 from . import models
 
-def create_transaction(db: Session, sender_id, receiver_id, energy):
-    db_transaction = models.EnergyTransaction(sender_id=sender_id, receiver_id=receiver_id, energy=energy)
+def create_transaction(db: Session, grid_id, sender_name, receiver_name, energy):
+    sender = get_building_by_name_grid(db, grid_id, sender_name)
+    receiver = get_building_by_name_grid(db, grid_id, sender_name)
+    db_transaction = models.EnergyTransaction(sender_id=sender.id, receiver_id=receiver.id, energy=energy)
     db.add(db_transaction)
     db.commit()
     db.refresh(db_transaction)
@@ -23,11 +25,19 @@ def create_grid(db: Session):
     db.refresh(db_grid)
     return db_grid
 
-def get_building(db: Session, building_id: int):
-    return db.query(models.Building).filter(models.Building.id == building_id).one()
+def get_building_by_name_grid(db: Session, grid_id, building_name):
+    return db.query(models.Building).filter(models.Building.grid_id == grid_id, models.Building.name == building_name).one_or_none()
 
-def get_non_fetched_transactions(db: Session, timestamp):
-    return db.query(models.EnergyTransaction).filter(models.EnergyTransaction.timestamp > timestamp)
+def get_building(db: Session, building_id: int):
+    return db.query(models.Building).get(building_id)
+
+def get_grid_buildings(db: Session, grid_id: int):
+    return db.query(models.Grid).get(grid_id).buildings
+
+def get_non_fetched_transactions(db: Session, grid_id, timestamp):
+    return db.query(models.EnergyTransaction).filter(models.EnergyTransaction.sender.has(models.Building.grid_id == grid_id), 
+                                                    models.EnergyTransaction.receiver.has(models.Building.grid_id == grid_id), 
+                                                    models.EnergyTransaction.timestamp > timestamp)
 
 
 

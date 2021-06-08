@@ -1,11 +1,19 @@
 
-import { UPDATE_BUILDING_TYPE, UPDATE_BUILDING_CONSUMPTION, ADD_BUILDING, REMOVE_BUILDING } from './types';
+import { UPDATE_BUILDING_TYPE, UPDATE_BUILDING_ADDRESS, UPDATE_BUILDING_CONSUMPTION, ADD_BUILDING, REMOVE_BUILDING, ADD_TRANSACTION, } from './types';
 
 export const updateBuildingType = (id, type) => ({
     type: UPDATE_BUILDING_TYPE,
     building_id: id,
     building_type: type
 });
+
+
+export const updateBuildingAddress = (id, address) => ({
+    type: UPDATE_BUILDING_ADDRESS,
+    building_id: id,
+    building_address: address
+});
+
 
 export const updateBuildingConsumption = (id, hour, value) => (
     {
@@ -28,13 +36,22 @@ export const addBuilding = (id, latitude, longitude, address, area, coordinates,
             type: "Prosumer",
             coordinates: coordinates,
             flatCoordinates: flatCoordinates,
-            consumption: defaultBuildingConsumption
+            consumption: defaultBuildingConsumption,
+            transactions: {}
         }
     });
 
 export const removeBuilding = (id) => ({
     type: REMOVE_BUILDING,
     building_id: id
+});
+
+export const addTransaction = (sender, receiver, energy, timestamp) => ({
+    type: ADD_TRANSACTION,
+    sender: sender,
+    receiver: receiver,
+    energy: energy,
+    timestamp: timestamp
 });
 
 const defaultBuildingConsumption = [

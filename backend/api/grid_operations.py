@@ -4,12 +4,15 @@ from . import models
 
 def create_transaction(db: Session, grid_id, sender_name, receiver_name, energy):
     sender = get_building_by_name_grid(db, grid_id, sender_name)
-    receiver = get_building_by_name_grid(db, grid_id, sender_name)
-    db_transaction = models.EnergyTransaction(sender_id=sender.id, receiver_id=receiver.id, energy=energy)
-    db.add(db_transaction)
-    db.commit()
-    db.refresh(db_transaction)
-    return db_transaction
+    receiver = get_building_by_name_grid(db, grid_id, receiver_name)
+    if sender is not None and receiver is not None:
+        db_transaction = models.EnergyTransaction(sender_id=sender.id, receiver_id=receiver.id, energy=energy)
+        db.add(db_transaction)
+        db.commit()
+        db.refresh(db_transaction)
+        return db_transaction
+    else: 
+        print("Transaction could not be performed")
 
 def create_building(db: Session, name, direction, type, grid_id):
     db_building = models.Building( name=name, direction=direction, type=type, grid_id=grid_id)

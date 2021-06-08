@@ -3,7 +3,7 @@ import 'fontsource-roboto';
 import React from 'react';
 import { makeStyles } from '@material-ui/core';
 import { Header } from "./Common"
-import { ConsumptionContainer } from './ConsumptionMenu';
+import { PanelContainer } from './PanelMenu';
 
 
 
@@ -16,16 +16,16 @@ const useStyles = makeStyles((theme) => ({
     }
 }));
 
-const GridBuildingConsumption = () => {
+const GridBuildingPanels = () => {
 
     const classes = useStyles();
 
     return (
         <div className={classes.GridDesigner}>
             <Header title="Building Panels" />
-            <ConsumptionContainer />
+            <PanelContainer />
         </div >
     )
 };
 
-export default GridBuildingConsumption;
+export default GridBuildingPanels;

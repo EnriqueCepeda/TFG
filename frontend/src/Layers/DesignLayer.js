@@ -1,4 +1,4 @@
-import { useContext, useEffect } from "react";
+import { useContext, useEffect, useState } from "react";
 import MapContext from "../Map/MapContext";
 import OLVectorLayer from "ol/layer/Vector";
 import { Vector as VectorSource } from 'ol/source';
@@ -8,10 +8,11 @@ import OSMXML from 'ol/format/OSMXML';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 import { toLonLat } from 'ol/proj';
 import { useSelector, useDispatch } from 'react-redux';
-import { addBuilding, removeBuilding } from '../redux/actions/buildingActions';
+import { addBuilding, removeBuilding, updateBuildingAddress } from '../redux/actions/buildingActions';
 import { getBuildings } from '../redux/selectors';
 import proj4 from "proj4";
 import { Fill, Stroke, Style } from 'ol/style';
+import axios from 'axios';
 
 
 let styles = {
@@ -41,34 +42,38 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 	const { map } = useContext(MapContext);
 	const buildings = useSelector(getBuildings);
 	const dispatch = useDispatch();
+	const [firstMounted, setFirstMounted] = useState(true);
+
 	let defaultStyle = styles.default;
 	let highlightStyle = styles.highlight;
 
 	useEffect(() => {
 		if (!map) return;
 
+		setFirstMounted(false);
 		let source = new VectorSource({
 			format: new OSMXML(),
 			loader: function (extent, resolution, projection) {
-				var epsg4326Extent = transformExtent(extent, projection, 'EPSG:4326');
-				var client = new XMLHttpRequest();
-				client.open('POST', 'https://overpass-api.de/api/interpreter');
-				client.addEventListener('load', function () {
-					var features = new OSMXML().readFeatures(client.responseText, {
+				let epsg4326Extent = transformExtent(extent, projection, 'EPSG:4326');
+				let request_url = 'https://overpass-api.de/api/interpreter';
+				let extended_load_percentage = 0.02;
+				let stringExtent = (epsg4326Extent[1] - epsg4326Extent[1] * extended_load_percentage) + ',' + (epsg4326Extent[0] * extended_load_percentage + epsg4326Extent[0]) + ',' +
+					(epsg4326Extent[3] * extended_load_percentage + epsg4326Extent[3]) + ',' + (epsg4326Extent[2] - epsg4326Extent[2] * extended_load_percentage);
+				let query = "(way[building](" + stringExtent + ");); out meta; >; out meta qt;"
+				axios.post(request_url, query).then(response => {
+					var features = new OSMXML().readFeatures(response.data, {
 						featureProjection: map.getView().getProjection(),
 					});
 					source.addFeatures(features);
-					reloadSelectedItems(source)
-				});
-				var extended_load_percentage = 0.02;
-				var stringExtent = (epsg4326Extent[1] - epsg4326Extent[1] * extended_load_percentage) + ',' + (epsg4326Extent[0] * extended_load_percentage + epsg4326Extent[0]) + ',' +
-					(epsg4326Extent[3] * extended_load_percentage + epsg4326Extent[3]) + ',' + (epsg4326Extent[2] - epsg4326Extent[2] * extended_load_percentage);
-				var query = "(way[building](" + stringExtent + ");); out meta; >; out meta qt;"
-				client.send(query);
+					if (firstMounted) {
+						reloadSelectedItems(source);
+					}
+				})
 			},
 			strategy: bboxStrategy,
 
 		});
+
 
 		let vectorLayer = new OLVectorLayer({
 			source: source,
@@ -119,25 +124,12 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 		return newCoordinates;
 	}
 
-	function getBuildingAddress(latitude, longitude) {
-		let request_url = `http://localhost:8000/api/v1/building/address?latitude=${latitude}&longitude=${longitude}`
-		var request = new XMLHttpRequest();
-		request.open('GET', request_url, false);  // `false` makes the request synchronous
-		try {
-			request.send(null);
-			if (request.status === 200) {
-				console.log(request.responseText)
-				return request.responseText.replace("\"", "")
-			} else {
-				return `Latitude: ${latitude.toFixed(8)} \n Longitude: ${longitude.toFixed(8)}`
-			}
+	const fetchBuildingAddress = (latitude, longitude, building_id) => (
+		() => {
+			let request_url = `http://localhost:8000/api/v1/building/address?latitude=${latitude}&longitude=${longitude}`
+			axios.get(request_url).then(res => res.data.response).then(address => { dispatch(updateBuildingAddress(building_id, address)) });
+		})
 
-		} catch (e) {
-			return `Latitude: ${latitude.toFixed(8)} \n Longitude: ${longitude.toFixed(8)}`
-		}
-
-
-	}
 
 	function modifyBuildingListListener(e) {
 		map.forEachFeatureAtPixel(e.pixel, function (feature) {
@@ -152,13 +144,15 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 				var longitude = lonLatCoordinates[0];
 				var area = getArea(feature.getGeometry()).toFixed(2);
 				var coordinates = getPolygonCoordinates(feature.getGeometry().getCoordinates()[0]);
-				let address = getBuildingAddress(latitude, longitude);
+				let address = `Latitude: ${latitude.toFixed(8)} \n Longitude: ${longitude.toFixed(8)}`
 				var flatCoordinates = feature.getGeometry().getCoordinates()[0];
-				dispatch(addBuilding(buildingOlId, latitude, longitude, address, area, coordinates, flatCoordinates));
 				feature.setStyle(highlightStyle);
+				dispatch(addBuilding(buildingOlId, latitude, longitude, address, area, coordinates, flatCoordinates));
+				dispatch(fetchBuildingAddress(latitude, longitude, buildingOlId));
 			} else {
-				dispatch(removeBuilding(buildingOlId));
 				feature.setStyle(defaultStyle);
+				dispatch(removeBuilding(buildingOlId));
+
 			}
 		});
 

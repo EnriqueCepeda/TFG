@@ -1,5 +1,6 @@
 import React from "react";
 import { CardContent, Divider, Typography } from '@material-ui/core';
+import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
 import { makeStyles } from '@material-ui/core/styles';
 import VerticalSlider from "./VerticalSlider";
 import { Card } from '@material-ui/core';
@@ -66,6 +67,16 @@ const useStyles = makeStyles(() => ({
 
 }));
 
+const energyFontTheme = createMuiTheme({
+    overrides: {
+        MuiTypography: {
+            h6: {
+                fontSize: "12pt",
+            }
+        }
+    },
+});
+
 export default function ConsumptionCard({ ol_uid }) {
 
     const building = useSelector(state => getBuilding(state, ol_uid));
@@ -122,11 +133,14 @@ export default function ConsumptionCard({ ol_uid }) {
                 </div>
                 <Divider orientation="vertical" flexItem variant="middle" />
                 <div className={classes.graph}>
+
                     <Typography variant="h6" align="center" > ENERGY CONSUMPTION </ Typography >
                     <Divider variant="middle" />
+                    <ThemeProvider theme={energyFontTheme}>
+                        <Typography variant="h6" align="center"> {_.sum(buildingConsumption).toFixed(2)} </ Typography >
+                        <Typography variant="h6" align="center"> Kw </Typography >
+                    </ThemeProvider>
 
-                    <Typography variant="h3" align="center"> {_.sum(buildingConsumption).toFixed(2)} </ Typography >
-                    <Typography variant="h3" align="center"> Kw </Typography >
                 </div>
             </div>
         </Card >);

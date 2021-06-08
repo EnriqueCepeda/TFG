@@ -24,8 +24,8 @@ class EnergyTransaction(Base):
 
     def to_dict(self):
         return {
-            'sender_id': self.sender_id,
-            'receiver': self.receiver_id,
+            'sender': self.sender.name,
+            'receiver': self.receiver.name,
             'energy': self.energy,
             'timestamp': self.timestamp
         }

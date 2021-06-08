@@ -4,7 +4,8 @@ from sqlalchemy.orm import sessionmaker
 import json
 import time
 
-from ..main import app, get_db
+from ..main import app, get_db, get_settings
+from .. import config
 from ..models import Base
 from ..grid_operations import create_building
 
@@ -25,8 +26,12 @@ def override_get_db():
     finally:
         db.close()
 
-app.state.TEST = True
+def get_settings_override():
+    return config.Settings(test=True)
+
 app.dependency_overrides[get_db] = override_get_db
+app.dependency_overrides[get_settings] = get_settings_override
+
 client = TestClient(app)
 
 def get_grid_fixture():
@@ -94,8 +99,8 @@ def test_get_non_fetched_transactions():
     response_text = transactions_response.text
     assert transactions_response.status_code == 200
     transactions_response_dict = transactions_response.json()
-    assert isinstance(transactions_response_dict, dict)
-    assert len(transactions_response_dict.keys()) == 2
+    assert isinstance(transactions_response_dict, list)
+    assert len(transactions_response_dict) == 2
 
 
 

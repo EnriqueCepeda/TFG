@@ -16,11 +16,11 @@ import { Link as RouterLink } from "react-router-dom";
 
 const headersData = [
     {
-        label: "GRID DESIGNER",
+        label: "DESIGN GRID",
         href: "/",
     },
     {
-        label: "GRID CONSUMPTION",
+        label: "BUILDINGS CONSUMPTION",
         href: "/consumption",
     },
 ];

@@ -3,9 +3,13 @@ import MapContext from "../Map/MapContext";
 import OLVectorLayer from "ol/layer/Vector";
 import { Vector as VectorSource } from 'ol/source';
 import { useSelector, useDispatch } from 'react-redux';
-import { wsConnect, wsDisconnect, } from '../redux/actions/buildingActions';
-import { getBuilding, getBuildings } from '../redux/selectors';
+import { useInterval } from '../Common'
+import { getBuilding, getBuildings, getGridId } from '../redux/selectors';
+import { addGrid } from '../redux/actions/gridActions';
+import { addTransaction } from '../redux/actions/buildingActions';
+
 import clsx from 'clsx';
+import axios from 'axios';
 import { Fill, Stroke, Style } from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
 import Overlay from 'ol/Overlay';
@@ -141,16 +145,16 @@ const DashboardLayer = () => {
     let [overlay, setOverlay] = useState(null);
     const { map } = useContext(MapContext);
     const buildings = useSelector(getBuildings);
-    const [selectedBuildingId, setSelectedBuildingId] = useState(null);
-    const host = "ws://127.0.0.1:8000/api/v1/grid/open_connection";
+    const gridId = useSelector(getGridId);
     const dispatch = useDispatch();
+    const [selectedBuildingId, setSelectedBuildingId] = useState(null);
+    const [lastEpochCheck, setLastEpochCheck] = useState(null);
+    const [delay, setDelay] = useState(10000);
+    const [isActive, setActive] = useState(false);
 
     function popupCloseHandler() {
         overlay.setPosition(undefined);
     }
-
-
-
 
     useEffect(() => {
         if (!map) return;
@@ -221,24 +225,55 @@ const DashboardLayer = () => {
             }
         });
         setOverlay(overlay)
-        connectToWebsocket();
         return () => {
             if (map) {
-                map.removeOverlay(overlay)
-                disconnectToWebsocket()
+                map.removeOverlay(overlay);
             }
         }
 
 
     }, [map])
 
-    function connectToWebsocket() {
-        dispatch(wsConnect(host));
+
+    useEffect(() => {
+        dispatch(launchGrid());
+        setActive(true);
+        return () => {
+            setActive(false);
+            removeGrid();
+        }
+    }, []);
+
+
+    useInterval(() => {
+        dispatch(askForNonFetchedTransactions());
+    }, isActive ? delay : null);
+
+    const launchGrid = () => (
+        () => {
+            let request_url = "http://localhost:8000/api/v1/grid/launch";
+            axios.post(request_url, buildings).then(res => res.data.id).then(grid_id => { dispatch(addGrid(grid_id)) });
+            setLastEpochCheck(Date.now())
+
+        }
+    )
+
+    const askForNonFetchedTransactions = () => (
+        () => {
+            let request_url = `http://localhost:8000/api/v1/grid/${gridId}/transactions/${lastEpochCheck}`;
+            axios.get(request_url).then(res => res.data).then(transactions => transactions.map((transaction) => {
+                dispatch(addTransaction(transaction.sender, transaction.receiver, transaction.energy, transaction.timestamp))
+            }));
+            setLastEpochCheck(Date.now())
+        }
+    )
+
+
+    function removeGrid() {
+        let request_url = "http://localhost:8000/api/v1/grid/stop";
+        axios.post(request_url).then(console.log("Grid stopped"))
     }
 
-    function disconnectToWebsocket() {
-        dispatch(wsDisconnect(host));
-    }
 
 
     function setBuildingsStyle(source) {

@@ -1,13 +1,26 @@
 import 'fontsource-roboto';
-import React, { useState } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useEffect, useState } from 'react';
+import { useSelector } from 'react-redux';
+import { getBuildings } from './redux/selectors';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Header } from "./Common";
 import Map from "./Map";
 import { Layers, TileLayer, DashboardLayer } from "./Layers";
 import { osm } from "./Source";
 import { Controls, FullScreenControl, ZoomControl } from "./Controls";
-import { fromLonLat } from 'ol/proj'
+import { fromLonLat } from 'ol/proj';
+import LinearProgress from '@material-ui/core/LinearProgress';
 
+const BorderLinearProgress = withStyles((theme) => ({
+    root: {
+        height: 10,
+        borderRadius: 5,
+    },
+    bar: {
+        borderRadius: 5,
+        backgroundColor: "#5f468a",
+    },
+}))(LinearProgress);
 
 
 const useStyles = makeStyles((theme) => ({
@@ -25,12 +38,15 @@ const useStyles = makeStyles((theme) => ({
 const GridDashboard = () => {
 
     const classes = useStyles();
+    const buildings = useSelector(getBuildings);
+
     const [center, setCenter] = useState([-3.92907, 38.98626]);
     const [zoom, setZoom] = useState(18);
 
     return (
         <React.Fragment>
             <Header title="Dashboard" > </Header>
+            <BorderLinearProgress color="secondary" />
             <Map style={classes.olMap} center={fromLonLat(center)} zoom={zoom}>
                 <Layers>
                     <TileLayer

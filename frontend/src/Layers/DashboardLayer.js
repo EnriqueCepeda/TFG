@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState, useRef, useCallback } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import MapContext from "../Map/MapContext";
 import OLVectorLayer from "ol/layer/Vector";
 import { Vector as VectorSource } from 'ol/source';
@@ -8,14 +8,12 @@ import { getBuilding, getBuildings, getGridId } from '../redux/selectors';
 import { addGrid } from '../redux/actions/gridActions';
 import { addTransaction } from '../redux/actions/buildingActions';
 
-import clsx from 'clsx';
 import axios from 'axios';
 import { Fill, Stroke, Style } from 'ol/style';
 import GeoJSON from 'ol/format/GeoJSON';
 import Overlay from 'ol/Overlay';
 import IconButton from '@material-ui/core/IconButton';
-import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import { makeStyles, Card, CardHeader, CardContent, Collapse, Typography } from '@material-ui/core';
+import { makeStyles, Card, CardHeader, CardContent, Collapse, Typography, CardActionArea, withStyles } from '@material-ui/core';
 import CloseSharpIcon from '@material-ui/icons/CloseSharp';
 
 let buildingStyles = {
@@ -73,7 +71,7 @@ let buildingStyles = {
 
 let usePopupStyles = makeStyles((theme) => ({
     root: {
-        maxWidth: 345,
+        maxWidth: 450,
     },
     expand: {
         transform: 'rotate(0deg)',
@@ -87,6 +85,18 @@ let usePopupStyles = makeStyles((theme) => ({
     },
 }));
 
+const PopupCardActionArea = withStyles({
+    root: {
+        '&:hover $focusHighlight': {
+            opacity: 0.11,
+        },
+    },
+    focusHighlight: {
+        background: "#5f468a"
+    }
+
+})(CardActionArea);
+
 const Popup = ({ buildingId, popupRef, closeHandler, }) => {
     const selectedBuilding = useSelector(state => getBuilding(state, buildingId));
     const classes = usePopupStyles();
@@ -96,41 +106,44 @@ const Popup = ({ buildingId, popupRef, closeHandler, }) => {
         setExpanded(!expanded);
     };
 
+    const getBuildingTransactions = (dictkey) => {
+        if (selectedBuilding.transactions[dictkey][1] > 0) {
+            return (<Typography> {dictkey + " | " + selectedBuilding.transactions[dictkey][1] + "Kw from " + selectedBuilding.transactions[dictkey][0]} </Typography>)
+        } else {
+            return (<Typography> {dictkey + " | " + (-selectedBuilding.transactions[dictkey][1]) + "Kw to " + selectedBuilding.transactions[dictkey][0]} </Typography>)
+        }
+    }
+
     return (
         <Card id="popup" ref={popupRef} className={classes.root} style={{ display: buildingId ? 'block' : 'none' }}>
             {selectedBuilding &&
                 (<React.Fragment>
-                    <CardHeader
-                        id="popup-header"
-                        title={buildingId}
-                        subheader={selectedBuilding.type}
-                        action={
-                            <IconButton aria-label="settings" onClick={closeHandler}>
-                                <CloseSharpIcon />
-                            </IconButton>
-                        }>
-
-                    </CardHeader>
-                    <CardContent id="popup-content"> Más contenido </CardContent>
-
-                    < IconButton
-                        className={clsx(classes.expand, {
-                            [classes.expandOpen]: expanded,
-                        })}
-                        onClick={handleExpandClick}
-                        aria-expanded={expanded}
-                        aria-label="show more"
-                    >
-                        <ExpandMoreIcon />
-                    </IconButton>
+                    <PopupCardActionArea onClick={handleExpandClick}>
+                        <CardHeader
+                            id="popup-header"
+                            title={selectedBuilding.address}
+                            subheader={buildingId + " - " + selectedBuilding.type}
+                            action={
+                                <IconButton aria-label="settings" onClick={closeHandler}>
+                                    <CloseSharpIcon />
+                                </IconButton>
+                            }>
+                        </CardHeader>
+                    </PopupCardActionArea>
 
                     <Collapse in={expanded} timeout="auto" unmountOnExit>
                         <CardContent>
-                            <Typography paragraph>More text</Typography>
+                            {
+                                Object.keys(selectedBuilding.transactions).map((dictkey, index) => (
+                                    <React.Fragment key={dictkey}>
+                                        {getBuildingTransactions(dictkey)}
+                                    </React.Fragment>
+
+                                ))
+                            }
+
                         </CardContent>
                     </Collapse>
-
-
                 </React.Fragment>)
 
             }

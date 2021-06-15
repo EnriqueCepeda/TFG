@@ -70,7 +70,7 @@ export default function VerticalSlider({ ol_uid, hour, marginTitle, initialValue
         dispatch(updateBuildingConsumption(ol_uid, hour, newValue));
     }
 
-    const getLabelFormatted = (value) => `${value}Kw`
+    const getLabelFormatted = (value) => `${value}`
 
     return (
         <div className={classes.root}>
@@ -88,10 +88,7 @@ export default function VerticalSlider({ ol_uid, hour, marginTitle, initialValue
                     onChangeCommitted={handleSliderCommit}
                     aria-label="consumption slider"
                     getAriaValueText={(value, index) => getLabelFormatted(value)}
-
                     valueLabelFormat={(value) => getLabelFormatted(value)}
-
-
                 />
             </div>
         </div >

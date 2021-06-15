@@ -1,7 +1,5 @@
 import 'fontsource-roboto';
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
-import { getBuildings } from './redux/selectors';
+import React, { useState } from 'react';
 import { makeStyles, withStyles } from '@material-ui/core/styles';
 import { Header } from "./Common";
 import Map from "./Map";
@@ -38,15 +36,13 @@ const useStyles = makeStyles((theme) => ({
 const GridDashboard = () => {
 
     const classes = useStyles();
-    const buildings = useSelector(getBuildings);
-
     const [center, setCenter] = useState([-3.92907, 38.98626]);
     const [zoom, setZoom] = useState(18);
 
     return (
         <React.Fragment>
             <Header title="Dashboard" > </Header>
-            <BorderLinearProgress color="secondary" />
+            <BorderLinearProgress />
             <Map style={classes.olMap} center={fromLonLat(center)} zoom={zoom}>
                 <Layers>
                     <TileLayer

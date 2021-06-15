@@ -12,7 +12,7 @@ import { Link } from 'react-router-dom'
 const useStyles = makeStyles((theme) => ({
     pagination: {
         marginTop: 10,
-        marginBottom: 10
+        marginBottom: 20
     },
     footer: {
         display: 'flex',
@@ -54,11 +54,12 @@ export default function ConsumptionContainer() {
     return (
         <React.Fragment>
             <Divider variant="middle" />
-            <ContainerScrollbar autoHide autoHideTimeout={500} autoHideDuration={200} >
+            <ContainerScrollbar>
                 {
                     currentPageData()
                 }
             </ContainerScrollbar >
+            <Divider variant="middle" />
             <div className={classes.footer}>
                 <Pagination
                     count={pageCount}
@@ -68,7 +69,7 @@ export default function ConsumptionContainer() {
                     shape="rounded"
                     className={classes.pagination}
                 />
-                <ThemeButton color="primary" component={Link} to="/dashboard" style={{ marginRight: 75 }} >
+                <ThemeButton color="primary" component={Link} to="/dashboard" style={{ marginRight: 20 }} >
                     Launch Grid
                 </ThemeButton>
             </div>

@@ -1,7 +1,6 @@
 import React from "react";
 import { CardContent, Divider, Typography } from '@material-ui/core';
-import { createMuiTheme, ThemeProvider } from '@material-ui/core/styles';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles } from '@material-ui/core/styles';
 import VerticalSlider from "./VerticalSlider";
 import { Card } from '@material-ui/core';
 import { useSelector } from 'react-redux'
@@ -27,10 +26,10 @@ const useStyles = makeStyles(() => ({
         marginRight: 5,
     },
     consumptionCard: {
-        marginLeft: '10px',
-        marginRight: '10px',
-        marginTop: '10px',
-        marginBottom: '10px',
+        marginLeft: 10,
+        marginRight: 10,
+        marginTop: 10,
+        marginBottom: 10,
         display: "inline-block",
 
     },
@@ -56,26 +55,28 @@ const useStyles = makeStyles(() => ({
 
     },
     graph: {
-        alignItems: "center",
         marginTop: 10,
         marginLeft: 10,
         marginRight: 10,
+        marginBottom: 10,
         width: 160,
         display: "flex",
-        flexDirection: "column"
+        flexDirection: "column",
+        justifyContent: "space-around"
     },
+    energyQuantity: {
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center"
+    }
 
 }));
 
-const energyFontTheme = createMuiTheme({
-    overrides: {
-        MuiTypography: {
-            h6: {
-                fontSize: "12pt",
-            }
-        }
-    },
-});
+const PurpleTextTypography = withStyles({
+    root: {
+        color: "#5F468A"
+    }
+})(Typography);
 
 export default function ConsumptionCard({ ol_uid }) {
 
@@ -133,13 +134,22 @@ export default function ConsumptionCard({ ol_uid }) {
                 </div>
                 <Divider orientation="vertical" flexItem variant="middle" />
                 <div className={classes.graph}>
+                    <div>
+                        <Typography variant="h6" align="center" > CONSUMPTION </ Typography >
+                        <Divider variant="middle" />
+                    </div>
 
-                    <Typography variant="h6" align="center" > ENERGY CONSUMPTION </ Typography >
-                    <Divider variant="middle" />
-                    <ThemeProvider theme={energyFontTheme}>
-                        <Typography variant="h6" align="center"> {_.sum(buildingConsumption).toFixed(2)} </ Typography >
-                        <Typography variant="h6" align="center"> Kw </Typography >
-                    </ThemeProvider>
+                    <div>
+                        <Typography variant="h6" align="center" > TOTAL / 24H </ Typography >
+                        <Divider variant="middle" />
+                        <PurpleTextTypography variant="h5" align="center"> {_.sum(buildingConsumption).toFixed(2)} Kw </ PurpleTextTypography >
+                    </div>
+
+                    <div>
+                        <Typography variant="h6" align="center" > AVERAGE </ Typography >
+                        <Divider variant="middle" />
+                        <PurpleTextTypography variant="h5" align="center"> {_.mean(buildingConsumption).toFixed(2)} Kw </ PurpleTextTypography >
+                    </div>
 
                 </div>
             </div>

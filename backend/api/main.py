@@ -115,7 +115,7 @@ async def launch_grid(building_data: Dict , db: Session = Depends(get_db), setti
     building_roles = {}
     for building_id in building_data:
       building_roles[building_id] = building_data[building_id]["type"]
-    command_list = ["java", "jade.Boot", "-gui", "-agents" ]
+    command_list = ["java", "jade.Boot", "-agents" ]
     agents_str = 'grid_agent:com.multiagent.GridAgent;'
     grid = grid_operations.create_grid(db)
     for building_id in building_data:
@@ -132,7 +132,7 @@ async def launch_grid(building_data: Dict , db: Session = Depends(get_db), setti
       agents_str += ";"
     command_list.append(agents_str)
     if not settings.test:
-      proc = subprocess.Popen(command_list)
+      subprocess.Popen(command_list, start_new_session=True)
     return {"id": grid.id}
 
 @app.get(_API_ROOT_ + "/grid/{grid_id}/buildings/", status_code=200)
@@ -143,13 +143,13 @@ def get_buildings(grid_id: int, db: Session = Depends(get_db)):
     response[building.id] = building.to_dict()
   return response
 
+'''
 @app.post(_API_ROOT_ + "/grid/test/", status_code=200)
 def stop_grid():
   proc = subprocess.Popen(['yes'])
-  app.state.grid = proc
-  print(app.state.grid)
+  return proc.pid
 
-@app.post(_API_ROOT_ + "/grid/stop/", status_code=200)
-def stop_grid():
-  app.state.grid.terminate()
-  app.state.grid = None
+@app.post(_API_ROOT_ + "/grid/stop/{process_pid}", status_code=200)
+def stop_grid(process_pid: int):
+  os.killpg(process_pid, signal.SIGKILL)
+'''

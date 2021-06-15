@@ -6,7 +6,7 @@ import { useSelector } from 'react-redux';
 import { Divider } from '@material-ui/core';
 import { Box } from '@material-ui/core';
 import {
-    Link
+    Link, useHistory
 } from "react-router-dom";
 import { getBuildings } from '../redux/selectors';
 import { ContainerScrollbar, ThemeButton } from '../Common'
@@ -34,12 +34,21 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
 
     const classes = useStyles();
     const buildingList = useSelector(getBuildings);
+    const history = useHistory();
+
+    function designSubmitListener(buildingList) {
+        if (Object.keys(buildingList).length <= 0) {
+            alert("A grid must have at least one building");
+        } else {
+            history.push("/consumption")
+        }
+    }
 
     return (
         <div className={classes.buildingContainer}>
             <Typography variant="h5" align="center" style={{ marginBottom: 10 }}> SELECTED BUILDINGS </Typography>
             <Divider variant="middle" />
-            <ContainerScrollbar autoHide autoHideTimeout={500} autoHideDuration={200} className={classes.buildingList}>
+            <ContainerScrollbar className={classes.buildingList}>
                 {
                     Object.keys(buildingList).map((dictkey, index) => (
                         <React.Fragment key={dictkey}>
@@ -51,9 +60,9 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
             <Divider variant="middle" />
             <div className={classes.buildingConsumptionButton}>
                 <Box textAlign='center'>
-                    <ThemeButton color="primary" component={Link} to="/consumption" >
-                        grid buildings consumption
-                </ThemeButton>
+                    <ThemeButton color="primary" onClick={() => designSubmitListener(buildingList)} >
+                        buildings consumption
+                    </ThemeButton>
                 </ Box>
             </div>
 

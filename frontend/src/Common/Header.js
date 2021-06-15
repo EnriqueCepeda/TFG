@@ -12,12 +12,17 @@ import {
 import 'fontsource-roboto';
 import MenuIcon from "@material-ui/icons/Menu";
 import React, { useState, useEffect } from "react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useHistory } from "react-router-dom";
+import { useSelector } from 'react-redux';
+import { getBuildings } from '../redux/selectors';
+
+
 
 const headersData = [
     {
         label: "DESIGN GRID",
         href: "/",
+
     },
     {
         label: "BUILDINGS CONSUMPTION",
@@ -53,6 +58,9 @@ const useStyles = makeStyles(() => ({
 
 export default function Header({ title }) {
     const { header, logo, menuButton, toolbar, drawerContainer } = useStyles();
+    const history = useHistory();
+    const buildingList = useSelector(getBuildings);
+
 
     const [state, setState] = useState({
         mobileView: false,
@@ -141,6 +149,15 @@ export default function Header({ title }) {
         </Typography>
     );
 
+    const buttonClickHandler = (href) => {
+        if (href === "/consumption" && Object.keys(buildingList).length <= 0) {
+            alert("A grid must have at least one building");
+        } else {
+            history.push(href);
+        }
+
+    }
+
     const getMenuButtons = () => {
         return headersData.map(({ label, href }) => {
             return (
@@ -148,13 +165,12 @@ export default function Header({ title }) {
                     {...{
                         key: label,
                         color: "inherit",
-                        to: href,
-                        component: RouterLink,
+                        onClick: () => buttonClickHandler(href),
                         className: menuButton,
                     }}
                 >
                     {label}
-                </Button>
+                </Button >
             );
         });
     };

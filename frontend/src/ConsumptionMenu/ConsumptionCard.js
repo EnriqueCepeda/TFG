@@ -11,6 +11,7 @@ import consumer from "../assets/house.svg"
 import both from "../assets/solar-house.svg"
 import { getBuilding, getBuildingConsumption } from "../redux/selectors"
 import _ from "lodash";
+import CountUp from "react-countup"
 
 const useStyles = makeStyles(() => ({
     sizeBuilding: {
@@ -125,7 +126,6 @@ export default function ConsumptionCard({ ol_uid }) {
                             <Avatar className={classes.sizeAvatar} variant="square" src={areaImg} />
                             <Typography> {building.area} m² </Typography>
                         </div>
-
                     </CardContent>
                 </Card >
                 <div className={classes.sliders}>
@@ -142,13 +142,13 @@ export default function ConsumptionCard({ ol_uid }) {
                     <div>
                         <Typography variant="h6" align="center" > TOTAL / 24H </ Typography >
                         <Divider variant="middle" />
-                        <PurpleTextTypography variant="h5" align="center"> {_.sum(buildingConsumption).toFixed(2)} Kw </ PurpleTextTypography >
+                        <PurpleTextTypography variant="h5" align="center"> <CountUp start={0} end={_.sum(buildingConsumption)} duration={0.75} decimals={2} suffix="Kw"></CountUp> </ PurpleTextTypography >
                     </div>
 
                     <div>
                         <Typography variant="h6" align="center" > AVERAGE </ Typography >
                         <Divider variant="middle" />
-                        <PurpleTextTypography variant="h5" align="center"> {_.mean(buildingConsumption).toFixed(2)} Kw </ PurpleTextTypography >
+                        <PurpleTextTypography variant="h5" align="center"> <CountUp start={0} end={_.mean(buildingConsumption)} duration={0.75} decimals={2} suffix="Kw"></CountUp> </ PurpleTextTypography >
                     </div>
 
                 </div>

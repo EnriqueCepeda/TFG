@@ -42,7 +42,6 @@ const GridDashboard = () => {
     return (
         <React.Fragment>
             <Header title="Dashboard" > </Header>
-            <BorderLinearProgress />
             <Map style={classes.olMap} center={fromLonLat(center)} zoom={zoom}>
                 <Layers>
                     <TileLayer

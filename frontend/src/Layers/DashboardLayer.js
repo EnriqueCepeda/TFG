@@ -15,6 +15,12 @@ import Overlay from 'ol/Overlay';
 import IconButton from '@material-ui/core/IconButton';
 import { makeStyles, Card, CardHeader, CardContent, Collapse, Typography, CardActionArea, withStyles } from '@material-ui/core';
 import CloseSharpIcon from '@material-ui/icons/CloseSharp';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import ExpandLessIcon from '@material-ui/icons/ExpandLess';
+import CardActions from '@material-ui/core/CardActions';
+import { Divider } from '@material-ui/core';
+import clsx from 'clsx';
+
 
 let buildingStyles = {
     'default': new Style({
@@ -71,7 +77,7 @@ let buildingStyles = {
 
 let usePopupStyles = makeStyles((theme) => ({
     root: {
-        maxWidth: 450,
+        maxWidth: 345,
     },
     expand: {
         transform: 'rotate(0deg)',
@@ -83,6 +89,14 @@ let usePopupStyles = makeStyles((theme) => ({
     expandOpen: {
         transform: 'rotate(180deg)',
     },
+    expandLine: {
+        display: "flex",
+        flexDirection: "row",
+        justifyContent: "space-between",
+        marginLeft: 5,
+        marginRight: 5,
+
+    }
 }));
 
 const PopupCardActionArea = withStyles({
@@ -118,18 +132,31 @@ const Popup = ({ buildingId, popupRef, closeHandler, }) => {
         <Card id="popup" ref={popupRef} className={classes.root} style={{ display: buildingId ? 'block' : 'none' }}>
             {selectedBuilding &&
                 (<React.Fragment>
-                    <PopupCardActionArea onClick={handleExpandClick}>
-                        <CardHeader
-                            id="popup-header"
-                            title={selectedBuilding.address}
-                            subheader={buildingId + " - " + selectedBuilding.type}
-                            action={
-                                <IconButton aria-label="settings" onClick={closeHandler}>
-                                    <CloseSharpIcon />
-                                </IconButton>
-                            }>
-                        </CardHeader>
-                    </PopupCardActionArea>
+                    <CardHeader
+                        id="popup-header"
+                        title={selectedBuilding.address}
+                        subheader={buildingId + " - " + selectedBuilding.type}
+                        action={
+                            <IconButton aria-label="settings" onClick={closeHandler}>
+                                <CloseSharpIcon />
+                            </IconButton>
+                        }>
+
+                    </CardHeader>
+                    <Divider variant="middle" />
+                    <CardActions disableSpacing className={classes.expandLine}>
+                        <Typography variant="h6"> Transactions </Typography>
+                        <IconButton
+                            className={clsx(classes.expand, {
+                                [classes.expandOpen]: expanded,
+                            })}
+                            onClick={handleExpandClick}
+                            aria-expanded={expanded}
+                            aria-label="show more"
+                        >
+                            <ExpandMoreIcon />
+                        </IconButton>
+                    </CardActions>
 
                     <Collapse in={expanded} timeout="auto" unmountOnExit>
                         <CardContent>

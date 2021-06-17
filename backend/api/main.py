@@ -51,7 +51,7 @@ ACTIVE_GRID = None
 async def validation_exception_handler(request, exc):
   return PlainTextResponse(str(exc), status_code=400)
 
-@app.post(f"{_API_ROOT_}/building/configuration")
+@app.post(f"{_API_ROOT_}/building/configuration", status_code=200)
 def get_building_module_configuration(polygon_coordinates: List, latitude:float):
   '''
   It returns the rows of solar modules and the solar modules per row of a building using the geometry vertices of its roof
@@ -66,7 +66,7 @@ def infere_building_energy(modules_per_string:int, strings_per_inverter:int, lat
     return infere_energy_production(latitude, longitude, modules_per_string, strings_per_inverter)
 
 
-@app.get(f"{_API_ROOT_}/building/address")
+@app.get(f"{_API_ROOT_}/building/address", status_code=200)
 async def get_building_address(latitude: float, longitude: float):
   '''
   It returns the street address of a certain location 

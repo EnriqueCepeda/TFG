@@ -5,7 +5,7 @@ import { getProducerBuildings } from '../redux/selectors/buildingSelectors';
 import { ContainerScrollbar, PurpleButton } from "../Common"
 import BuildingDataCard from './BuildingDataCard';
 import { PanelSelector } from './PanelSelector';
-
+import { Link } from 'react-router-dom';
 
 const useStyles = makeStyles(() => ({
     root: {
@@ -33,7 +33,7 @@ const useStyles = makeStyles(() => ({
         display: 'flex',
         flexDirection: "column",
         flex: 2,
-        minWidth: 250
+        minWidth: 250,
     },
     card: {
         marginRight: 10,
@@ -66,11 +66,16 @@ export default function PanelContainer() {
                         ))
                     }
                 </ContainerScrollbar>
+
             </div>
-            <Divider orientation="vertical" />
             <div className={classes.panelContainer}>
-                <PanelSelector building_id={selectedBuilding} />
+                {selectedBuilding &&
+                    <PanelSelector building_id={selectedBuilding} />}
+
             </div>
+            <PurpleButton color="primary" component={Link} to="/dashboard" style={{ marginRight: 20, alignSelf: "flex-end" }} >
+                Launch Grid
+            </PurpleButton>
 
         </div>
     );

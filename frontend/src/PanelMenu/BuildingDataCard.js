@@ -55,7 +55,7 @@ export default function BuildingDataCard({ building_id, selectedBuildingSetter }
     }
 
     return (
-        <Card variant="outlined">
+        <Card variant="outlined" style={{ marginRight: 10 }}>
             <CardActionArea onClick={clickCardHandler}>
                 {getBuildingAvatar(building.type)}
                 <CardContent>

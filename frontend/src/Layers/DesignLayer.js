@@ -13,6 +13,7 @@ import { getBuildings } from '../redux/selectors';
 import proj4 from "proj4";
 import { Fill, Stroke, Style } from 'ol/style';
 import axios from 'axios';
+import { updateBuildingMaxPanels } from "../redux/actions/buildingActions"
 
 
 let styles = {
@@ -71,7 +72,6 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 				})
 			},
 			strategy: bboxStrategy,
-
 		});
 
 
@@ -130,6 +130,13 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 			axios.get(request_url).then(res => res.data.response).then(address => { dispatch(updateBuildingAddress(building_id, address)) });
 		})
 
+	const fetchMaxPanels = (building_id, latitude, coordinates) => (
+		() => {
+			let request_url = `http://localhost:8000/api/v1/building/configuration?latitude=${latitude}`
+			let request_body = coordinates
+			axios.post(request_url, request_body).then(res => res.data.panels).then(panels => { dispatch(updateBuildingMaxPanels(building_id, panels)) });
+		})
+
 
 	function modifyBuildingListListener(e) {
 		map.forEachFeatureAtPixel(e.pixel, function (feature) {
@@ -138,8 +145,9 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 			var selIndex = keys.indexOf(buildingOlId);
 			centerSetter(toLonLat(map.getView().getCenter()));
 			if (selIndex < 0) {
-				var coordinates = feature.getGeometry().getInteriorPoint().getCoordinates();
-				var lonLatCoordinates = toLonLat([coordinates[0], coordinates[1]]);
+				debugger;
+				var interiorCoordinates = feature.getGeometry().getInteriorPoint().getCoordinates();
+				var lonLatCoordinates = toLonLat([interiorCoordinates[0], interiorCoordinates[1]]);
 				var latitude = lonLatCoordinates[1];
 				var longitude = lonLatCoordinates[0];
 				var area = getArea(feature.getGeometry()).toFixed(2);
@@ -149,6 +157,7 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 				feature.setStyle(highlightStyle);
 				dispatch(addBuilding(buildingOlId, latitude, longitude, address, area, coordinates, flatCoordinates));
 				dispatch(fetchBuildingAddress(latitude, longitude, buildingOlId));
+				dispatch(fetchMaxPanels(buildingOlId, latitude, coordinates))
 			} else {
 				feature.setStyle(defaultStyle);
 				dispatch(removeBuilding(buildingOlId));

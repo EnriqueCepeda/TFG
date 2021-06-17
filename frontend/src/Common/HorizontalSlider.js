@@ -27,7 +27,7 @@ const HorizontalSlider = styled(Slider)({
         border: "1px solid rgba(246, 207, 101)",
     },
     '& .MuiSlider-valueLabel': {
-        left: 'calc(-50% + 2px)',
+        left: 'calc(-50% + 6px)',
     }
 });
 

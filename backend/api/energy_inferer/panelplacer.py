@@ -45,10 +45,7 @@ class PanelPlacer:
       x = minx
       y = y2 + cartesian_panel_height * 0.5
 
-    ''' TO-DO: Find the optimum number for the inverter and remove the rest of the division'''
-    panels_per_row = 10 
-    rows = math.floor(panels / panels_per_row)
-    return rows, panels_per_row 
+    return panels
 
   @classmethod
   def __add_polygon_to_plot(cls, polygon, subplot, facecolor=BLUE, edgecolor=BLUE):

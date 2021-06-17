@@ -28,7 +28,7 @@ const VerticalSlider = withStyles({
 
     },
     valueLabel: {
-        left: 'calc(-50% + 2px)',
+        left: 'calc(-50% + 3px)',
     }
 
 })(Slider);

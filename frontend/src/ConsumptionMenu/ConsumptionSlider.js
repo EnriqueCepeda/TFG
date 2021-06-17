@@ -40,8 +40,6 @@ export default function ConsumptionSlider({ ol_uid, hour, marginTitle, initialVa
         dispatch(updateBuildingConsumption(ol_uid, hour, newValue));
     }
 
-    const getLabelFormatted = (value) => `${value}`
-
     return (
         <div className={classes.root}>
             <Typography style={{ marginLeft: marginTitle }}> {hour}h </Typography>
@@ -57,8 +55,6 @@ export default function ConsumptionSlider({ ol_uid, hour, marginTitle, initialVa
                     onChange={handleSliderChange}
                     onChangeCommitted={handleSliderCommit}
                     aria-label="consumption slider"
-                    getAriaValueText={(value, index) => getLabelFormatted(value)}
-                    valueLabelFormat={(value) => getLabelFormatted(value)}
                 />
             </div>
         </div >

@@ -27,9 +27,8 @@ def get_inverter():
 
 def get_panels_configuration(building_coordinates, latitude):
     module = get_module(latitude)
-    modules_per_string, strings_per_inverter = PanelPlacer.run(building_coordinates, module["m_projected_length"],  module["m_projected_width"])
-    return {"modules_per_string" : modules_per_string,
-            "strings_per_inverter" : strings_per_inverter}
+    panels = PanelPlacer.run(building_coordinates, module["m_projected_length"],  module["m_projected_width"])
+    return {"panels" : panels}
 
 def infere_energy_production(latitude, longitude, modules_per_string=2, strings_per_inverter=1) :
     module = get_module(latitude)

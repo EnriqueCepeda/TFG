@@ -69,8 +69,8 @@ export default function ConsumptionContainer() {
                     shape="rounded"
                     className={classes.pagination}
                 />
-                <PurpleButton color="primary" component={Link} to="/dashboard" style={{ marginRight: 20 }} >
-                    Launch Grid
+                <PurpleButton color="primary" component={Link} to="/panels" style={{ marginRight: 20 }} >
+                    Building Panels
                 </PurpleButton>
             </div>
 

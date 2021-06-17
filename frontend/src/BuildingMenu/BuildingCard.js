@@ -109,7 +109,7 @@ function BuildingCard({ ol_uid, centerSetter }) {
                     </div>
                     <div className={classes.cardContentRow}>
                         <Avatar className={classes.sizeAvatar} variant="square" src={areaImg} />
-                        <Typography variant="subtitle1"> {building.area} m² </Typography>
+                        <Typography> {building.area} m² </Typography>
                     </div>
                     <div className={classes.cardContentRow}>
                         <Typography> {building.type} - <GreyTypography display="inline"> {ol_uid} </GreyTypography> </Typography>

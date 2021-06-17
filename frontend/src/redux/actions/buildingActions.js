@@ -1,5 +1,5 @@
 
-import { UPDATE_BUILDING_TYPE, UPDATE_BUILDING_ADDRESS, UPDATE_BUILDING_CONSUMPTION, ADD_BUILDING, REMOVE_BUILDING, ADD_TRANSACTION, } from './types';
+import { UPDATE_BUILDING_TYPE, UPDATE_BUILDING_ADDRESS, UPDATE_BUILDING_CONSUMPTION, ADD_BUILDING, REMOVE_BUILDING, ADD_TRANSACTION, UPDATE_BUILDING_MAX_PANELS, UPDATE_BUILDING_PANELS } from './types';
 
 export const updateBuildingType = (id, type) => ({
     type: UPDATE_BUILDING_TYPE,
@@ -24,6 +24,22 @@ export const updateBuildingConsumption = (id, hour, value) => (
     }
 );
 
+export const updateBuildingMaxPanels = (building_id, panels) => (
+    {
+        type: UPDATE_BUILDING_MAX_PANELS,
+        building_id: building_id,
+        maxPanels: panels
+    }
+)
+
+export const updateBuildingPanels = (building_id, panels) => (
+    {
+        type: UPDATE_BUILDING_PANELS,
+        building_id: building_id,
+        panels: panels
+    }
+)
+
 export const addBuilding = (id, latitude, longitude, address, area, coordinates, flatCoordinates) => (
     {
         type: ADD_BUILDING,
@@ -37,7 +53,9 @@ export const addBuilding = (id, latitude, longitude, address, area, coordinates,
             coordinates: coordinates,
             flatCoordinates: flatCoordinates,
             consumption: defaultBuildingConsumption,
-            transactions: {}
+            transactions: {},
+            maxPanels: 1,
+            panels: 1,
         }
     });
 

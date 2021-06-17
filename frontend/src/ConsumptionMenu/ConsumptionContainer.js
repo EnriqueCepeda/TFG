@@ -54,7 +54,7 @@ export default function ConsumptionContainer() {
     return (
         <React.Fragment>
             <Divider variant="middle" />
-            <ContainerScrollbar>
+            <ContainerScrollbar autoHide>
                 {
                     currentPageData()
                 }
@@ -69,12 +69,10 @@ export default function ConsumptionContainer() {
                     shape="rounded"
                     className={classes.pagination}
                 />
-                <PurpleButton color="primary" component={Link} to="/panels" style={{ marginRight: 20 }} >
+                <PurpleButton variant="outlined" color="primary" component={Link} to="/panels" style={{ marginRight: 20 }} >
                     Building Panels
                 </PurpleButton>
             </div>
-
-
         </React.Fragment>
     )
 }

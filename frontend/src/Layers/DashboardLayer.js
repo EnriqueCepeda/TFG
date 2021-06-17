@@ -1,24 +1,26 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
-import MapContext from "../Map/MapContext";
+import { useSelector, useDispatch } from 'react-redux';
+import axios from 'axios';
+
 import OLVectorLayer from "ol/layer/Vector";
 import { Vector as VectorSource } from 'ol/source';
-import { useSelector, useDispatch } from 'react-redux';
+import { Fill, Stroke, Style } from 'ol/style';
+import GeoJSON from 'ol/format/GeoJSON';
+import Overlay from 'ol/Overlay';
+
 import { useInterval } from '../Common'
 import { getBuilding, getBuildings, getGridId } from '../redux/selectors';
 import { addGrid } from '../redux/actions/gridActions';
 import { addTransaction } from '../redux/actions/buildingActions';
+import MapContext from "../Map/MapContext";
 
-import axios from 'axios';
-import { Fill, Stroke, Style } from 'ol/style';
-import GeoJSON from 'ol/format/GeoJSON';
-import Overlay from 'ol/Overlay';
-import IconButton from '@material-ui/core/IconButton';
-import { makeStyles, Card, CardHeader, CardContent, Collapse, Typography, CardActionArea, withStyles } from '@material-ui/core';
+
+
+
+import { makeStyles, Card, CardHeader, CardContent, CardActions, Collapse, Divider, Typography, CardActionArea, withStyles } from '@material-ui/core';
 import CloseSharpIcon from '@material-ui/icons/CloseSharp';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
-import ExpandLessIcon from '@material-ui/icons/ExpandLess';
-import CardActions from '@material-ui/core/CardActions';
-import { Divider } from '@material-ui/core';
+import IconButton from '@material-ui/core/IconButton';
 import clsx from 'clsx';
 
 

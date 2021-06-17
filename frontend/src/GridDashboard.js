@@ -1,13 +1,12 @@
 import 'fontsource-roboto';
 import React, { useState } from 'react';
-import { makeStyles, withStyles } from '@material-ui/core/styles';
+import { makeStyles, withStyles, LinearProgress } from '@material-ui/core';
 import { Header } from "./Common";
 import Map from "./Map";
 import { Layers, TileLayer, DashboardLayer } from "./Layers";
 import { osm } from "./Source";
 import { Controls, FullScreenControl, ZoomControl } from "./Controls";
 import { fromLonLat } from 'ol/proj';
-import LinearProgress from '@material-ui/core/LinearProgress';
 
 const BorderLinearProgress = withStyles((theme) => ({
     root: {

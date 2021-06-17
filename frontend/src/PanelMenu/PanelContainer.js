@@ -57,7 +57,7 @@ export default function PanelContainer() {
             <div className={classes.buildingList}>
                 <Typography variant="h5" align="center" style={{ marginBottom: 10 }}>PRODUCERS / PROSUMERS</Typography>
                 <Divider variant="middle" />
-                <ContainerScrollbar >
+                <ContainerScrollbar autoHide>
                     {
                         Object.keys(buildingList).map((dictkey, index) => (
                             <div key={dictkey} className={classes.card}>
@@ -66,6 +66,7 @@ export default function PanelContainer() {
                         ))
                     }
                 </ContainerScrollbar>
+                <Divider variant="middle" />
 
             </div>
             <div className={classes.panelContainer}>
@@ -73,7 +74,7 @@ export default function PanelContainer() {
                     <PanelSelector building_id={selectedBuilding} />}
 
             </div>
-            <PurpleButton color="primary" component={Link} to="/dashboard" style={{ marginRight: 20, alignSelf: "flex-end" }} >
+            <PurpleButton variant="outlined" color="primary" component={Link} to="/dashboard" style={{ marginRight: 20, alignSelf: "flex-end" }} >
                 Launch Grid
             </PurpleButton>
 

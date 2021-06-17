@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardHeader, CardContent, CardActions, makeStyles, Slider, styled, Icon, Grid } from "@material-ui/core";
+import { Card, CardHeader, CardContent, makeStyles, Slider, styled, Icon, Grid, Typography } from "@material-ui/core";
 import { PurpleButton } from "../Common"
 import SolarPanel from "../assets/solar-panel-simple.svg"
-import { Typography } from "@material-ui/core";
 import { useDispatch, useSelector } from "react-redux";
 import { getBuilding } from "../redux/selectors";
 import { updateBuildingPanels } from "../redux/actions/buildingActions";
@@ -64,7 +63,7 @@ const HorizontalSlider = styled(Slider)({
 function PanelIcon() {
     return (
         <Icon >
-            <img src={SolarPanel} height={33} width={33} />
+            <img src={SolarPanel} height={33} width={33} alt="panels" />
         </Icon>
     );
 }
@@ -132,19 +131,19 @@ export function PanelSelector({ building_id }) {
                     </Grid>
                     <Grid container item spacing={1} justify="center">
                         <Grid item>
-                            <PurpleButton onClick={() => buttonPercentagePanelsCommit(10)}> 10% </PurpleButton>
+                            <PurpleButton variant="outlined" onClick={() => buttonPercentagePanelsCommit(10)}> 10% </PurpleButton>
                         </Grid>
                         <Grid item>
-                            <PurpleButton onClick={() => buttonPercentagePanelsCommit(25)}>25%</PurpleButton>
+                            <PurpleButton variant="outlined" onClick={() => buttonPercentagePanelsCommit(25)}>25%</PurpleButton>
                         </Grid>
                         <Grid item>
-                            <PurpleButton onClick={() => buttonPercentagePanelsCommit(50)}>50%</PurpleButton>
+                            <PurpleButton variant="outlined" onClick={() => buttonPercentagePanelsCommit(50)}>50%</PurpleButton>
                         </Grid>
                         <Grid item>
-                            <PurpleButton onClick={() => buttonPercentagePanelsCommit(75)}>75%</PurpleButton>
+                            <PurpleButton variant="outlined" onClick={() => buttonPercentagePanelsCommit(75)}>75%</PurpleButton>
                         </Grid>
                         <Grid item>
-                            <PurpleButton onClick={() => buttonPercentagePanelsCommit(100)}>100%</PurpleButton>
+                            <PurpleButton variant="outlined" onClick={() => buttonPercentagePanelsCommit(100)}>100%</PurpleButton>
                         </Grid>
                     </Grid>
                 </Grid>

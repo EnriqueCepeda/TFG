@@ -1,6 +1,5 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
-import { Typography } from '@material-ui/core';
+import { makeStyles, Typography } from "@material-ui/core";
 import { useDispatch } from 'react-redux';
 import { updateBuildingConsumption } from '../redux/actions/buildingActions.js';
 import VerticalSlider from "../Common/VerticalSlider.js";

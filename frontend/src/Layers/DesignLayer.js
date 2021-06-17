@@ -1,5 +1,8 @@
 import { useContext, useEffect, useState } from "react";
-import MapContext from "../Map/MapContext";
+import { useSelector, useDispatch } from 'react-redux';
+import proj4 from "proj4";
+import axios from 'axios';
+
 import OLVectorLayer from "ol/layer/Vector";
 import { Vector as VectorSource } from 'ol/source';
 import { transformExtent } from 'ol/proj';
@@ -7,13 +10,12 @@ import { getArea } from 'ol/sphere';
 import OSMXML from 'ol/format/OSMXML';
 import { bbox as bboxStrategy } from 'ol/loadingstrategy';
 import { toLonLat } from 'ol/proj';
-import { useSelector, useDispatch } from 'react-redux';
-import { addBuilding, removeBuilding, updateBuildingAddress } from '../redux/actions/buildingActions';
-import { getBuildings } from '../redux/selectors';
-import proj4 from "proj4";
 import { Fill, Stroke, Style } from 'ol/style';
-import axios from 'axios';
-import { updateBuildingMaxPanels } from "../redux/actions/buildingActions"
+
+
+import MapContext from "../Map/MapContext";
+import { addBuilding, removeBuilding, updateBuildingAddress, updateBuildingMaxPanels } from '../redux/actions/buildingActions';
+import { getBuildings } from '../redux/selectors';
 
 
 let styles = {

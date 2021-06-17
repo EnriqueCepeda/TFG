@@ -1,12 +1,12 @@
 import React from "react"
-import { Card, CardContent, Typography, Avatar, makeStyles } from "@material-ui/core"
+import { useSelector } from "react-redux"
+
+import { Card, CardContent, CardActionArea, Typography, Avatar, makeStyles, Tooltip } from "@material-ui/core"
 import locationImg from "../assets/location.svg"
 import areaImg from "../assets/area.svg"
 import consumer from "../assets/house.svg"
 import both from "../assets/solar-house.svg"
 import producer from "../assets/panel-solar.svg"
-import { CardActionArea } from "@material-ui/core"
-import { useSelector } from "react-redux"
 import { getBuilding } from "../redux/selectors"
 import { GreyTypography } from "../Common"
 
@@ -55,25 +55,27 @@ export default function BuildingDataCard({ building_id, selectedBuildingSetter }
     }
 
     return (
-        <Card variant="outlined" style={{ marginRight: 10 }}>
-            <CardActionArea onClick={clickCardHandler}>
-                {getBuildingAvatar(building.type)}
-                <CardContent>
-                    <div className={classes.cardContentRow}>
-                        <Typography display="inline" className={classes.typographyStyle} align="center">
-                            {building.type} - <GreyTypography display="inline"> {building_id}</GreyTypography>
-                        </Typography>
-                    </div>
-                    <div className={classes.cardContentRow}>
-                        <Avatar className={classes.sizeAvatar} variant="square" src={locationImg} />
-                        <Typography> {building.address} </Typography>
-                    </div>
-                    <div className={classes.cardContentRow}>
-                        <Avatar className={classes.sizeAvatar} variant="square" src={areaImg} />
-                        <Typography> {building.area} m² </Typography>
-                    </div>
-                </CardContent>
-            </CardActionArea>
-        </Card >
+        <Tooltip title="Click to show PV panels selection menu.">
+            <Card variant="outlined" >
+                <CardActionArea onClick={clickCardHandler}>
+                    {getBuildingAvatar(building.type)}
+                    <CardContent>
+                        <div className={classes.cardContentRow}>
+                            <Typography display="inline" className={classes.typographyStyle} align="center">
+                                {building.type} - <GreyTypography display="inline"> {building_id}</GreyTypography>
+                            </Typography>
+                        </div>
+                        <div className={classes.cardContentRow}>
+                            <Avatar className={classes.sizeAvatar} variant="square" src={locationImg} />
+                            <Typography> {building.address} </Typography>
+                        </div>
+                        <div className={classes.cardContentRow}>
+                            <Avatar className={classes.sizeAvatar} variant="square" src={areaImg} />
+                            <Typography> {building.area} m² </Typography>
+                        </div>
+                    </CardContent>
+                </CardActionArea>
+            </Card >
+        </Tooltip>
     )
 }

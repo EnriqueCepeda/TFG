@@ -1,12 +1,9 @@
 import React from "react";
-import { makeStyles } from '@material-ui/core/styles';
-import { Typography } from '@material-ui/core/';
+import { makeStyles, Typography, Divider, Box } from '@material-ui/core/';
 import BuildingCard from './BuildingCard';
 import { useSelector } from 'react-redux';
-import { Divider } from '@material-ui/core';
-import { Box } from '@material-ui/core';
 import {
-    Link, useHistory
+    useHistory
 } from "react-router-dom";
 import { getBuildings } from '../redux/selectors';
 import { ContainerScrollbar, PurpleButton } from '../Common'
@@ -19,6 +16,7 @@ const useStyles = makeStyles(() => ({
         flex: 2,
         display: 'flex',
         flexDirection: "column",
+        marginLeft: 10,
     },
     buildingList: {
         flex: 12,
@@ -38,7 +36,7 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
 
     function designSubmitListener(buildingList) {
         if (Object.keys(buildingList).length <= 0) {
-            alert("A grid must have at least one building");
+            alert("The grid must have at least one building");
         } else {
             history.push("/consumption")
         }
@@ -48,7 +46,7 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
         <div className={classes.buildingContainer}>
             <Typography variant="h5" align="center" style={{ marginBottom: 10 }}>SELECTED BUILDINGS</Typography>
             <Divider variant="middle" />
-            <ContainerScrollbar className={classes.buildingList}>
+            <ContainerScrollbar autoHide className={classes.buildingList}>
                 {
                     Object.keys(buildingList).map((dictkey, index) => (
                         <React.Fragment key={dictkey}>
@@ -60,7 +58,7 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
             <Divider variant="middle" />
             <div className={classes.buildingConsumptionButton}>
                 <Box textAlign='center'>
-                    <PurpleButton color="primary" onClick={() => designSubmitListener(buildingList)} >
+                    <PurpleButton variant="outlined" color="primary" onClick={() => designSubmitListener(buildingList)} >
                         buildings consumption
                     </PurpleButton>
                 </ Box>

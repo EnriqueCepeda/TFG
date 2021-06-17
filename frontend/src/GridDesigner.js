@@ -8,7 +8,7 @@ import { osm } from "./Source";
 import { Controls, FullScreenControl, ZoomControl } from "./Controls";
 import { BuildingContainer, } from './BuildingMenu';
 import { fromLonLat } from 'ol/proj';
-import { makeStyles } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core';
 import { Header } from "./Common"
 
 

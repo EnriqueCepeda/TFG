@@ -1,11 +1,11 @@
 import React from "react"
+import { useSelector } from "react-redux"
 import { Card, CardContent, Typography, Avatar, makeStyles } from "@material-ui/core"
 import locationImg from "../assets/location.svg"
 import areaImg from "../assets/area.svg"
 import consumer from "../assets/house.svg"
 import both from "../assets/solar-house.svg"
 import producer from "../assets/panel-solar.svg"
-import { useSelector } from "react-redux"
 import { getBuilding } from "../redux/selectors"
 import { GreyTypography } from "../Common"
 

@@ -9,7 +9,7 @@ import {
     Link, useHistory
 } from "react-router-dom";
 import { getBuildings } from '../redux/selectors';
-import { ContainerScrollbar, ThemeButton } from '../Common'
+import { ContainerScrollbar, PurpleButton } from '../Common'
 
 
 
@@ -21,7 +21,7 @@ const useStyles = makeStyles(() => ({
         flexDirection: "column",
     },
     buildingList: {
-        flex: 12
+        flex: 12,
     },
     buildingConsumptionButton: {
         flex: 1,
@@ -46,7 +46,7 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
 
     return (
         <div className={classes.buildingContainer}>
-            <Typography variant="h5" align="center" style={{ marginBottom: 10 }}> SELECTED BUILDINGS </Typography>
+            <Typography variant="h5" align="center" style={{ marginBottom: 10 }}>SELECTED BUILDINGS</Typography>
             <Divider variant="middle" />
             <ContainerScrollbar className={classes.buildingList}>
                 {
@@ -60,9 +60,9 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
             <Divider variant="middle" />
             <div className={classes.buildingConsumptionButton}>
                 <Box textAlign='center'>
-                    <ThemeButton color="primary" onClick={() => designSubmitListener(buildingList)} >
+                    <PurpleButton color="primary" onClick={() => designSubmitListener(buildingList)} >
                         buildings consumption
-                    </ThemeButton>
+                    </PurpleButton>
                 </ Box>
             </div>
 

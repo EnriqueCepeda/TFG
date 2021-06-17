@@ -4,7 +4,7 @@ import { purple } from '@material-ui/core/colors';
 import Button from '@material-ui/core/Button';
 
 
-const ThemeButton = withStyles((theme) => ({
+const PurpleButton = withStyles((theme) => ({
     root: {
         color: theme.palette.getContrastText('rgb(95,70,138)'),
         backgroundColor: 'rgb(95, 70, 138)',
@@ -14,4 +14,4 @@ const ThemeButton = withStyles((theme) => ({
     },
 }))(Button);
 
-export default ThemeButton;
+export default PurpleButton;

@@ -1,4 +1,3 @@
-import ConsumptionCard from "./ConsumptionCard"
 import ConsumptionContainer from "./ConsumptionContainer"
-
-export { ConsumptionCard, ConsumptionContainer }
+import BuildingDataCard from "./BuildingDataCard"
+export { BuildingDataCard, ConsumptionContainer }

@@ -22,7 +22,7 @@ const GridBuildingPanels = () => {
 
     return (
         <div className={classes.GridDesigner}>
-            <Header title="Building Panels" />
+            <Header title="Grid Panels" />
             <PanelContainer />
         </div >
     )

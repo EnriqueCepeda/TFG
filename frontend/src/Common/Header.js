@@ -28,6 +28,11 @@ const headersData = [
         label: "BUILDINGS CONSUMPTION",
         href: "/consumption",
     },
+    {
+        label: "BUILDINGS PANELS",
+        href: "/panels"
+
+    }
 ];
 
 const useStyles = makeStyles(() => ({
@@ -150,7 +155,7 @@ export default function Header({ title }) {
     );
 
     const buttonClickHandler = (href) => {
-        if (href === "/consumption" && Object.keys(buildingList).length <= 0) {
+        if ((href === "/consumption" || href === "/panels") && Object.keys(buildingList).length <= 0) {
             alert("A grid must have at least one building");
         } else {
             history.push(href);

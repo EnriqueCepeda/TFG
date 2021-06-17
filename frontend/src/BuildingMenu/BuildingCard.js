@@ -15,6 +15,7 @@ import { ToggleButton } from '@material-ui/lab';
 import { useSelector, useDispatch } from 'react-redux';
 import { updateBuildingType } from '../redux/actions/buildingActions.js';
 import { getBuilding } from '../redux/selectors';
+import { GreyTypography, PurpleTypography } from "../Common";
 
 
 const useStyles = makeStyles(() => ({
@@ -29,10 +30,10 @@ const useStyles = makeStyles(() => ({
     },
     card: {
         display: "flex",
-        marginLeft: '10px',
-        marginRight: '10px',
-        marginTop: '10px',
-        marginBottom: '10px'
+        marginLeft: 20,
+        marginRight: 10,
+        marginTop: 10,
+        marginBottom: 10
     },
     leftContent: {
         flex: 1
@@ -108,10 +109,10 @@ function BuildingCard({ ol_uid, centerSetter }) {
                     </div>
                     <div className={classes.cardContentRow}>
                         <Avatar className={classes.sizeAvatar} variant="square" src={areaImg} />
-                        <Typography> {building.area} m² </Typography>
+                        <Typography variant="subtitle1"> {building.area} m² </Typography>
                     </div>
                     <div className={classes.cardContentRow}>
-                        <Typography> {building.type} </Typography>
+                        <Typography> {building.type} - <GreyTypography display="inline"> {ol_uid} </GreyTypography> </Typography>
                     </div>
                 </CardContent>
             </CardActionArea>

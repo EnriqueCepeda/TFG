@@ -1,10 +1,10 @@
-import { getBuildings, getBuilding, getProducerBuildings, getBuildingConsumption } from "./buildingSelectors.js"
+import { getBuildings, getBuilding, getConsumerBuildings, getBuildingConsumption } from "./buildingSelectors.js"
 import { getGridId } from "./gridSelectors.js"
 
 export {
     getBuildings,
     getBuilding,
-    getProducerBuildings,
+    getConsumerBuildings,
     getBuildingConsumption,
     getGridId
 }

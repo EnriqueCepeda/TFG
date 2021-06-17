@@ -1,9 +1,9 @@
 import React from "react";
-import { withStyles, makeStyles } from "@material-ui/core/styles";
-import Slider from "@material-ui/core/Slider";
+import { makeStyles } from "@material-ui/core/styles";
 import { Typography } from '@material-ui/core';
 import { useDispatch } from 'react-redux';
 import { updateBuildingConsumption } from '../redux/actions/buildingActions.js';
+import VerticalSlider from "../Common/VerticalSlider.js";
 
 
 
@@ -14,7 +14,7 @@ const useStyles = makeStyles(theme => ({
         width: "3vw"
     },
     slider: {
-        height: "19vh",
+        height: 200,
         marginTop: 20,
     },
     input: {
@@ -24,39 +24,9 @@ const useStyles = makeStyles(theme => ({
 
 }));
 
-const CustomSlider = withStyles({
-    root: {
-        color: "#5F468A",
-    },
-    thumb: {
-        width: "23px !important",
-        height: "23px !important",
-        backgroundColor: "#fff",
-        border: "2px solid currentColor",
-        "&:focus, &:hover,&:active": {
-            boxShadow: "none !important",
-        }
-    },
-    track: {
-        width: "12.5px !important",
-        borderRadius: "0 0 24px 24px",
-        marginBottom: "-2px",
-    },
-    rail: {
-        width: "10px !important",
-        borderRadius: 24,
-        opacity: 1,
-        color: "rgba(255, 242, 175)",
-        border: "1px solid rgba(246, 207, 101)",
 
-    },
-    valueLabel: {
-        left: 'calc(-50% + 2px)',
-    }
 
-})(Slider);
-
-export default function VerticalSlider({ ol_uid, hour, marginTitle, initialValue }) {
+export default function ConsumptionSlider({ ol_uid, hour, marginTitle, initialValue }) {
     const classes = useStyles();
     const [value, setValue] = React.useState(initialValue);
     const dispatch = useDispatch();
@@ -76,7 +46,7 @@ export default function VerticalSlider({ ol_uid, hour, marginTitle, initialValue
         <div className={classes.root}>
             <Typography style={{ marginLeft: marginTitle }}> {hour}h </Typography>
             <div className={classes.slider} >
-                <CustomSlider
+                <VerticalSlider
                     orientation="vertical"
                     valueLabelDisplay='auto'
                     defaultValue={0}

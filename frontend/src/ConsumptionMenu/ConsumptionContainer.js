@@ -2,9 +2,9 @@ import { useSelector } from "react-redux";
 import { Pagination } from '@material-ui/lab';
 
 import React, { useState } from "react";
-import { getProducerBuildings } from "../redux/selectors";
+import { getConsumerBuildings } from "../redux/selectors";
 import ConsumptionCard from "./ConsumptionCard";
-import { ContainerScrollbar, ThemeButton } from "../Common"
+import { ContainerScrollbar, PurpleButton } from "../Common"
 import { makeStyles } from '@material-ui/core';
 import { Divider } from '@material-ui/core';
 import { Link } from 'react-router-dom'
@@ -25,7 +25,7 @@ const useStyles = makeStyles((theme) => ({
 
 export default function ConsumptionContainer() {
     const [currentPage, setCurrentPage] = useState(1);
-    const producerBuildings = useSelector(getProducerBuildings);
+    const producerBuildings = useSelector(getConsumerBuildings);
     const classes = useStyles();
 
 
@@ -69,9 +69,9 @@ export default function ConsumptionContainer() {
                     shape="rounded"
                     className={classes.pagination}
                 />
-                <ThemeButton color="primary" component={Link} to="/dashboard" style={{ marginRight: 20 }} >
+                <PurpleButton color="primary" component={Link} to="/dashboard" style={{ marginRight: 20 }} >
                     Launch Grid
-                </ThemeButton>
+                </PurpleButton>
             </div>
 
 

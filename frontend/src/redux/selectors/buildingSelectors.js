@@ -3,11 +3,23 @@ export const getBuildings = state => state.buildings;
 
 export const getBuilding = (state, ol_uid) => getBuildings(state)[ol_uid]
 
-export const getProducerBuildings = (state) => {
+export const getConsumerBuildings = (state) => {
     const buildings = getBuildings(state);
     var filteredItems = {};
     Object.keys(buildings).map((dictkey, index) => {
         if (buildings[dictkey].type !== "Producer") {
+            filteredItems[dictkey] = buildings[dictkey];
+        }
+    })
+    return filteredItems;
+}
+
+
+export const getProducerBuildings = (state) => {
+    const buildings = getBuildings(state);
+    var filteredItems = {};
+    Object.keys(buildings).map((dictkey, index) => {
+        if (buildings[dictkey].type !== "Consumer") {
             filteredItems[dictkey] = buildings[dictkey];
         }
     })

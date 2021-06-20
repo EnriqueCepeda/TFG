@@ -2,7 +2,6 @@ from haversine import haversine, Unit
 from shapely.geometry import Polygon, MultiPolygon
 from descartes.patch import PolygonPatch
 from matplotlib import pyplot
-import math
 from .figures import BLUE, PURPLE, plot_coords
 
 
@@ -65,3 +64,6 @@ class PanelPlacer:
     subplot.axis("off")
     pyplot.show()
 
+
+if __name__ == __main__:
+  

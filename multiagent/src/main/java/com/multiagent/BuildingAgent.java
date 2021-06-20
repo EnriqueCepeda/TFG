@@ -79,6 +79,7 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		String consumption = ((String) args[4]).replace("?", ",");
 		String buildingRoles = ((String) args[5]).replace("?", ",");
 		Integer grid_id = Integer.parseInt((String) args[6]);
+		Integer panels = Integer.parseInt((String) args[7]);
 		JSONArray jsonCoordinates = new JSONArray(coordinates);
 		JSONArray jsonConsumption = new JSONArray(consumption);
 		JSONObject jsonBuildingRoles = new JSONObject(buildingRoles);
@@ -90,39 +91,21 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		data.put("consumption", jsonConsumption);
 		data.put("buildingRoles", jsonBuildingRoles);
 		data.put("grid_id", grid_id);
+		data.put("panels", panels);
 
 		if (BuildingType.PRODUCER.name().equalsIgnoreCase(type)
 				|| BuildingType.PROSUMER.name().equalsIgnoreCase(type)) {
 
-			JSONObject configurationResponse = getPanelConfiguration(latitude, jsonCoordinates);
-			data.put("modules_per_string", configurationResponse.getInt("modules_per_string"));
-			data.put("strings_per_inverter", configurationResponse.getInt("strings_per_inverter"));
-
+			if (panels < 10) {
+				data.put("modules_per_string", panels);
+				data.put("strings_per_inverter", 1);
+			} else {
+				data.put("modules_per_string", (int) panels / 10);
+				data.put("strings_per_inverter", 10);
+			}
 		}
 
 		return data;
-	}
-
-	public JSONObject getPanelConfiguration(Double latitude, JSONArray coordinates)
-			throws IOException, ClientProtocolException, URISyntaxException, Exception {
-		URIBuilder uriBuilder = new URIBuilder(this.BUILDING_CONFIGURATION_URI);
-		uriBuilder.addParameter("latitude", latitude.toString());
-		URI requestURI = uriBuilder.build();
-
-		StringEntity requestEntity = new StringEntity(coordinates.toString(), ContentType.APPLICATION_JSON);
-		HttpPost httpPost = new HttpPost(requestURI);
-		httpPost.setEntity(requestEntity);
-
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
-		if (httpResponse.getStatusLine().getStatusCode() != 200) {
-			System.out.println("Panel configuration cannot be obtained, deleting agent");
-		}
-		InputStream responseStream = httpResponse.getEntity().getContent();
-		JSONObject response = new JSONObject(IOUtils.toString(responseStream));
-		httpClient.close();
-		return response;
-
 	}
 
 	public Double getBuildingProduction(Integer modules_per_string, Integer strings_per_inverter, Double latitude,

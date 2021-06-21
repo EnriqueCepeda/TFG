@@ -3,6 +3,9 @@ import { makeStyles, Typography } from "@material-ui/core";
 import { useDispatch } from 'react-redux';
 import { updateBuildingConsumption } from '../redux/actions/buildingActions.js';
 import VerticalSlider from "../Common/VerticalSlider.js";
+import { useSelector } from "react-redux";
+import { getBuildingConsumption } from "../redux/selectors/buildingSelectors.js";
+import _ from "lodash";
 
 
 
@@ -25,9 +28,11 @@ const useStyles = makeStyles(theme => ({
 
 
 
-export default function ConsumptionSlider({ ol_uid, hour, marginTitle, initialValue }) {
+export default function ConsumptionSlider({ ol_uid, hour, marginTitle, initialValue, lastTotalConsumptionSetter, lastMeanConsumptionSetter }) {
     const classes = useStyles();
     const [value, setValue] = React.useState(initialValue);
+    const buildingConsumption = useSelector((state) => getBuildingConsumption(state, ol_uid));
+
     const dispatch = useDispatch();
 
     const handleSliderChange = (event, newValue) => {
@@ -36,6 +41,8 @@ export default function ConsumptionSlider({ ol_uid, hour, marginTitle, initialVa
 
     const handleSliderCommit = (event, newValue) => {
         setValue(newValue);
+        lastTotalConsumptionSetter(_.sum(buildingConsumption))
+        lastMeanConsumptionSetter(_.mean(buildingConsumption))
         dispatch(updateBuildingConsumption(ol_uid, hour, newValue));
     }
 

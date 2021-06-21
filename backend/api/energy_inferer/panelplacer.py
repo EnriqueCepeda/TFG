@@ -2,6 +2,7 @@ from haversine import haversine, Unit
 from shapely.geometry import Polygon, MultiPolygon
 from descartes.patch import PolygonPatch
 from matplotlib import pyplot
+from scipy.spatial.distance import cdist
 from .figures import BLUE, PURPLE, plot_coords
 
 
@@ -10,8 +11,11 @@ class PanelPlacer:
   @classmethod
   def __get_cartesian_panel_height_width(cls, panel_length, panel_width, building_bounds):
     minx, miny, maxx, maxy = building_bounds
+    print(building_bounds)
     height_distance = haversine((minx, miny), (minx, maxy), Unit.METERS)
-    width_distance = haversine((minx, miny), (maxx, miny), Unit.METERS)
+    width_distance = haversine((minx, miny), (maxx, miny), Unit.METERS)  
+    print(height_distance)
+    print(width_distance)
     panel_rows = (height_distance / panel_width)
 
     panel_columns = (width_distance / panel_length)
@@ -22,8 +26,9 @@ class PanelPlacer:
   @classmethod
   def run(cls, coordinates, panel_length, panel_width):
     building_polygon = Polygon(coordinates)
-    minx, miny, maxx, maxy = building_polygon.bounds
-    cartesian_panel_height, cartesian_panel_width = cls.__get_cartesian_panel_height_width(panel_length, panel_width, building_polygon.bounds)
+    building_bounds = building_polygon.bounds
+    minx, miny, maxx, maxy = building_bounds
+    cartesian_panel_height, cartesian_panel_width = cls.__get_cartesian_panel_height_width(panel_length, panel_width, building_bounds)
     correctly_placed_panels = []
     x = minx
     y = miny
@@ -42,7 +47,7 @@ class PanelPlacer:
         x = x2
 
       x = minx
-      y = y2 + cartesian_panel_height * 0.5
+      y = y2 + cartesian_panel_height
 
     return panels
 
@@ -65,5 +70,4 @@ class PanelPlacer:
     pyplot.show()
 
 
-if __name__ == __main__:
-  
+

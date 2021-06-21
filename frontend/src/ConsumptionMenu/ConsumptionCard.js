@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, Divider, Typography, makeStyles } from '@material-ui/core';
 import { PurpleTypography } from "../Common";
 import ConsumptionSlider from "./ConsumptionSlider";
@@ -50,6 +50,8 @@ const useStyles = makeStyles(() => ({
 export default function ConsumptionCard({ ol_uid }) {
 
     const buildingConsumption = useSelector((state) => getBuildingConsumption(state, ol_uid));
+    const [lastConsumption, setLastConsumption] = useState(0);
+    const [lastMeanConsumption, setLastMeanConsumption] = useState(0);
     const classes = useStyles();
 
     function getHourSliders() {
@@ -59,7 +61,11 @@ export default function ConsumptionCard({ ol_uid }) {
             if (i <= 9) {
                 marginTitle = 8;
             }
-            sliders.push(<React.Fragment key={i}> <ConsumptionSlider ol_uid={ol_uid} hour={i} marginTitle={marginTitle} initialValue={buildingConsumption[i]} /> </React.Fragment >)
+            sliders.push(<React.Fragment key={i}> <ConsumptionSlider ol_uid={ol_uid} hour={i}
+                marginTitle={marginTitle} initialValue={buildingConsumption[i]}
+                lastTotalConsumptionSetter={setLastConsumption}
+                lastMeanConsumptionSetter={setLastMeanConsumption} />
+            </React.Fragment >)
         }
         return sliders
     }
@@ -82,13 +88,13 @@ export default function ConsumptionCard({ ol_uid }) {
                     <div>
                         <Typography variant="h6" align="center" > TOTAL / 24H </ Typography >
                         <Divider variant="middle" />
-                        <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={_.sum(buildingConsumption)} duration={0.75} decimals={2} suffix="Kw"></CountUp> </ PurpleTypography >
+                        <PurpleTypography variant="h5" align="center"> <CountUp start={lastConsumption} end={_.sum(buildingConsumption)} duration={0.75} decimals={2} suffix="Kw"></CountUp> </ PurpleTypography >
                     </div>
 
                     <div>
                         <Typography variant="h6" align="center" > AVERAGE </ Typography >
                         <Divider variant="middle" />
-                        <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={_.mean(buildingConsumption)} duration={0.75} decimals={2} suffix="Kw"></CountUp> </ PurpleTypography >
+                        <PurpleTypography variant="h5" align="center"> <CountUp start={lastMeanConsumption} end={_.mean(buildingConsumption)} duration={0.75} decimals={2} suffix="Kw"></CountUp> </ PurpleTypography >
                     </div>
 
                 </div>

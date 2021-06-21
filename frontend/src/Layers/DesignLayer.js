@@ -1,6 +1,5 @@
 import { useContext, useEffect, useState } from "react";
 import { useSelector, useDispatch } from 'react-redux';
-import proj4 from "proj4";
 import axios from 'axios';
 
 import OLVectorLayer from "ol/layer/Vector";
@@ -120,7 +119,8 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 	function getPolygonCoordinates(coordinates) {
 		var newCoordinates = [];
 		coordinates.map(element => {
-			var latloncoordinates = proj4('EPSG:3857', 'WGS84', [element[0], element[1]])
+			var lonlatcoordinates = toLonLat([element[0], element[1]])
+			var latloncoordinates = [lonlatcoordinates[1], lonlatcoordinates[0]]
 			newCoordinates.push(latloncoordinates);
 		})
 		return newCoordinates;
@@ -153,9 +153,9 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 				var latitude = lonLatCoordinates[1];
 				var longitude = lonLatCoordinates[0];
 				var area = getArea(feature.getGeometry()).toFixed(2);
-				var coordinates = getPolygonCoordinates(feature.getGeometry().getCoordinates()[0]);
-				let address = `Latitude: ${latitude.toFixed(8)} \n Longitude: ${longitude.toFixed(8)}`
 				var flatCoordinates = feature.getGeometry().getCoordinates()[0];
+				var coordinates = getPolygonCoordinates(flatCoordinates);
+				let address = `Latitude: ${latitude.toFixed(8)} \n Longitude: ${longitude.toFixed(8)}`
 				feature.setStyle(highlightStyle);
 				dispatch(addBuilding(buildingOlId, latitude, longitude, address, area, coordinates, flatCoordinates));
 				dispatch(fetchBuildingAddress(latitude, longitude, buildingOlId));

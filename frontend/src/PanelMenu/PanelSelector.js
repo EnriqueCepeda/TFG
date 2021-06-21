@@ -1,18 +1,15 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardHeader, CardContent, makeStyles, Slider, styled, Icon, Grid, Typography } from "@material-ui/core";
+import { Card, CardHeader, CardContent, makeStyles, Icon, Grid, Typography } from "@material-ui/core";
 import { PurpleButton } from "../Common"
-import SolarPanel from "../assets/solar-panel-simple.svg"
+import SolarPanel from "../assets/panel-solar2.svg"
 import { useDispatch, useSelector } from "react-redux";
 import { getBuilding } from "../redux/selectors";
 import { updateBuildingPanels } from "../redux/actions/buildingActions";
+import { HorizontalSlider } from "../Common";
 
 const useStyles = makeStyles((theme) => ({
     card: {
-        marginLeft: 20,
-        marginRight: 20,
-        marginTop: 20,
-        marginBottom: 20,
-        width: 400
+        width: 400,
     },
     buttons: {
         display: "flex",
@@ -28,37 +25,6 @@ const useStyles = makeStyles((theme) => ({
         textAlign: "center"
     }
 }));
-
-const HorizontalSlider = styled(Slider)({
-    color: '#5F468A',
-    height: 8,
-    '& .MuiSlider-thumb': {
-        height: 23,
-        width: 23,
-        backgroundColor: '#fff',
-        border: '2px solid currentColor',
-        marginTop: -5,
-        marginLeft: -12,
-        '&:focus, &:hover, &.Mui-active': {
-            boxShadow: 'inherit',
-        },
-    },
-    '& .MuiSlider-track': {
-        height: 12.5,
-        borderRadius: "24px 24px 24px 24px",
-        marginBottom: "-2px"
-    },
-    '& .MuiSlider-rail': {
-        height: 10,
-        borderRadius: 24,
-        opacity: 1,
-        color: "rgba(255, 242, 175)",
-        border: "1px solid rgba(246, 207, 101)",
-    },
-    '& .MuiSlider-valueLabel': {
-        left: 'calc(-50% + 2px)',
-    }
-});
 
 function PanelIcon() {
     return (
@@ -114,7 +80,7 @@ export function PanelSelector({ building_id }) {
                         <Grid item>
                             <PanelIcon />
                         </Grid>
-                        <Grid item xs>
+                        <Grid item xs >
                             <HorizontalSlider
                                 valueLabelDisplay="auto"
                                 orientation="horizontal"

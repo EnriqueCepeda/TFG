@@ -6,7 +6,7 @@ import {
     useHistory
 } from "react-router-dom";
 import { getBuildings } from '../redux/selectors';
-import { ContainerScrollbar, PurpleButton } from '../Common'
+import { ContainerScrollbar, PurpleButton, DarkPurpleTypography } from '../Common'
 
 
 
@@ -44,7 +44,7 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
 
     return (
         <div className={classes.buildingContainer}>
-            <Typography variant="h5" align="center" style={{ marginBottom: 10 }}>SELECTED BUILDINGS</Typography>
+            <DarkPurpleTypography variant="h5" align="center" style={{ marginBottom: 10 }}>SELECTED BUILDINGS</DarkPurpleTypography>
             <Divider variant="middle" />
             <ContainerScrollbar autoHide className={classes.buildingList}>
                 {

@@ -23,11 +23,11 @@ const HorizontalSlider = styled(Slider)({
         height: 10,
         borderRadius: 24,
         opacity: 1,
-        color: "rgba(255, 242, 175)",
-        border: "1px solid rgba(246, 207, 101)",
+        color: "#FFF2AF",
+        border: "1px solid #F5CF65",
     },
     '& .MuiSlider-valueLabel': {
-        left: 'calc(-50% + 6px)',
+        left: 'calc(-50% + 3px)',
     }
 });
 

@@ -7,6 +7,7 @@ import VerticalSlider from './VerticalSlider'
 import PurpleTypography from './PurpleTypography'
 import GreyTypography from './GreyTypograhpy'
 import HorizontalSlider from './HorizontalSlider'
+import DarkPurpleTypography from './DarkPurpleTypography'
 
 
 export {
@@ -18,5 +19,6 @@ export {
     VerticalSlider,
     PurpleTypography,
     GreyTypography,
-    HorizontalSlider
+    HorizontalSlider,
+    DarkPurpleTypography,
 }

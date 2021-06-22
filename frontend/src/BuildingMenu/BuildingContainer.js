@@ -19,7 +19,7 @@ const useStyles = makeStyles(() => ({
         marginLeft: 10,
     },
     buildingList: {
-        flex: 12,
+        flex: 20,
     },
     buildingConsumptionButton: {
         flex: 1,

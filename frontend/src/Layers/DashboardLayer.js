@@ -17,7 +17,7 @@ import MapContext from "../Map/MapContext";
 
 
 
-import { makeStyles, Card, CardHeader, CardContent, CardActions, Collapse, Divider, Typography, CardActionArea, withStyles } from '@material-ui/core';
+import { makeStyles, Card, CardHeader, CardContent, CardActions, Collapse, Divider, Typography } from '@material-ui/core';
 import CloseSharpIcon from '@material-ui/icons/CloseSharp';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import IconButton from '@material-ui/core/IconButton';
@@ -101,18 +101,6 @@ let usePopupStyles = makeStyles((theme) => ({
     }
 }));
 
-const PopupCardActionArea = withStyles({
-    root: {
-        '&:hover $focusHighlight': {
-            opacity: 0.11,
-        },
-    },
-    focusHighlight: {
-        background: "#5f468a"
-    }
-
-})(CardActionArea);
-
 const Popup = ({ buildingId, popupRef, closeHandler, }) => {
     const selectedBuilding = useSelector(state => getBuilding(state, buildingId));
     const classes = usePopupStyles();
@@ -191,7 +179,7 @@ const DashboardLayer = () => {
     const dispatch = useDispatch();
     const [selectedBuildingId, setSelectedBuildingId] = useState(null);
     const [lastEpochCheck, setLastEpochCheck] = useState(null);
-    const [delay, setDelay] = useState(10000);
+    const ms_delay = 10000;
     const [isActive, setActive] = useState(false);
 
     function popupCloseHandler() {
@@ -289,7 +277,7 @@ const DashboardLayer = () => {
 
     useInterval(() => {
         dispatch(askForNonFetchedTransactions());
-    }, isActive ? delay : null);
+    }, isActive ? ms_delay : null);
 
     const launchGrid = () => (
         () => {

@@ -9,8 +9,6 @@ import { Controls, FullScreenControl, ZoomControl } from "./Controls";
 import { BuildingContainer, } from './BuildingMenu';
 import { fromLonLat } from 'ol/proj';
 import { makeStyles } from '@material-ui/core';
-import { Header } from "./Common"
-
 
 
 
@@ -40,7 +38,6 @@ const GridDesigner = () => {
 
     return (
         <React.Fragment>
-            <Header title="Grid designer" > </Header>
             <div className={classes.content}>
                 <Map center={fromLonLat(center)} zoom={zoom} style={classes.olMap}>
                     <Layers>

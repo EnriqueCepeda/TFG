@@ -1,24 +1,11 @@
 import 'fontsource-roboto';
-import React, { useState } from 'react';
-import { makeStyles, withStyles, LinearProgress } from '@material-ui/core';
-import { Header } from "./Common";
+import React from 'react';
+import { makeStyles } from '@material-ui/core';
 import Map from "./Map";
 import { Layers, TileLayer, DashboardLayer } from "./Layers";
 import { osm } from "./Source";
 import { Controls, FullScreenControl, ZoomControl } from "./Controls";
 import { fromLonLat } from 'ol/proj';
-
-const BorderLinearProgress = withStyles((theme) => ({
-    root: {
-        height: 10,
-        borderRadius: 5,
-    },
-    bar: {
-        borderRadius: 5,
-        backgroundColor: "#5f468a",
-    },
-}))(LinearProgress);
-
 
 const useStyles = makeStyles((theme) => ({
     olMap: {
@@ -35,12 +22,11 @@ const useStyles = makeStyles((theme) => ({
 const GridDashboard = () => {
 
     const classes = useStyles();
-    const [center, setCenter] = useState([-3.92907, 38.98626]);
-    const [zoom, setZoom] = useState(18);
+    const center = [-3.92907, 38.98626];
+    const zoom = 18;
 
     return (
         <React.Fragment>
-            <Header title="Dashboard" > </Header>
             <Map style={classes.olMap} center={fromLonLat(center)} zoom={zoom}>
                 <Layers>
                     <TileLayer

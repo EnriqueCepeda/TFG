@@ -22,7 +22,6 @@ const headersData = [
     {
         label: "DESIGN GRID",
         href: "/",
-
     },
     {
         label: "BUILDINGS CONSUMPTION",
@@ -61,10 +60,11 @@ const useStyles = makeStyles(() => ({
     },
 }));
 
-export default function Header({ title }) {
+export default function Header() {
     const { header, logo, menuButton, toolbar, drawerContainer } = useStyles();
     const history = useHistory();
     const location = useLocation();
+    const [title, setTitle] = useState("hi")
     const buildingList = useSelector(getBuildings);
 
 
@@ -86,6 +86,20 @@ export default function Header({ title }) {
 
         window.addEventListener("resize", () => setResponsiveness());
     }, []);
+
+    useEffect(() => {
+        var dashboard = true
+        headersData.map(({ label, href }) => {
+            if (href === location.pathname) {
+                setTitle(label)
+                dashboard = false
+            }
+        })
+        if (dashboard) {
+            setTitle("GRID DASHBOARD")
+        }
+
+    }, [location])
 
     const displayDesktop = () => {
         return (

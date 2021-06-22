@@ -8,11 +8,13 @@ import {
 	Switch,
 	Route,
 } from "react-router-dom";
+import { Header } from './Common';
 
 
 export default function App() {
 	return (
 		<Router>
+			<Header />
 			<Switch>
 				<Route path="/dashboard" component={GridDashboard} />
 				<Route path="/consumption" component={GridBuildingConsumption} />

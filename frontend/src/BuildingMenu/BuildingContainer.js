@@ -1,5 +1,5 @@
 import React from "react";
-import { makeStyles, Typography, Divider, Box } from '@material-ui/core/';
+import { makeStyles, Divider, Box } from '@material-ui/core/';
 import BuildingCard from './BuildingCard';
 import { useSelector } from 'react-redux';
 import {
@@ -46,13 +46,16 @@ function BuildingContainer({ centerSetter, zoomSetter }) {
         <div className={classes.buildingContainer}>
             <DarkPurpleTypography variant="h5" align="center" style={{ marginBottom: 10 }}>SELECTED BUILDINGS</DarkPurpleTypography>
             <Divider variant="middle" />
+
             <ContainerScrollbar autoHide className={classes.buildingList}>
                 {
+
                     Object.keys(buildingList).map((dictkey, index) => (
                         <React.Fragment key={dictkey}>
                             <BuildingCard ol_uid={dictkey} centerSetter={centerSetter} />
                         </React.Fragment>
                     ))
+
                 }
             </ContainerScrollbar>
             <Divider variant="middle" />

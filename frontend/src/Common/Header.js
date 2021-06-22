@@ -12,7 +12,7 @@ import {
 import 'fontsource-roboto';
 import MenuIcon from "@material-ui/icons/Menu";
 import React, { useState, useEffect } from "react";
-import { Link as RouterLink, useHistory } from "react-router-dom";
+import { Link as RouterLink, useHistory, useLocation } from "react-router-dom";
 import { useSelector } from 'react-redux';
 import { getBuildings } from '../redux/selectors';
 
@@ -64,6 +64,7 @@ const useStyles = makeStyles(() => ({
 export default function Header({ title }) {
     const { header, logo, menuButton, toolbar, drawerContainer } = useStyles();
     const history = useHistory();
+    const location = useLocation();
     const buildingList = useSelector(getBuildings);
 
 

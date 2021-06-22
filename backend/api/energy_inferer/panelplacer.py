@@ -11,11 +11,8 @@ class PanelPlacer:
   @classmethod
   def __get_cartesian_panel_height_width(cls, panel_length, panel_width, building_bounds):
     minx, miny, maxx, maxy = building_bounds
-    print(building_bounds)
     height_distance = haversine((minx, miny), (minx, maxy), Unit.METERS)
     width_distance = haversine((minx, miny), (maxx, miny), Unit.METERS)  
-    print(height_distance)
-    print(width_distance)
     panel_rows = (height_distance / panel_width)
 
     panel_columns = (width_distance / panel_length)

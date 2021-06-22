@@ -50,7 +50,7 @@ def get_grid_buildings(grid_id):
     return response
 
 def register_transaction(grid_id, sender_name, receiver_name, energy):
-    uri = f"{_API_ROOT_}/grid/transaction?{grid_id=!s}&{sender_name=!s}&{receiver_name=!s}&{energy=!s}"
+    uri = f"{_API_ROOT_}/grid/{grid_id}/transaction?{sender_name=!s}&{receiver_name=!s}&{energy=!s}"
     response = client.post(uri)
     return response
 

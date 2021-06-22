@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { makeStyles, Divider, Typography } from '@material-ui/core';
 import { useSelector } from 'react-redux';
 import { getProducerBuildings } from '../redux/selectors/buildingSelectors';
-import { ContainerScrollbar, PurpleButton } from "../Common"
+import { ContainerScrollbar, PurpleButton, PurpleTypography } from "../Common"
 import BuildingDataCard from './BuildingDataCard';
 import { PanelSelector } from './PanelSelector';
 import { Link } from 'react-router-dom';
@@ -55,7 +55,7 @@ export default function PanelContainer() {
     return (
         <div className={classes.root}>
             <div className={classes.buildingList}>
-                <Typography variant="h5" align="center" style={{ marginBottom: 10 }}>PRODUCERS / PROSUMERS</Typography>
+                <PurpleTypography variant="h5" align="center" style={{ marginBottom: 10 }}>PRODUCERS / PROSUMERS</PurpleTypography>
                 <Divider variant="middle" />
                 <ContainerScrollbar autoHide>
                     {

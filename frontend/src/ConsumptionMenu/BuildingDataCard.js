@@ -57,7 +57,7 @@ export default function BuildingDataCard({ building_id }) {
             {getBuildingAvatar(building.type)}
             <CardContent>
                 <div className={classes.cardContentRow}>
-                    <Typography display="inline" className={classes.typographyStyle} align="center">{building.type} - <GreyTypography display="inline"> {building_id}</GreyTypography></Typography>
+                    <Typography display="inline" className={classes.typographyStyle} align="center">{building.type} - </Typography> <GreyTypography display="inline"> {building_id}</GreyTypography>
                 </div>
                 <div className={classes.cardContentRow}>
                     <Avatar className={classes.sizeAvatar} variant="square" src={locationImg} />

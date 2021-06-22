@@ -5,8 +5,7 @@ import React, { useState } from "react";
 import { getConsumerBuildings } from "../redux/selectors";
 import ConsumptionCard from "./ConsumptionCard";
 import { ContainerScrollbar, PurpleButton } from "../Common"
-import { makeStyles } from '@material-ui/core';
-import { Divider } from '@material-ui/core';
+import { makeStyles, Divider } from '@material-ui/core';
 import { Link } from 'react-router-dom'
 
 const useStyles = makeStyles((theme) => ({
@@ -58,6 +57,7 @@ export default function ConsumptionContainer() {
                 {
                     currentPageData()
                 }
+
             </ContainerScrollbar >
             <Divider variant="middle" />
             <div className={classes.footer}>

@@ -111,27 +111,26 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 	public Double getBuildingProduction(Integer modules_per_string, Integer strings_per_inverter, Double latitude,
 			Double longitude) throws URISyntaxException, ClientProtocolException, IOException, Exception {
 
-		/*
-		 * URIBuilder uriBuilder = new URIBuilder(this.ENERGY_CONSUMPTION_URI);
-		 * uriBuilder.addParameter("latitude", latitude.toString());
-		 * uriBuilder.addParameter("longitude", longitude.toString());
-		 * uriBuilder.addParameter("strings_per_inverter",
-		 * strings_per_inverter.toString());
-		 * uriBuilder.addParameter("modules_per_string", modules_per_string.toString());
-		 * URI requestURI = uriBuilder.build(); HttpPost httpPost = new
-		 * HttpPost(requestURI); CloseableHttpClient httpClient =
-		 * HttpClients.createDefault(); CloseableHttpResponse httpResponse =
-		 * httpClient.execute(httpPost); if
-		 * (httpResponse.getStatusLine().getStatusCode() != 200) {
-		 * System.out.println("Building production cannot be obtained, deleting agent");
-		 * } InputStream responseStream = httpResponse.getEntity().getContent();
-		 * JSONObject response = new JSONObject(IOUtils.toString(responseStream));
-		 * httpClient.close(); Double production =
-		 * response.getDouble(JSONObject.getNames(response)[0]); if (production < 0) {
-		 * production = 0.0; } return production;
-		 */
-		return 20.0;
-
+		URIBuilder uriBuilder = new URIBuilder(this.ENERGY_CONSUMPTION_URI);
+		uriBuilder.addParameter("latitude", latitude.toString());
+		uriBuilder.addParameter("longitude", longitude.toString());
+		uriBuilder.addParameter("strings_per_inverter", strings_per_inverter.toString());
+		uriBuilder.addParameter("modules_per_string", modules_per_string.toString());
+		URI requestURI = uriBuilder.build();
+		HttpPost httpPost = new HttpPost(requestURI);
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
+		if (httpResponse.getStatusLine().getStatusCode() != 200) {
+			System.out.println("Building production cannot be obtained, deleting agent");
+		}
+		InputStream responseStream = httpResponse.getEntity().getContent();
+		JSONObject response = new JSONObject(IOUtils.toString(responseStream));
+		httpClient.close();
+		Double production = response.getDouble(JSONObject.getNames(response)[0]);
+		if (production < 0) {
+			production = 0.0;
+		}
+		return production;
 	}
 
 	public Double getEstimatedEnergy(JSONObject buildingData) throws ClientProtocolException, IOException, Exception {
@@ -479,7 +478,7 @@ class ConsumerBehaviour extends ContractNetInitiator {
 
 	Double energyNeed = 0.0;
 	Hashtable<Integer, Double> uncommitedEnergy = new Hashtable<Integer, Double>();
-	private final String REGISTER_TRANSACTION_URI = "http://localhost:8000/api/v1/grid/transaction";
+	private final String REGISTER_TRANSACTION_URI = "http://localhost:8000/api/v1/grid/";
 	int AcceptedOffersWithoutResponse = 0;
 	JSONObject data = null;
 
@@ -491,8 +490,8 @@ class ConsumerBehaviour extends ContractNetInitiator {
 
 	public void registerTransaction(Integer grid_id, String sender, String receiver, Double energy)
 			throws URISyntaxException, ClientProtocolException, IOException {
-		URIBuilder uriBuilder = new URIBuilder(this.REGISTER_TRANSACTION_URI);
-		uriBuilder.addParameter("grid_id", grid_id.toString());
+		String finalURL = this.REGISTER_TRANSACTION_URI + this.data.getInt("grid_id") + "/transaction";
+		URIBuilder uriBuilder = new URIBuilder(finalURL);
 		uriBuilder.addParameter("sender_name", sender);
 		uriBuilder.addParameter("receiver_name", receiver);
 		uriBuilder.addParameter("energy", energy.toString());

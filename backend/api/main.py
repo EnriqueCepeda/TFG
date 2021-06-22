@@ -22,6 +22,7 @@ origins = [
     "*",
 ]
 
+subprocess.Popen(["java", "jade.Boot", "-name", "SmartGrid"])
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -89,7 +90,7 @@ async def get_building_address(latitude: float, longitude: float):
       except Exception:
           raise HTTPException(status_code=500, detail="Server error")
 
-@app.post(f"{_API_ROOT_}/grid/transaction", status_code=201)
+@app.post(_API_ROOT_ + "/grid/{grid_id}/transaction", status_code=201)
 def new_transaction(grid_id: int, sender_name: str, receiver_name: str, energy: float, db: Session = Depends(get_db)
 ):
   sender_name = sender_name.replace("_", " ")
@@ -115,9 +116,10 @@ async def launch_grid(building_data: Dict , db: Session = Depends(get_db), setti
     building_roles = {}
     for building_id in building_data:
       building_roles[building_id] = building_data[building_id]["type"]
-    command_list = ["java", "jade.Boot", "-agents" ]
+    command_list = ["java", "jade.Boot", "-container", "-agents" ]
     agents_str = 'grid_agent:com.multiagent.GridAgent;'
     grid = grid_operations.create_grid(db)
+    grid_operations.create_building(db, "grid agent", "", "Producer", grid.id)
     for building_id in building_data:
       building = building_data[building_id]
       latitude = building["latitude"]

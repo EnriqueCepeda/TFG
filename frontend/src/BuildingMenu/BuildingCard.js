@@ -47,7 +47,7 @@ const useStyles = makeStyles(() => ({
         display: "flex",
         flexDirection: "row",
         margin: "5px"
-    }
+    },
 }));
 
 function BuildingCard({ ol_uid, centerSetter }) {

@@ -190,4 +190,4 @@ temp/
 backend/MTPs-Main-Container.txt
 backend/APDescription.txt
 backend/api/local.db
-backend/api/local.db
+backend/api/tests/test.db

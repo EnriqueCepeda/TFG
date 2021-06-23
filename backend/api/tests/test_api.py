@@ -7,7 +7,6 @@ import time
 from ..main import app, get_db, get_settings
 from .. import config
 from ..models import Base
-from ..grid_operations import create_building
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///api/tests/test.db"
 _API_ROOT_ = "/api/v1"

@@ -11,7 +11,7 @@ from .panelplacer import PanelPlacer
 def get_module(latitude):
     sandia_modules = retrieve_sam('SandiaMod')
     #http://www.solardesigntool.com/components/module-panel-solar/Silevo/2272/Triex-U300-Black/specification-data-sheet.html
-    module = sandia_modules['Silevo_Triex_U300_Black__2014_'] #1.68 square meters
+    module = sandia_modules['Canadian_Solar_CS5P_220M___2009_'] #1.68 square meters
     module['m_length'] = 1.586
     module['m_width'] = 1.056
     module["m_projected_length"] = module["m_length"]
@@ -37,8 +37,10 @@ def infere_energy_production(latitude, longitude, modules_per_string=2, strings_
 
     start = pd.Timestamp.now(tz='UTC')
     end = start + pd.Timedelta(hours=6)
-    
+
+    print("getting altitude")
     altitude = AltitudeAPI.get_altitude(latitude, longitude)
+    print(altitude)
     system = PVSystem(module_parameters=module,
                     inverter_parameters=inverter,
                     temperature_model_parameters=temperature_model_parameters)
@@ -59,8 +61,12 @@ def infere_energy_production(latitude, longitude, modules_per_string=2, strings_
 if __name__ == "__main__":
     module = get_module(38.98626)
     print(module)
-    coordinates = [[38.985699100000005,-3.9287349999999996],[38.985673700000035,-3.9288259999999995],[38.98571640000003,-3.9288482],[38.98574339999999,-3.9287609],[38.985699100000005,-3.9287349999999996]]
+    inverter = get_inverter()
+    print(inverter)
+    #coordinates = [[38.985699100000005,-3.9287349999999996],[38.985673700000035,-3.9288259999999995],[38.98571640000003,-3.9288482],[38.98574339999999,-3.9287609],[38.985699100000005,-3.9287349999999996]]
     #coordinates = [[-3.9322489000000007,38.98663880000001],[-3.932187,38.98674059999999],[-3.9323180000000004,38.986803799999976],[-3.9323816999999996,38.98669789999998],[-3.9322489000000007,38.98663880000001]]
     #coordinates = [[-3.927226,38.9863099],[-3.9272596,38.98668819999999],[-3.9270083000000002,38.98672400000002],[-3.9269712000000006,38.98634019999999],[-3.9270596000000006,38.98633059999998],[-3.927226,38.9863099]]
-    config = get_panels_configuration(coordinates, 38.986516950302786)
-    print(config)
+    #config = get_panels_configuration(coordinates, 38.986516950302786)
+    production = infere_energy_production(38.985699100000005,-3.9287349999999996, modules_per_string=1, strings_per_inverter=1)
+    print(production)
+    #print(config)

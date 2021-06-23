@@ -1,7 +1,6 @@
 import aiohttp
 import os
 import subprocess
-import signal
 from functools import lru_cache
 from typing import Dict, List
 from fastapi import FastAPI, HTTPException, Depends, Request
@@ -22,7 +21,13 @@ origins = [
     "*",
 ]
 
-subprocess.Popen(["java", "jade.Boot", "-name", "SmartGrid"])
+@lru_cache
+def get_settings():
+  return config.Settings()
+
+settings = get_settings()
+if not settings.test:
+  subprocess.Popen(["java", "jade.Boot", "-name", "SmartGrid"])
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -40,10 +45,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-@lru_cache
-def get_settings():
-  return config.Settings()
 
 _API_ROOT_ = "/api/v1"
 ACTIVE_GRID = None

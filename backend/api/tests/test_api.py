@@ -81,7 +81,7 @@ def test_get_grid_buildings():
     assert response.status_code == 200
     response_dict = response.json()
     assert isinstance(response_dict, dict)
-    assert len(response_dict.keys()) == 3
+    assert len(response_dict.keys()) == 5
 
 def test_register_transaction():
     grid_data = get_grid_fixture()

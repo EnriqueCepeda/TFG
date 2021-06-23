@@ -5,7 +5,6 @@ from pvlib.location import Location
 from pvlib.modelchain import ModelChain, get_orientation
 from pvlib.forecast import GFS
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
-from .altitude import AltitudeAPI
 from .panelplacer import PanelPlacer
 
 def get_module(latitude):

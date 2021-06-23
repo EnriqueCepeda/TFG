@@ -1,5 +1,15 @@
 
-export const getBuildings = state => state.buildings;
+export const getBuildings = state => {
+    var filteredItems = {};
+    Object.keys(state.buildings).map((dictkey, index) => {
+        if (dictkey !== "grid agent") {
+            filteredItems[dictkey] = state.buildings[dictkey];
+        }
+    })
+    return filteredItems;
+
+
+}
 
 export const getBuilding = (state, ol_uid) => getBuildings(state)[ol_uid]
 

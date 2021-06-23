@@ -56,7 +56,6 @@ public class BuildingAgent extends Agent {
 
 class BuildingAgentInitiator extends OneShotBehaviour {
 	private JSONObject data = null;
-	private final String BUILDING_CONFIGURATION_URI = "http://localhost:8000/api/v1/building/configuration";
 	private final String ENERGY_CONSUMPTION_URI = "http://localhost:8000/api/v1/building/production";
 
 	public BuildingAgentInitiator(Agent agent) {
@@ -541,8 +540,8 @@ class ConsumerBehaviour extends ContractNetInitiator {
 		this.AcceptedOffersWithoutResponse--;
 		Double energyTaken = Double.parseDouble(inform.getContent());
 		try {
-			System.out.println(this.myAgent.getLocalName());
-			System.out.println(inform.getSender().getLocalName());
+			System.out.println(this.myAgent.getLocalName()); // dbg
+			System.out.println(inform.getSender().getLocalName()); // dbg
 			registerTransaction(this.data.getInt("grid_id"), inform.getSender().getLocalName(),
 					this.myAgent.getLocalName(), energyTaken);
 		} catch (URISyntaxException | IOException e1) {

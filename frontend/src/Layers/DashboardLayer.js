@@ -79,7 +79,7 @@ let buildingStyles = {
 
 let usePopupStyles = makeStyles((theme) => ({
     root: {
-        maxWidth: 345,
+        maxWidth: 450,
     },
     expand: {
         transform: 'rotate(0deg)',

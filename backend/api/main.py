@@ -1,8 +1,9 @@
+from urllib.parse import urlencode
 import aiohttp
 import os
 import subprocess
 from functools import lru_cache
-from typing import Dict, List
+from typing import Dict, List, Tuple
 from fastapi import FastAPI, HTTPException, Depends, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
@@ -61,11 +62,11 @@ def get_building_module_configuration(polygon_coordinates: List, latitude:float)
   return get_panels_configuration(polygon_coordinates, latitude)
 
 @app.post(f"{_API_ROOT_}/building/production")
-def infere_building_energy(modules_per_string:int, strings_per_inverter:int, latitude:float, longitude:float):
+def infere_building_energy(latitude:float, longitude:float, altitude: float, modules_per_string:int, strings_per_inverter:int ):
     '''
     Returns the energy produced by a building in an hour on a certain location using a the building panel configuration
     '''
-    return infere_energy_production(latitude, longitude, modules_per_string, strings_per_inverter)
+    return infere_energy_production(latitude, longitude, altitude, modules_per_string, strings_per_inverter)
 
 
 @app.get(f"{_API_ROOT_}/building/address", status_code=200)
@@ -88,6 +89,24 @@ async def get_building_address(latitude: float, longitude: float):
         if len(result) == 0:
             raise HTTPException(status_code=404, detail="Address not found")
         return {"response" : result["results"][0]["formatted_address"]}
+      except Exception:
+          raise HTTPException(status_code=500, detail="Server error")
+
+@app.get(f"{_API_ROOT_}/building/altitude", status_code=200)
+async def get_building_altitude(latitude: float, longitude: float):
+  maps_api_key = os.getenv('GOOGLE_MAPS_APIKEY', '')
+  base_url = 'https://maps.googleapis.com/maps/api/elevation/json?'
+  locations_str = f"{latitude},{longitude}"
+  vars = {"key": maps_api_key, "locations": locations_str}
+  url = base_url + urlencode(vars)
+
+  async with aiohttp.ClientSession() as session:
+    async with session.get(url) as response:
+      try:
+        result = await response.json()
+        if len(result) == 0:
+            raise HTTPException(status_code=404, detail="Altitude not found")
+        return {"response" : result["results"][0]["elevation"]}
       except Exception:
           raise HTTPException(status_code=500, detail="Server error")
 
@@ -127,12 +146,13 @@ async def launch_grid(building_data: Dict , db: Session = Depends(get_db), setti
       longitude = building["longitude"]
       btype = building["type"]
       address = building["address"]
+      altitude = building["altitude"]
       panels = building["panels"]
       grid_operations.create_building(db, building_id, address, btype, grid.id)
       building_roles_str = str(building_roles).replace(",", "?")
       coordinates = str(building["coordinates"]).replace(",", "?")
       consumption = str(building["consumption"]).replace(",", "?")
-      agents_str += f'{building_id.replace(" ", "_")}:com.multiagent.BuildingAgent({latitude}, {longitude}, {btype}, {coordinates}, {consumption}, {building_roles_str}, {grid.id}, {panels})'
+      agents_str += f'{building_id.replace(" ", "_")}:com.multiagent.BuildingAgent({latitude}, {longitude}, {btype}, {coordinates}, {consumption}, {building_roles_str}, {grid.id}, {panels}, {altitude})'
       agents_str += ";"
     command_list.append(agents_str)
     if not settings.test:

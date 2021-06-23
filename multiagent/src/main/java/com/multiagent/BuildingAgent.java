@@ -37,8 +37,6 @@ import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONObject;
@@ -80,12 +78,14 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		String buildingRoles = ((String) args[5]).replace("?", ",");
 		Integer grid_id = Integer.parseInt((String) args[6]);
 		Integer panels = Integer.parseInt((String) args[7]);
+		Double altitude = Double.parseDouble((String) args[8]);
 		JSONArray jsonCoordinates = new JSONArray(coordinates);
 		JSONArray jsonConsumption = new JSONArray(consumption);
 		JSONObject jsonBuildingRoles = new JSONObject(buildingRoles);
 		JSONObject data = new JSONObject();
 		data.put("latitude", latitude);
 		data.put("longitude", longitude);
+		data.put("altitude", altitude);
 		data.put("type", type);
 		data.put("coordinates", jsonCoordinates);
 		data.put("consumption", jsonConsumption);
@@ -108,14 +108,16 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		return data;
 	}
 
-	public Double getBuildingProduction(Integer modules_per_string, Integer strings_per_inverter, Double latitude,
-			Double longitude) throws URISyntaxException, ClientProtocolException, IOException, Exception {
+	public Double getBuildingProduction(Double latitude, Double longitude, Double altitude, Integer modules_per_string,
+			Integer strings_per_inverter) throws URISyntaxException, ClientProtocolException, IOException, Exception {
 
 		URIBuilder uriBuilder = new URIBuilder(this.ENERGY_CONSUMPTION_URI);
 		uriBuilder.addParameter("latitude", latitude.toString());
 		uriBuilder.addParameter("longitude", longitude.toString());
+		uriBuilder.addParameter("altitude", altitude.toString());
 		uriBuilder.addParameter("strings_per_inverter", strings_per_inverter.toString());
 		uriBuilder.addParameter("modules_per_string", modules_per_string.toString());
+
 		URI requestURI = uriBuilder.build();
 		HttpPost httpPost = new HttpPost(requestURI);
 		CloseableHttpClient httpClient = HttpClients.createDefault();
@@ -141,11 +143,13 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		if (BuildingType.CONSUMER.name().equalsIgnoreCase(buildingData.getString("type"))) {
 			hourProduction = -hourConsumption;
 		} else {
-			Integer modules_per_string = this.data.getInt("modules_per_string");
-			Integer strings_per_inverter = this.data.getInt("strings_per_inverter");
 			Double latitude = this.data.getDouble("latitude");
 			Double longitude = this.data.getDouble("longitude");
-			hourProduction = getBuildingProduction(modules_per_string, strings_per_inverter, latitude, longitude);
+			Double altitude = this.data.getDouble("altitude");
+			Integer modules_per_string = this.data.getInt("modules_per_string");
+			Integer strings_per_inverter = this.data.getInt("strings_per_inverter");
+			hourProduction = getBuildingProduction(latitude, longitude, altitude, modules_per_string,
+					strings_per_inverter);
 
 			if (BuildingType.PROSUMER.name().equalsIgnoreCase(buildingData.getString("type"))) {
 				hourProduction = hourProduction - hourConsumption;
@@ -462,7 +466,7 @@ class ConsumerInitiatorBehaviour extends Behaviour {
 			}
 
 		} else {
-			block(50000);
+			block(5000);
 		}
 
 	}

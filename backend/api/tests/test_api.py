@@ -58,6 +58,16 @@ def get_non_fetched_transactions(grid_id, timestamp):
     response = client.get(uri)
     return response
 
+def get_building_address(latitude, longitude):
+    uri = f"{_API_ROOT_}/building/address?{latitude=!s}&{longitude=!s}"
+    response = client.get(uri)
+    return response
+
+def get_buildings_altitude(latitude, longitude):
+    uri = f"{_API_ROOT_}/building/altitude?{latitude=!s}&{longitude=!s}"
+    response = client.get(uri)
+    return response
+
 def test_create_grid():
     grid_data = get_grid_fixture()
     response = create_grid(grid_data)
@@ -101,6 +111,18 @@ def test_get_non_fetched_transactions():
     assert isinstance(transactions_response_dict, list)
     assert len(transactions_response_dict) == 2
 
+def test_get_building_address():
+    grid_data = get_grid_fixture()
+    building_data = grid_data[list(grid_data.keys())[1]]
+    latitude, longitude = building_data["latitude"], building_data["longitude"]
+    response = get_building_address(latitude, longitude)
+    assert response.status_code == 200
 
+def test_get_buildings_altitude():
+    grid_data = get_grid_fixture()
+    building_data =  list(grid_data.values())[0]
+    latitude, longitude, = building_data["latitude"], building_data["longitude"]
+    response = get_buildings_altitude(latitude, longitude)
+    assert response.status_code == 200
 
 

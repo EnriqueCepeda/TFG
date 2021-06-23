@@ -29,7 +29,7 @@ def get_panels_configuration(building_coordinates, latitude):
     panels = PanelPlacer.run(building_coordinates, module["m_projected_length"],  module["m_projected_width"])
     return {"panels" : panels}
 
-def infere_energy_production(latitude, longitude, modules_per_string=2, strings_per_inverter=1) :
+def infere_energy_production(latitude, longitude, altitude=0, modules_per_string=2, strings_per_inverter=1) :
     module = get_module(latitude)
     inverter = get_inverter()
     temperature_model_parameters = TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
@@ -37,10 +37,6 @@ def infere_energy_production(latitude, longitude, modules_per_string=2, strings_
 
     start = pd.Timestamp.now(tz='UTC')
     end = start + pd.Timedelta(hours=6)
-
-    print("getting altitude")
-    altitude = AltitudeAPI.get_altitude(latitude, longitude)
-    print(altitude)
     system = PVSystem(module_parameters=module,
                     inverter_parameters=inverter,
                     temperature_model_parameters=temperature_model_parameters)

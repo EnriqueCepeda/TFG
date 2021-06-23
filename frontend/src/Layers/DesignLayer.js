@@ -13,7 +13,7 @@ import { Fill, Stroke, Style } from 'ol/style';
 
 
 import MapContext from "../Map/MapContext";
-import { addBuilding, removeBuilding, updateBuildingAddress, updateBuildingMaxPanels } from '../redux/actions/buildingActions';
+import { addBuilding, removeBuilding, updateBuildingAddress, updateBuildingMaxPanels, updateBuildingAltitude } from '../redux/actions/buildingActions';
 import { getBuildings } from '../redux/selectors';
 
 
@@ -129,15 +129,27 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 	const fetchBuildingAddress = (latitude, longitude, building_id) => (
 		() => {
 			let request_url = `http://localhost:8000/api/v1/building/address?latitude=${latitude}&longitude=${longitude}`
-			axios.get(request_url).then(res => res.data.response).then(address => { dispatch(updateBuildingAddress(building_id, address)) });
+			axios.get(request_url).then(res => res.data.response).then(address => {
+				dispatch(updateBuildingAddress(building_id, address))
+			});
 		})
 
 	const fetchMaxPanels = (building_id, latitude, coordinates) => (
 		() => {
 			let request_url = `http://localhost:8000/api/v1/building/configuration?latitude=${latitude}`
 			let request_body = coordinates
-			axios.post(request_url, request_body).then(res => res.data.panels).then(panels => { dispatch(updateBuildingMaxPanels(building_id, panels)) });
+			axios.post(request_url, request_body).then(res => res.data.panels).then(panels => {
+				dispatch(updateBuildingMaxPanels(building_id, panels))
+			});
 		})
+
+	const fetchBuildingAltitude = (latitude, longitude, building_id) => (
+		() => {
+			let request_url = `http://localhost:8000/api/v1/building/altitude?latitude=${latitude}&longitude=${longitude}`
+			axios.get(request_url).then(res => res.data.response).then(altitude => {
+				dispatch(updateBuildingAltitude(building_id, altitude))
+			})
+		});
 
 
 	function modifyBuildingListListener(e) {
@@ -160,6 +172,7 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 				dispatch(addBuilding(buildingOlId, latitude, longitude, address, area, coordinates, flatCoordinates));
 				dispatch(fetchBuildingAddress(latitude, longitude, buildingOlId));
 				dispatch(fetchMaxPanels(buildingOlId, latitude, coordinates))
+				dispatch(fetchBuildingAltitude(latitude, longitude, buildingOlId))
 			} else {
 				feature.setStyle(defaultStyle);
 				dispatch(removeBuilding(buildingOlId));

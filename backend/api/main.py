@@ -66,7 +66,7 @@ def infere_building_energy(latitude:float, longitude:float, altitude: float, mod
     '''
     Returns the energy produced by a building in an hour on a certain location using a the building panel configuration
     '''
-    return infere_energy_production(latitude, longitude, altitude, modules_per_string, strings_per_inverter)
+    return {"production": infere_energy_production(latitude, longitude, altitude, modules_per_string, strings_per_inverter)}
 
 
 @app.get(f"{_API_ROOT_}/building/address", status_code=200)

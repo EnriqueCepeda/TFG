@@ -179,7 +179,7 @@ const DashboardLayer = () => {
     const dispatch = useDispatch();
     const [selectedBuildingId, setSelectedBuildingId] = useState(null);
     const [lastEpochCheck, setLastEpochCheck] = useState(null);
-    const ms_delay = 10000;
+    const ms_delay = 25000;
     const [isActive, setActive] = useState(false);
 
     function popupCloseHandler() {

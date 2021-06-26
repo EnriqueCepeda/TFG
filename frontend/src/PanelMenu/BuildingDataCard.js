@@ -55,7 +55,7 @@ export default function BuildingDataCard({ building_id, selectedBuildingSetter }
     }
 
     return (
-        <Card variant="outlined" >
+        <Card variant="outlined" title="Click to configure the number of PV panels on the building" >
             <CardActionArea onClick={clickCardHandler}>
                 {getBuildingAvatar(building.type)}
                 <CardContent>

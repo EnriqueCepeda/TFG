@@ -98,7 +98,7 @@ function BuildingCard({ ol_uid, centerSetter }) {
 
                 </CardContent >
             </div >
-            <CardActionArea onClick={clickCardHandler}>
+            <CardActionArea onClick={clickCardHandler} title="Click to focus the building on the map">
                 <CardContent className={classes.rightContent}>
                     <div className={classes.cardContentRow}>
                         <Avatar className={classes.sizeAvatar} variant="square" src={locationImg} />

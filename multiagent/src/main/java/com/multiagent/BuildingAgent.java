@@ -127,7 +127,7 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		InputStream responseStream = httpResponse.getEntity().getContent();
 		JSONObject response = new JSONObject(IOUtils.toString(responseStream));
 		httpClient.close();
-		Double production = response.getDouble(JSONObject.getNames(response)[0]);
+		Double production = response.getDouble("production");
 		if (production < 0) {
 			production = 0.0;
 		}
@@ -135,7 +135,7 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 	}
 
 	public Double getEstimatedEnergy(JSONObject buildingData) throws ClientProtocolException, IOException, Exception {
-		System.out.println("Agent" + this.myAgent.getLocalName() + ": Getting energy balance");
+		System.out.println("Agent " + this.myAgent.getLocalName() + ": Getting energy balance");
 		Double hourProduction = 0.0;
 		int hour = Instant.now().atZone(ZoneOffset.UTC).getHour();
 		Double hourConsumption = ((JSONArray) (buildingData.get("consumption"))).getDouble(hour);
@@ -280,7 +280,6 @@ class ProducerInitiatiorBehaviour extends OneShotBehaviour {
 			e.printStackTrace();
 		}
 
-		System.out.println("Agent " + this.myAgent.getLocalName() + ": Waiting for energy requests of other agents.");
 		MessageTemplate template = MessageTemplate.and(
 				MessageTemplate.MatchProtocol(FIPANames.InteractionProtocol.FIPA_CONTRACT_NET),
 				MessageTemplate.MatchPerformative(ACLMessage.CFP));
@@ -308,7 +307,7 @@ class ProducerBehaviour extends ContractNetResponder {
 			this.myAgent.addBehaviour(new CheckFinishedConsumersBehaviour(this.myAgent, this.data, this));
 		}
 		System.out.println("Agent " + this.myAgent.getLocalName() + ": CFP received from "
-				+ cfp.getSender().getLocalName() + ". Action is " + cfp.getContent());
+				+ cfp.getSender().getLocalName() + ". of " + cfp.getContent() + " Kw");
 
 		if (this.remainingEnergy > 0) {
 			Double proposal = Double.parseDouble(cfp.getContent());
@@ -452,7 +451,7 @@ class ConsumerInitiatorBehaviour extends Behaviour {
 				// Only if all producers are ready
 				for (int i = 0; i < dfProducersOrGrid.length; ++i) {
 					System.out.println("Agent " + this.myAgent.getLocalName() + ": Sending energy request to "
-							+ dfProducersOrGrid[i].getName());
+							+ dfProducersOrGrid[i].getName().getLocalName());
 					msgInitiator.addReceiver(dfProducersOrGrid[i].getName());
 				}
 

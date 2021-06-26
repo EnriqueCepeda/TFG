@@ -94,7 +94,7 @@ export default function ConsumptionCard({ ol_uid }) {
                     <div>
                         <Typography variant="h6" align="center" > AVERAGE </ Typography >
                         <Divider variant="middle" />
-                        <PurpleTypography variant="h5" align="center"> <CountUp start={lastMeanConsumption} end={_.mean(buildingConsumption)} duration={0.75} decimals={2} suffix="Kw"></CountUp> </ PurpleTypography >
+                        <PurpleTypography variant="h5" align="center"> <CountUp start={lastMeanConsumption} end={_.mean(buildingConsumption)} duration={0.75} decimals={2} suffix="Kwh"></CountUp> </ PurpleTypography >
                     </div>
 
                 </div>

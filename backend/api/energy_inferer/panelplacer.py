@@ -20,9 +20,16 @@ class PanelPlacer:
     cartesian_panel_width = (maxy - miny) / panel_columns
     return cartesian_panel_height, cartesian_panel_width
 
+  
   @classmethod
-  def run(cls, coordinates, panel_length, panel_width):
-    building_polygon = Polygon(coordinates)
+  def __coordinates_to_lonlat(coordinates):
+    return [[longitude, latitude] for vertex in coordinates for latitude, longitude in vertex]
+
+
+  @classmethod
+  def run(cls, lanlon_coordinates, panel_length, panel_width):
+    lonlat_coordinates = cls.__coordinates_to_lonlat(lanlon_coordinates)
+    building_polygon = Polygon(lonlat_coordinates)
     building_bounds = building_polygon.bounds
     minx, miny, maxx, maxy = building_bounds
     cartesian_panel_height, cartesian_panel_width = cls.__get_cartesian_panel_height_width(panel_length, panel_width, building_bounds)
@@ -46,6 +53,7 @@ class PanelPlacer:
       x = minx
       y = y2 + cartesian_panel_height
 
+    cls.plot_building(correctly_placed_panels, building_polygon)
     return panels
 
   @classmethod

@@ -2,8 +2,9 @@ from haversine import haversine as haversine_distance, Unit
 from shapely.geometry import Polygon, MultiPolygon
 from descartes.patch import PolygonPatch
 from matplotlib import pyplot
-from .figures import BLUE, PURPLE, plot_coords
 
+BLUE = '#6699cc'
+PURPLE = '#5f468a'
 
 class PanelPlacer:
 
@@ -12,10 +13,10 @@ class PanelPlacer:
     minx, miny, maxx, maxy = building_bounds
     height_distance = haversine_distance((minx, miny), (minx, maxy), Unit.METERS)
     width_distance = haversine_distance((minx, miny), (maxx, miny), Unit.METERS)  
-    panel_rows = height_distance / panel_width
-    panel_columns = width_distance / panel_length
-    cartesian_panel_height = (maxy - miny) / panel_rows
-    cartesian_panel_width = (maxx - minx) / panel_columns
+    max_rows = height_distance / panel_width
+    max_columns = width_distance / panel_length
+    cartesian_panel_height = (maxy - miny) / max_rows
+    cartesian_panel_width = (maxx - minx) / max_columns
     return cartesian_panel_height, cartesian_panel_width
 
   
@@ -58,8 +59,13 @@ class PanelPlacer:
     return panels
 
   @classmethod
+  def plot_coords(cls, ax, ob, color=PURPLE, zorder=1, alpha=1):
+      x, y = ob.xy
+      ax.plot(x, y, 'o', color=color, zorder=zorder, alpha=alpha)
+
+  @classmethod
   def __add_polygon_to_plot(cls, polygon, subplot, facecolor=BLUE, edgecolor=BLUE):
-      plot_coords(subplot, polygon.exterior)
+      cls.plot_coords(subplot, polygon.exterior)
       patch = PolygonPatch(polygon, facecolor=facecolor, edgecolor=edgecolor, alpha=0.5, zorder=2)
       subplot.add_patch(patch)
       return subplot
@@ -83,8 +89,5 @@ class PanelPlacer:
     subplot.set_ylabel('LATITUDE')
     subplot = cls.__add_polygon_to_plot(building_polygon, subplot, PURPLE, PURPLE)
     pyplot.show()
-
-  
-
 
 

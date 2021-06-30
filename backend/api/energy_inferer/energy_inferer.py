@@ -6,7 +6,7 @@ from pvlib.modelchain import get_orientation
 from pvlib.forecast import GFS
 from pvlib.temperature import TEMPERATURE_MODEL_PARAMETERS
 import pvlib
-from .panelplacer import PanelPlacer
+from .panel_placer import PanelPlacer
 
 ORIENTATION_STRATEGY='south_at_latitude_tilt'
 

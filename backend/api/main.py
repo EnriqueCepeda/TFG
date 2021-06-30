@@ -15,7 +15,7 @@ from . import grid_operations
 from . import  models
 from .database import SessionLocal, engine
 
-from .energy_inferer.energy_inferer import infere_energy_production, get_panels_configuration
+from .energy_inferer.energy_inferer import infere_energy_production, get_panels_configuration, infere_energy_production_without_real_weather
 
 app = FastAPI()
 origins = [
@@ -66,7 +66,7 @@ def infere_building_energy(latitude:float, longitude:float, altitude: float, mod
     '''
     Returns the energy produced by a building in an hour on a certain location using a the building panel configuration
     '''
-    return {"production": infere_energy_production(latitude, longitude, altitude, modules_per_string, strings_per_inverter)}
+    return {"production": infere_energy_production_without_real_weather(latitude, longitude, altitude, modules_per_string, strings_per_inverter)}
 
 
 @app.get(f"{_API_ROOT_}/building/address", status_code=200)
@@ -166,14 +166,3 @@ def get_buildings(grid_id: int, db: Session = Depends(get_db)):
   for building in buildings:
     response[building.id] = building.to_dict()
   return response
-
-'''
-@app.post(_API_ROOT_ + "/grid/test/", status_code=200)
-def stop_grid():
-  proc = subprocess.Popen(['yes'])
-  return proc.pid
-
-@app.post(_API_ROOT_ + "/grid/stop/{process_pid}", status_code=200)
-def stop_grid(process_pid: int):
-  os.killpg(process_pid, signal.SIGKILL)
-'''

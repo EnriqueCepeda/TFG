@@ -21,6 +21,10 @@ import { makeStyles, Card, CardHeader, CardContent, CardActions, Collapse, Divid
 import CloseSharpIcon from '@material-ui/icons/CloseSharp';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import IconButton from '@material-ui/core/IconButton';
+import PurpleTypography from "Common/PurpleTypography";
+
+import _ from "lodash";
+import CountUp from "react-countup"
 import clsx from 'clsx';
 
 
@@ -98,6 +102,13 @@ let usePopupStyles = makeStyles((theme) => ({
         marginLeft: 5,
         marginRight: 5,
 
+    },
+    quantities: {
+        display: "flex",
+        flexDirection: "row"
+    },
+    quantitiesItem: {
+
     }
 }));
 
@@ -118,6 +129,14 @@ const Popup = ({ buildingId, popupRef, closeHandler, }) => {
         }
     }
 
+    const getEnergyBalance = (selectedBuilding) => {
+        var values = [];
+        Object.values(selectedBuilding.transactions).forEach((transaction) => (
+            values.push(transaction[1])
+        ));
+        return _.sum(values);
+    }
+
     return (
         <Card id="popup" ref={popupRef} className={classes.root} style={{ display: buildingId ? 'block' : 'none' }}>
             {selectedBuilding &&
@@ -133,6 +152,14 @@ const Popup = ({ buildingId, popupRef, closeHandler, }) => {
                         }>
 
                     </CardHeader>
+                    <Divider variant="middle" />
+                    <CardContent>
+                        <div className={classes.quantities}>
+                            <div className={classes.quantitiesItem}>
+                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={getEnergyBalance(selectedBuilding)} /> </PurpleTypography>
+                            </div>
+                        </div>
+                    </CardContent>
                     <Divider variant="middle" />
                     <CardActions disableSpacing className={classes.expandLine}>
                         <Typography variant="h6"> Transactions </Typography>
@@ -151,7 +178,7 @@ const Popup = ({ buildingId, popupRef, closeHandler, }) => {
                     <Collapse in={expanded} timeout="auto" unmountOnExit>
                         <CardContent>
                             {
-                                Object.keys(selectedBuilding.transactions).map((dictkey, index) => (
+                                Object.keys(selectedBuilding.transactions).forEach((dictkey) => (
                                     <React.Fragment key={dictkey}>
                                         {getBuildingTransactions(dictkey)}
                                     </React.Fragment>
@@ -270,7 +297,6 @@ const DashboardLayer = () => {
         setActive(true);
         return () => {
             setActive(false);
-            removeGrid();
         }
     }, []);
 

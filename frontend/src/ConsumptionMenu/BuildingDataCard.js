@@ -10,6 +10,9 @@ import { getBuilding } from "../redux/selectors"
 import { GreyTypography } from "../Common"
 
 const useStyles = makeStyles(() => ({
+    card: {
+        width: 275
+    },
     sizeBuilding: {
         height: 50,
         width: 50,
@@ -53,7 +56,7 @@ export default function BuildingDataCard({ building_id }) {
 
     return (
 
-        <Card >
+        <Card className={classes.card}>
             {getBuildingAvatar(building.type)}
             <CardContent>
                 <div className={classes.cardContentRow}>

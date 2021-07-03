@@ -13,8 +13,10 @@ import { ContainerScrollbar, PurpleButton, DarkPurpleTypography } from '../Commo
 
 const useStyles = makeStyles(() => ({
     buildingContainer: {
-        flex: 2,
         display: 'flex',
+        flexBasis: 425,
+        maxWidth: 475,
+        minWidth: 425,
         flexDirection: "column",
         marginLeft: 10,
     },

@@ -25,8 +25,7 @@ const useStyles = makeStyles((theme) => ({
         flex: 1,
     },
     olMap: {
-        flex: 7,
-        alignItems: 'stretch'
+        flex: "auto",
     },
 }));
 

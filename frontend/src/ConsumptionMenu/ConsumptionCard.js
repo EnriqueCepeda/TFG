@@ -26,15 +26,16 @@ const useStyles = makeStyles(() => ({
     },
     sliders: {
         display: "flex",
-        height: "25vh",
+        flexDirection: "row",
+        flexGrow: "auto",
         margin: "15px 0px 15px 25px",
     },
     graph: {
         marginTop: 10,
         marginLeft: 10,
-        marginRight: 10,
+        marginRight: 25,
         marginBottom: 10,
-        width: 160,
+        width: 140,
         display: "flex",
         flexDirection: "column",
         justifyContent: "space-around"

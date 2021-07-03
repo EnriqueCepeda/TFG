@@ -13,15 +13,13 @@ const useStyles = makeStyles(theme => ({
     root: {
         display: "flex",
         flexDirection: "column",
-        width: "3vw"
+        maxWidth: "2.975vw",
+        width: "2.975vw",
+        minWidth: 35
     },
     slider: {
         height: 200,
         marginTop: 20,
-    },
-    input: {
-        marginTop: 5,
-        marginLeft: 4
     }
 
 }));

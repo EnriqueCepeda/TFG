@@ -59,7 +59,7 @@ export default function PanelContainer() {
                 <Divider variant="middle" />
                 <ContainerScrollbar autoHide>
                     {
-                        Object.keys(buildingList).map((dictkey, index) => (
+                        Object.keys(buildingList).map((dictkey) => (
                             <div key={dictkey} className={classes.card}>
                                 <BuildingDataCard building_id={dictkey} selectedBuildingSetter={setSelectedBuilding} />
                             </div>

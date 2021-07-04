@@ -104,7 +104,7 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 	}, [map, buildings]);
 
 	function reloadSelectedItems(source) {
-		Object.keys(buildings).map((dictkey, index) => {
+		Object.keys(buildings).map((dictkey) => {
 			var feature = source.getFeatureById(getOriginalId(dictkey));
 			if (feature !== null) {
 				feature.setStyle(highlightStyle);

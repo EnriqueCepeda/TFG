@@ -2,7 +2,6 @@
 package com.multiagent;
 
 import jade.core.Agent;
-import jade.proto.ContractNetResponder;
 
 public class GridAgent extends Agent {
 

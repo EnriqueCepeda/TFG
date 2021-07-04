@@ -2,6 +2,7 @@ from sqlalchemy import Float, Column, ForeignKey, Integer, String, TIMESTAMP, Da
 from sqlalchemy import func
 from sqlalchemy.orm import relationship
 from sqlalchemy.ext.declarative import declarative_base
+import pandas as pd
 
 Base = declarative_base()
 
@@ -20,7 +21,7 @@ class EnergyTransaction(Base):
     receiver_id = Column(Integer, ForeignKey('buildings.id'))
     receiver = relationship("Building", foreign_keys=[receiver_id], back_populates="received_transactions")
     energy = Column(Float)
-    timestamp = Column(TIMESTAMP, nullable=False, default=func.now())
+    timestamp = Column(TIMESTAMP, nullable=False, default=pd.Timestamp.now('UTC').round('60min'))
 
     def to_dict(self):
         return {

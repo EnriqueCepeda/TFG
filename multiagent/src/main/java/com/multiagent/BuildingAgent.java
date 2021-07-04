@@ -263,7 +263,7 @@ class ProducerInitiatiorBehaviour extends OneShotBehaviour {
 	}
 
 	public void action() {
-		System.out.println("Agent " + this.myAgent.getLocalName() + ": Energy -> " + this.estimation + " Kw");
+		System.out.println("Agent " + this.myAgent.getLocalName() + ": Energy -> " + this.estimation + " Kwh");
 		DFAgentDescription description = new DFAgentDescription();
 		description.setName(this.myAgent.getAID());
 		description.addOntologies("FProducer");
@@ -307,7 +307,7 @@ class ProducerBehaviour extends ContractNetResponder {
 			this.myAgent.addBehaviour(new CheckFinishedConsumersBehaviour(this.myAgent, this.data, this));
 		}
 		System.out.println("Agent " + this.myAgent.getLocalName() + ": CFP received from "
-				+ cfp.getSender().getLocalName() + ". of " + cfp.getContent() + " Kw");
+				+ cfp.getSender().getLocalName() + ". of " + cfp.getContent() + " Kwh");
 
 		if (this.remainingEnergy > 0) {
 			Double proposal = Double.parseDouble(cfp.getContent());
@@ -319,7 +319,7 @@ class ProducerBehaviour extends ContractNetResponder {
 			}
 			// The agent energy can be consumed throughout the energy sharing process.
 			ACLMessage propose = cfp.createReply();
-			System.out.println("Agent " + this.myAgent.getLocalName() + ": Proposing " + offeredEnergy + " Kw to "
+			System.out.println("Agent " + this.myAgent.getLocalName() + ": Proposing " + offeredEnergy + " Kwh to "
 					+ cfp.getSender().getLocalName());
 			propose.setPerformative(ACLMessage.PROPOSE);
 			propose.setContent(String.valueOf(offeredEnergy));
@@ -442,7 +442,7 @@ class ConsumerInitiatorBehaviour extends Behaviour {
 
 			if (dfProducersOrGrid.length == 0) {
 				System.out.println("Agent " + this.myAgent.getLocalName() + ": No producers, asking grid agent for: "
-						+ this.energyNeed + " Kw");
+						+ this.energyNeed + " Kwh");
 				this.myAgent.addBehaviour(
 						new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, "Grid agent", this.data));
 
@@ -512,7 +512,7 @@ class ConsumerBehaviour extends ContractNetInitiator {
 
 	protected void handlePropose(ACLMessage propose, Vector v) {
 		System.out.println("Agent " + this.myAgent.getLocalName() + ": Agent " + propose.getSender().getName()
-				+ " proposed " + propose.getContent() + "Kw");
+				+ " proposed " + propose.getContent() + "Kwh");
 	}
 
 	protected void handleRefuse(ACLMessage refuse) {
@@ -547,7 +547,7 @@ class ConsumerBehaviour extends ContractNetInitiator {
 			e1.printStackTrace();
 		}
 		System.out.println("Agent " + this.myAgent.getLocalName()
-				+ ": Energy transaction have been completed succesfully: " + energyTaken + "Kw received");
+				+ ": Energy transaction have been completed succesfully: " + energyTaken + "Kwh received");
 		if (this.energyNeed == 0) {
 			try {
 				DFService.deregister(this.myAgent);
@@ -606,7 +606,7 @@ class ConsumerBehaviour extends ContractNetInitiator {
 			if (this.energyNeed == 0) {
 				reply.setPerformative(ACLMessage.REJECT_PROPOSAL);
 				System.out.println("Agent " + this.myAgent.getLocalName() + ": Rejecting proposal of " + proposal
-						+ " Kw from " + msg.getSender().getName());
+						+ " Kwh from " + msg.getSender().getName());
 			} else {
 				// Energy is substracted from the total, if any acceptance producer fails, the
 				// operation is undone in the handleFailure through the use of the
@@ -620,10 +620,10 @@ class ConsumerBehaviour extends ContractNetInitiator {
 				reply.setContent(String.valueOf(energyTaken));
 				if (energyTaken == proposal) {
 					System.out.println("Agent " + this.myAgent.getLocalName() + ": Accepting proposal of " + energyTaken
-							+ " Kw from " + msg.getSender().getName());
+							+ " Kwh from " + msg.getSender().getName());
 				} else {
 					System.out.println("Agent " + this.myAgent.getLocalName() + ": Proposing a consumption of "
-							+ energyTaken + " Kw from " + msg.getSender().getName());
+							+ energyTaken + " Kwh from " + msg.getSender().getName());
 				}
 			}
 
@@ -632,7 +632,7 @@ class ConsumerBehaviour extends ContractNetInitiator {
 
 		if (this.energyNeed > 0) {
 			System.out.println(
-					"Agent " + this.myAgent.getLocalName() + ": Asking grid agent for: " + this.energyNeed + " Kw");
+					"Agent " + this.myAgent.getLocalName() + ": Asking grid agent for: " + this.energyNeed + " Kwh");
 			this.myAgent.addBehaviour(
 					new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, "Grid agent", this.data));
 			this.myAgent.removeBehaviour(this);

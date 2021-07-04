@@ -102,7 +102,7 @@ def infere_energy_production(latitude, longitude, altitude, modules_per_string, 
     print(hypothetical_data_scaled)
     pdc0 = hypothetical_data_scaled.iloc[0]["p_mp"]
     ac_data = pvlib.inverter.pvwatts(pdc, pdc0) 
-    ac_data = ac_data / 1000 #W to kW
+    ac_data = ac_data / 1000 #Wh to kWh
     return ac_data 
 
 def infere_energy_production_without_real_weather(latitude, longitude, altitude, modules_per_string, strings_per_inverter):
@@ -167,7 +167,7 @@ def infere_energy_production_without_real_weather(latitude, longitude, altitude,
     print(hypothetical_data_scaled)
     pdc0 = hypothetical_data_scaled.iloc[0]["p_mp"]
     ac_data = pvlib.inverter.pvwatts(pdc, pdc0) 
-    ac_data = ac_data / 1000 #W to kW
+    ac_data = ac_data / 1000 #Wh to kWh
     return ac_data 
 
     

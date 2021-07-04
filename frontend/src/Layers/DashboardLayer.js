@@ -17,7 +17,7 @@ import MapContext from "../Map/MapContext";
 
 
 
-import { makeStyles, Card, CardHeader, CardContent, CardActions, Collapse, Divider, Typography } from '@material-ui/core';
+import { makeStyles, Card, CardHeader, CardContent, CardActions, Collapse, Divider, Typography, Box } from '@material-ui/core';
 import CloseSharpIcon from '@material-ui/icons/CloseSharp';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import IconButton from '@material-ui/core/IconButton';
@@ -105,7 +105,8 @@ let usePopupStyles = makeStyles((theme) => ({
     },
     quantities: {
         display: "flex",
-        flexDirection: "row"
+        flexDirection: "row",
+        justifyContent: "space-evenly"
     },
     quantitiesItem: {
 
@@ -123,9 +124,14 @@ const Popup = ({ buildingId, popupRef, closeHandler, }) => {
 
     const getBuildingTransactions = (dictkey) => {
         if (selectedBuilding.transactions[dictkey][1] > 0) {
-            return (<Typography> {dictkey + " | " + selectedBuilding.transactions[dictkey][1] + "Kw from " + selectedBuilding.transactions[dictkey][0]} </Typography>)
+            return (<React.Fragment>
+                <Typography display="inline"> {dictkey + " | "}  </Typography>
+                <PurpleTypography display="inline"> {selectedBuilding.transactions[dictkey][1] + " Kwh"} </PurpleTypography>
+                <Typography display="inline"> {"from "}  </Typography>
+                <PurpleTypography display="inline"> {selectedBuilding.transactions[dictkey][0]} </PurpleTypography>
+            </React.Fragment>)
         } else {
-            return (<Typography> {dictkey + " | " + (-selectedBuilding.transactions[dictkey][1]) + "Kw to " + selectedBuilding.transactions[dictkey][0]} </Typography>)
+            return (<Typography> {dictkey + " | " + (-selectedBuilding.transactions[dictkey][1]) + "Kwh to " + selectedBuilding.transactions[dictkey][0]} </Typography>)
         }
     }
 
@@ -155,8 +161,13 @@ const Popup = ({ buildingId, popupRef, closeHandler, }) => {
                     <Divider variant="middle" />
                     <CardContent>
                         <div className={classes.quantities}>
-                            <div className={classes.quantitiesItem}>
-                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={getEnergyBalance(selectedBuilding)} /> </PurpleTypography>
+                            <div>
+                                <Typography variant="h6" display="inline" align="center" > Energy Balance  </ Typography >
+                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={0} suffix="Kwh" /> </PurpleTypography>
+                            </div>
+                            <div>
+                                <Typography variant="h6" display="inline" align="center" > Last Hour Balance </ Typography >
+                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={0} suffix="Kwh" /> </PurpleTypography>
                             </div>
                         </div>
                     </CardContent>
@@ -178,12 +189,12 @@ const Popup = ({ buildingId, popupRef, closeHandler, }) => {
                     <Collapse in={expanded} timeout="auto" unmountOnExit>
                         <CardContent>
                             {
-                                Object.keys(selectedBuilding.transactions).forEach((dictkey) => (
+                                Object.keys(selectedBuilding.transactions).map((dictkey) => (
                                     <React.Fragment key={dictkey}>
                                         {getBuildingTransactions(dictkey)}
                                     </React.Fragment>
-
                                 ))
+
                             }
 
                         </CardContent>
@@ -229,7 +240,7 @@ const DashboardLayer = () => {
             ]
         }
         console.log(JSON.stringify(buildings));
-        Object.keys(buildings).map((dictkey, index) => {
+        Object.keys(buildings).map((dictkey) => {
             var feature = {
                 'id': dictkey,
                 'type': 'Feature',
@@ -333,7 +344,7 @@ const DashboardLayer = () => {
 
 
     function setBuildingsStyle(source) {
-        Object.keys(buildings).map((dictkey, index) => {
+        Object.keys(buildings).map((dictkey) => {
             var feature = source.getFeatureById(dictkey);
             switch (buildings[dictkey].type) {
                 case "Consumer":

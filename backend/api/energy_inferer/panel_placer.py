@@ -55,7 +55,6 @@ class PanelPlacer:
       x = minx
       y = y2 + cartesian_panel_height # inter-row spacing
 
-    cls.plot_panel_configuration(correctly_placed_panels, building_polygon)
     return panels
 
   @classmethod

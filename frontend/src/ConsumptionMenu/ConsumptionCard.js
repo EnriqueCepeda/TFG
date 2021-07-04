@@ -89,7 +89,7 @@ export default function ConsumptionCard({ ol_uid }) {
                     <div>
                         <Typography variant="h6" align="center" > TOTAL / 24H </ Typography >
                         <Divider variant="middle" />
-                        <PurpleTypography variant="h5" align="center"> <CountUp start={lastConsumption} end={_.sum(buildingConsumption)} duration={0.75} decimals={2} suffix="Kw"></CountUp> </ PurpleTypography >
+                        <PurpleTypography variant="h5" align="center"> <CountUp start={lastConsumption} end={_.sum(buildingConsumption)} duration={0.75} decimals={2} suffix="Kwh"></CountUp> </ PurpleTypography >
                     </div>
 
                     <div>

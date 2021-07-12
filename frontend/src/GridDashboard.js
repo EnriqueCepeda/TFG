@@ -6,13 +6,13 @@ import { Layers, TileLayer, DashboardLayer } from "./Layers";
 import { osm } from "./Source";
 import { Controls, FullScreenControl, ZoomControl } from "./Controls";
 import { fromLonLat } from 'ol/proj';
-import { useSelector } from 'react-redux';
-import { getBuildings } from 'redux/selectors';
 import { PurpleTypography } from 'Common';
 import CountUp from 'react-countup';
 import _ from "lodash";
 import { Typography } from '@material-ui/core';
 import { Card } from '@material-ui/core';
+import { getTotalConsumedEnergy, getTotalGeneratedEnergy, getConsumedEnergy, getGeneratedEnergy, getTotalLastHourConsumedEnergy, getTotalLastHourGeneratedEnergy } from 'redux/selectors/buildingSelectors';
+import { useSelector } from 'react-redux';
 
 
 const useStyles = makeStyles((theme) => ({
@@ -31,48 +31,58 @@ const useStyles = makeStyles((theme) => ({
 const useStatisticsStyles = makeStyles((theme) => ({
     root: {
         display: "flex",
+        flexWrap: "wrap",
         flexDirection: "row",
-        height: 75,
         marginBottom: 10,
         justifyContent: "space-evenly",
         alignItems: "center"
 
+    },
+
+    stat: {
+        height: 75,
     }
 }));
 
 
 const GridStatistics = () => {
 
-    const buildingList = useSelector(getBuildings);
+
     const classes = useStatisticsStyles();
+    const totalConsumedEnergy = useSelector(state => getTotalConsumedEnergy(state));
+    const totalGeneratedEnergy = useSelector(state => getTotalGeneratedEnergy(state));
+    const gridAgentConsumedEnergy = useSelector(state => getConsumedEnergy(state, "grid_agent"));
+    const gridAgentGeneratedEnergy = useSelector(state => getGeneratedEnergy(state, "grid_agent"));
+    const totalLastHourEnergyProduction = useSelector(state => getTotalLastHourGeneratedEnergy(state));
+    const totalLastHourEnergyConsumption = useSelector(state => getTotalLastHourConsumedEnergy(state));;
 
 
 
     return (
         <Card className={classes.root} variant="outlined">
             <div>
-                <Typography variant="h6" display="inline" align="center" > Self-Consumption Rate  </ Typography >
-                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={0} /> </PurpleTypography>
+                <Typography variant="h6" display="inline" align="center" > Last hour energy production </ Typography >
+                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={totalLastHourEnergyProduction} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
             <div>
-                <Typography variant="h6" display="inline" align="center" > Self-Sufficiency Rate  </ Typography >
-                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={0} /> </PurpleTypography>
+                <Typography variant="h6" display="inline" align="center" > Last hour energy consumption  </ Typography >
+                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={totalLastHourEnergyConsumption} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
             <div>
-                <Typography variant="h6" display="inline" align="center" > Overall Balance  </ Typography >
-                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={0} suffix="Kwh" /> </PurpleTypography>
+                <Typography variant="h6" display="inline" align="center" > Grid produced energy  </ Typography >
+                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={totalGeneratedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
             <div>
-                <Typography variant="h6" display="inline" align="center" > Hour Balance   </ Typography >
-                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={0} suffix="Kwh" /> </PurpleTypography>
+                <Typography variant="h6" display="inline" align="center" > Grid consumed energy  </ Typography >
+                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={totalConsumedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
             <div>
-                <Typography variant="h6" display="inline" align="center" > Grid Agent Sent Energy  </ Typography >
-                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={0} suffix="Kwh" /> </PurpleTypography>
+                <Typography variant="h6" display="inline" align="center" > Energy from grid supplier  </ Typography >
+                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={gridAgentGeneratedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
             <div>
-                <Typography variant="h6" display="inline" align="center" > Grid Agent Received Energy </ Typography >
-                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={0} suffix="Kwh" /> </PurpleTypography>
+                <Typography variant="h6" display="inline" align="center" > Energy given to grid supplier </ Typography >
+                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={gridAgentConsumedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
 
 

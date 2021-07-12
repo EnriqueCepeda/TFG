@@ -77,12 +77,13 @@ export const removeBuilding = (id) => ({
     building_id: id
 });
 
-export const addTransaction = (sender, receiver, energy, timestamp) => ({
+export const addTransaction = (sender, receiver, energy, timestamp, grid_timestamp) => ({
     type: ADD_TRANSACTION,
     sender: sender,
     receiver: receiver,
     energy: energy,
-    timestamp: timestamp
+    timestamp: timestamp,
+    grid_timestamp: grid_timestamp
 });
 
 const defaultBuildingConsumption = [

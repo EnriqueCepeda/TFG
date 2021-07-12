@@ -581,8 +581,17 @@ const reducer = (state = initialState, action) => {
         }
         case ADD_TRANSACTION: {
             let stateCloned = _.cloneDeep(state);
-            stateCloned[action.sender].transactions[action.timestamp] = [action.receiver, -action.energy];
-            stateCloned[action.receiver].transactions[action.timestamp] = [action.sender, action.energy];
+            if (action.grid_timestamp in stateCloned[action.sender].transactions) {
+                stateCloned[action.sender].transactions[action.grid_timestamp].push([action.receiver, -action.energy]);
+            } else {
+                stateCloned[action.sender].transactions[action.grid_timestamp] = [[action.receiver, -action.energy]];
+            }
+
+            if (action.grid_timestamp in stateCloned[action.receiver].transactions) {
+                stateCloned[action.receiver].transactions[action.grid_timestamp].push([action.sender, +action.energy]);
+            } else {
+                stateCloned[action.receiver].transactions[action.grid_timestamp] = [[action.sender, +action.energy]];
+            }
             return stateCloned;
         }
         case UPDATE_BUILDING_MAX_PANELS: {

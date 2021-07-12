@@ -21,14 +21,17 @@ class EnergyTransaction(Base):
     receiver_id = Column(Integer, ForeignKey('buildings.id'))
     receiver = relationship("Building", foreign_keys=[receiver_id], back_populates="received_transactions")
     energy = Column(Float)
-    timestamp = Column(TIMESTAMP, nullable=False, default=pd.Timestamp.now('UTC').round('60min'))
+    timestamp = Column(TIMESTAMP, nullable=False, default=func.now())
+    grid_timestamp = Column(TIMESTAMP, nullable=True)
+
 
     def to_dict(self):
         return {
             'sender': self.sender.name,
             'receiver': self.receiver.name,
             'energy': self.energy,
-            'timestamp': self.timestamp
+            'timestamp': self.timestamp,
+            'grid_timestamp': self.grid_timestamp
         }
 
 class Building(Base):

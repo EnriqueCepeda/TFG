@@ -152,7 +152,7 @@ async def launch_grid(building_data: Dict , db: Session = Depends(get_db), setti
       building_roles_str = str(building_roles).replace(",", "?")
       coordinates = str(building["coordinates"]).replace(",", "?")
       consumption = str(building["consumption"]).replace(",", "?")
-      agents_str += f'{building_id.replace(" ", "_")}:com.multiagent.BuildingAgent({latitude}, {longitude}, {btype}, {coordinates}, {consumption}, {building_roles_str}, {grid.id}, {panels}, {altitude})'
+      agents_str += f'Grid{grid.id}-{building_id.replace(" ", "_")}:com.multiagent.BuildingAgent({latitude}, {longitude}, {btype}, {coordinates}, {consumption}, {building_roles_str}, {grid.id}, {panels}, {altitude})'
       agents_str += ";"
     command_list.append(agents_str)
     if not settings.test:

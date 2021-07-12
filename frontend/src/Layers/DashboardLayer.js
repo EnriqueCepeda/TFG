@@ -23,67 +23,48 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import IconButton from '@material-ui/core/IconButton';
 import PurpleTypography from "Common/PurpleTypography";
 
-import _ from "lodash";
 import CountUp from "react-countup"
 import clsx from 'clsx';
+import { getGeneratedEnergy, getConsumedEnergy, getLastHourConsumedEnergy, getLastHourGeneratedEnergy, getBuildingConsumption } from "redux/selectors/buildingSelectors";
+import _ from "lodash"
 
 
 let buildingStyles = {
-    'default': new Style({
-        zIndex: 1,
-        stroke: new Stroke({
-            color: 'rgba(246, 207, 101, 1.0)',
-            width: 1,
-        }),
-        fill: new Fill({
-            color: 'rgba(255, 242, 175, 0.5)',
-        }),
-    }),
     'profit': new Style({
         zIndex: 2,
         stroke: new Stroke({
-            color: 'rgb(4,102,0)',
+            color: 'rgb(38,64,39)',
             width: 2,
         }),
         fill: new Fill({
-            color: 'rgba(235,255,235,0.7)',
+            color: 'rgba(166,255,71,0.5)',
         }),
     }),
     'deficit': new Style({
         zIndex: 2,
         stroke: new Stroke({
-            color: 'rgb(220,64,64)',
+            color: 'rgb(102,0,0)',
             width: 2,
         }),
         fill: new Fill({
-            color: 'rgba(255,220,220, 0.5)',
-        }),
-    }),
-    'error': new Style({
-        zIndex: 2,
-        stroke: new Stroke({
-            color: 'rgb(20,64,64)',
-            width: 2,
-        }),
-        fill: new Fill({
-            color: 'rgba(255,255,255,0.7)',
+            color: 'rgba(239,98,108, 0.5)',
         }),
     }),
     'brokeEven': new Style({
         zIndex: 2,
         stroke: new Stroke({
-            color: 'rgb(0,95,212)',
+            color: 'rgb(95,70,138)',
             width: 2,
         }),
         fill: new Fill({
-            color: 'rgba(231,241,255, 0.5)',
+            color: 'rgba(222,192,241,0.5)',
         }),
     }),
 }
 
 let usePopupStyles = makeStyles((theme) => ({
     root: {
-        maxWidth: 450,
+        maxWidth: 465,
     },
     expand: {
         transform: 'rotate(0deg)',
@@ -106,6 +87,7 @@ let usePopupStyles = makeStyles((theme) => ({
     quantities: {
         display: "flex",
         flexDirection: "row",
+        flexWrap: "wrap",
         justifyContent: "space-evenly"
     },
     quantitiesItem: {
@@ -113,35 +95,33 @@ let usePopupStyles = makeStyles((theme) => ({
     }
 }));
 
-const Popup = ({ buildingId, popupRef, closeHandler, }) => {
+const Popup = ({ buildingId, popupRef, closeHandler, overallConsumedEnergy, overallGeneratedEnergy, lastHourConsumedEnergy, lastHourGeneratedEnergy }) => {
     const selectedBuilding = useSelector(state => getBuilding(state, buildingId));
     const classes = usePopupStyles();
-    const [expanded, setExpanded] = useState(false)
+    const [expanded, setExpanded] = useState(false);
 
     const handleExpandClick = () => {
         setExpanded(!expanded);
     };
 
-    const getBuildingTransactions = (dictkey) => {
-        if (selectedBuilding.transactions[dictkey][1] > 0) {
+    const getBuildingTransactions = (timestamp, transaction) => {
+        if (transaction[1] < 0) {
             return (<React.Fragment>
-                <Typography display="inline"> {dictkey + " | "}  </Typography>
-                <PurpleTypography display="inline"> {selectedBuilding.transactions[dictkey][1] + " Kwh"} </PurpleTypography>
-                <Typography display="inline"> {"from "}  </Typography>
-                <PurpleTypography display="inline"> {selectedBuilding.transactions[dictkey][0]} </PurpleTypography>
+                <Typography display="inline"> {timestamp + " | "}  </Typography>
+                <PurpleTypography display="inline"> {(-transaction[1].toFixed(2)) + " Kwh"} </PurpleTypography>
+                <Typography display="inline"> {"to "}  </Typography>
+                <PurpleTypography display="inline" > {transaction[0]} </PurpleTypography>
             </React.Fragment>)
         } else {
-            return (<Typography> {dictkey + " | " + (-selectedBuilding.transactions[dictkey][1]) + "Kwh to " + selectedBuilding.transactions[dictkey][0]} </Typography>)
+            return (<React.Fragment>
+                <Typography display="inline"> {timestamp + " | "}  </Typography>
+                <PurpleTypography display="inline"> {transaction[1].toFixed(2) + " Kwh"} </PurpleTypography>
+                <Typography display="inline"> {"from "}  </Typography>
+                <PurpleTypography display="inline"> {transaction[0]} </PurpleTypography>
+            </React.Fragment>)
         }
     }
 
-    const getEnergyBalance = (selectedBuilding) => {
-        var values = [];
-        Object.values(selectedBuilding.transactions).forEach((transaction) => (
-            values.push(transaction[1])
-        ));
-        return _.sum(values);
-    }
 
     return (
         <Card id="popup" ref={popupRef} className={classes.root} style={{ display: buildingId ? 'block' : 'none' }}>
@@ -162,13 +142,24 @@ const Popup = ({ buildingId, popupRef, closeHandler, }) => {
                     <CardContent>
                         <div className={classes.quantities}>
                             <div>
-                                <Typography variant="h6" display="inline" align="center" > Energy Balance  </ Typography >
-                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={0} suffix="Kwh" /> </PurpleTypography>
+                                <Typography variant="h6" display="inline" align="center" > Last hour generation </ Typography >
+                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={lastHourGeneratedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
+                            </div>
+
+                            <div>
+                                <Typography variant="h6" display="inline" align="center" > Generation  </ Typography >
+                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={overallGeneratedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
                             </div>
                             <div>
-                                <Typography variant="h6" display="inline" align="center" > Last Hour Balance </ Typography >
-                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={0} suffix="Kwh" /> </PurpleTypography>
+                                <Typography variant="h6" display="inline" align="center" > Last hour consumption </ Typography >
+                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} decimals={2} end={lastHourConsumedEnergy} suffix="Kwh" /> </PurpleTypography>
                             </div>
+                            <div>
+                                <Typography variant="h6" display="inline" align="center" > Consumption  </ Typography >
+                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={overallConsumedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
+                            </div>
+
+
                         </div>
                     </CardContent>
                     <Divider variant="middle" />
@@ -189,10 +180,14 @@ const Popup = ({ buildingId, popupRef, closeHandler, }) => {
                     <Collapse in={expanded} timeout="auto" unmountOnExit>
                         <CardContent>
                             {
-                                Object.keys(selectedBuilding.transactions).map((dictkey) => (
-                                    <React.Fragment key={dictkey}>
-                                        {getBuildingTransactions(dictkey)}
-                                    </React.Fragment>
+                                Object.keys(selectedBuilding.transactions).map((timestamp) => (
+                                    selectedBuilding.transactions[timestamp].map((transaction) => (
+                                        <React.Fragment key={timestamp}>
+                                            {getBuildingTransactions(timestamp, transaction)}
+                                            <br />
+                                        </React.Fragment>
+                                    )
+                                    )
                                 ))
 
                             }
@@ -210,15 +205,21 @@ const Popup = ({ buildingId, popupRef, closeHandler, }) => {
 const DashboardLayer = () => {
 
     let popupRef = useRef(null);
-    let [overlay, setOverlay] = useState(null);
     const { map } = useContext(MapContext);
+    let [overlay, setOverlay] = useState(null);
+    const [selectedBuildingId, setSelectedBuildingId] = useState(null);
+    const [lastEpochCheck, setLastEpochCheck] = useState(null);
+    const [isActive, setActive] = useState(false);
+
     const buildings = useSelector(getBuildings);
     const gridId = useSelector(getGridId);
     const dispatch = useDispatch();
-    const [selectedBuildingId, setSelectedBuildingId] = useState(null);
-    const [lastEpochCheck, setLastEpochCheck] = useState(null);
-    const ms_delay = 25000;
-    const [isActive, setActive] = useState(false);
+
+    const ms_delay = 5000;
+    const overallConsumedEnergy = useSelector(state => getConsumedEnergy(state, selectedBuildingId))
+    const overallGeneratedEnergy = useSelector(state => getGeneratedEnergy(state, selectedBuildingId))
+    const lastHourConsumedEnergy = useSelector(state => getLastHourConsumedEnergy(state, selectedBuildingId))
+    const lastHourGeneratedEnergy = useSelector(state => getLastHourGeneratedEnergy(state, selectedBuildingId))
 
     function popupCloseHandler() {
         overlay.setPosition(undefined);
@@ -239,7 +240,6 @@ const DashboardLayer = () => {
 
             ]
         }
-        console.log(JSON.stringify(buildings));
         Object.keys(buildings).map((dictkey) => {
             var feature = {
                 'id': dictkey,
@@ -268,7 +268,8 @@ const DashboardLayer = () => {
                 map.removeLayer(vectorLayer);
             }
         };
-    }, [map]);
+    }, [map, buildings]);
+
 
     useEffect(() => {
         if (!map) return;
@@ -329,7 +330,7 @@ const DashboardLayer = () => {
         () => {
             let request_url = `http://localhost:8000/api/v1/grid/${gridId}/transactions/${lastEpochCheck}`;
             axios.get(request_url).then(res => res.data).then(transactions => transactions.map((transaction) => {
-                dispatch(addTransaction(transaction.sender, transaction.receiver, transaction.energy, transaction.timestamp))
+                dispatch(addTransaction(transaction.sender, transaction.receiver, transaction.energy, transaction.timestamp, transaction.grid_timestamp))
             }));
             setLastEpochCheck(Date.now())
         }
@@ -342,28 +343,36 @@ const DashboardLayer = () => {
     }
 
 
+    const getEnergyBalance = (selectedBuilding) => {
+        var values = []
+        Object.values(selectedBuilding.transactions).forEach((hourTransactions) => (
+            hourTransactions.forEach((transaction) => {
+                values.push(transaction[1]);
+            })));
+        return _.sum(values);
+
+    }
+
 
     function setBuildingsStyle(source) {
-        Object.keys(buildings).map((dictkey) => {
-            var feature = source.getFeatureById(dictkey);
-            switch (buildings[dictkey].type) {
-                case "Consumer":
-                    feature.setStyle(buildingStyles.deficit);
-                    break;
-                case "Producer":
-                    feature.setStyle(buildingStyles.profit);
-                    break;
-                case "Prosumer":
-                    feature.setStyle(buildingStyles.brokeEven);
-                    break;
-                default:
-                    feature.setStyle(buildingStyles.error);
-                    break;
+        Object.entries(buildings).map(([buildingId, building]) => {
+            var feature = source.getFeatureById(buildingId);
+            var buildingBalance = getEnergyBalance(building)
+            if (buildingBalance > 0) {
+                feature.setStyle(buildingStyles.deficit);
+            } else if (buildingBalance < 0) {
+                feature.setStyle(buildingStyles.profit);
+            } else {
+                feature.setStyle(buildingStyles.brokeEven);
             }
         });
     }
 
-    return (<Popup buildingId={selectedBuildingId} popupRef={popupRef} closeHandler={popupCloseHandler} />);
+    return (<Popup buildingId={selectedBuildingId} popupRef={popupRef} closeHandler={popupCloseHandler}
+        overallConsumedEnergy={overallConsumedEnergy}
+        overallGeneratedEnergy={overallGeneratedEnergy}
+        lastHourConsumedEnergy={lastHourConsumedEnergy}
+        lastHourGeneratedEnergy={lastHourGeneratedEnergy} />);
 
 
 };

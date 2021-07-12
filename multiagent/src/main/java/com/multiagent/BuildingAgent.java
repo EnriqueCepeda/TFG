@@ -32,7 +32,6 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetInitiator;
 import jade.proto.ContractNetResponder;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -41,8 +40,41 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONObject;
 import org.json.JSONArray;
+import org.json.JSONException;
 
 public class BuildingAgent extends Agent {
+	static final String REGISTER_TRANSACTION_URI = "http://localhost:8000/api/v1/grid/";
+	static final String ENERGY_CONSUMPTION_URI = "http://localhost:8000/api/v1/building/production";
+
+	public static void registerTransaction(Integer grid_id, String sender, String receiver, Double energy)
+			throws URISyntaxException, ClientProtocolException, IOException {
+		String finalURL = BuildingAgent.REGISTER_TRANSACTION_URI + grid_id + "/transaction";
+		URIBuilder uriBuilder = new URIBuilder(finalURL);
+		System.out.println(sender);
+		System.out.println(receiver);
+		uriBuilder.addParameter("sender_name", getRealBuildingId(sender));
+		uriBuilder.addParameter("receiver_name", getRealBuildingId(receiver));
+		uriBuilder.addParameter("energy", energy.toString());
+		URI requestURI = uriBuilder.build();
+		HttpPost httpPost = new HttpPost(requestURI);
+
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
+		if (httpResponse.getStatusLine().getStatusCode() != 201) {
+			System.out.println("Transaction could not be registered");
+		}
+		InputStream responseStream = httpResponse.getEntity().getContent();
+		httpClient.close();
+
+	}
+
+	public static String getRealBuildingId(String agentName) {
+		if (agentName.equals("grid_agent")) {
+			return agentName;
+		} else {
+			return agentName.split("-")[1];
+		}
+	}
 
 	protected void setup() {
 		addBehaviour(new BuildingAgentInitiator(this));
@@ -56,7 +88,6 @@ public class BuildingAgent extends Agent {
 
 class BuildingAgentInitiator extends OneShotBehaviour {
 	private JSONObject data = null;
-	private final String ENERGY_CONSUMPTION_URI = "http://localhost:8000/api/v1/building/production";
 
 	public BuildingAgentInitiator(Agent agent) {
 		super(agent);
@@ -110,28 +141,27 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 	public Double getBuildingProduction(Double latitude, Double longitude, Double altitude, Integer modules_per_string,
 			Integer strings_per_inverter) throws URISyntaxException, ClientProtocolException, IOException, Exception {
 
-		URIBuilder uriBuilder = new URIBuilder(this.ENERGY_CONSUMPTION_URI);
-		uriBuilder.addParameter("latitude", latitude.toString());
-		uriBuilder.addParameter("longitude", longitude.toString());
-		uriBuilder.addParameter("altitude", altitude.toString());
-		uriBuilder.addParameter("strings_per_inverter", strings_per_inverter.toString());
-		uriBuilder.addParameter("modules_per_string", modules_per_string.toString());
-
-		URI requestURI = uriBuilder.build();
-		HttpPost httpPost = new HttpPost(requestURI);
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
-		if (httpResponse.getStatusLine().getStatusCode() != 200) {
-			System.out.println("Building production cannot be obtained, deleting agent");
-		}
-		InputStream responseStream = httpResponse.getEntity().getContent();
-		JSONObject response = new JSONObject(IOUtils.toString(responseStream));
-		httpClient.close();
-		Double production = response.getDouble("production");
-		if (production < 0) {
-			production = 0.0;
-		}
-		return production;
+		/*
+		 * URIBuilder uriBuilder = new URIBuilder(BuildingAgent.ENERGY_CONSUMPTION_URI);
+		 * uriBuilder.addParameter("latitude", latitude.toString());
+		 * uriBuilder.addParameter("longitude", longitude.toString());
+		 * uriBuilder.addParameter("altitude", altitude.toString());
+		 * uriBuilder.addParameter("strings_per_inverter",
+		 * strings_per_inverter.toString());
+		 * uriBuilder.addParameter("modules_per_string", modules_per_string.toString());
+		 * 
+		 * URI requestURI = uriBuilder.build(); HttpPost httpPost = new
+		 * HttpPost(requestURI); CloseableHttpClient httpClient =
+		 * HttpClients.createDefault(); CloseableHttpResponse httpResponse =
+		 * httpClient.execute(httpPost); if
+		 * (httpResponse.getStatusLine().getStatusCode() != 200) {
+		 * System.out.println("Building production cannot be obtained, deleting agent");
+		 * } InputStream responseStream = httpResponse.getEntity().getContent();
+		 * JSONObject response = new JSONObject(IOUtils.toString(responseStream));
+		 * httpClient.close(); Double production = response.getDouble("production"); if
+		 * (production < 0) { production = 0.0; } return production;
+		 */
+		return 20.0;
 	}
 
 	public Double getEstimatedEnergy(JSONObject buildingData) throws ClientProtocolException, IOException, Exception {
@@ -227,6 +257,14 @@ class CheckFinishedConsumersBehaviour extends TickerBehaviour {
 		}
 
 		if (consumers != null && consumers.length == 0) {
+			try {
+				BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
+						"grid_agent", this.producerBehaviour.remainingEnergy);
+			} catch (JSONException | URISyntaxException | IOException e1) {
+				e1.printStackTrace();
+				System.out.println("Problems registering final transaction producer");
+			}
+			System.out.println(this.producerBehaviour.remainingEnergy);
 			System.out.println("Agent " + this.myAgent.getLocalName() + ": Unregistering from DF");
 			this.myAgent.removeBehaviour(this.producerBehaviour);
 			try {
@@ -464,7 +502,7 @@ class ConsumerInitiatorBehaviour extends Behaviour {
 			}
 
 		} else {
-			block(5000);
+			block(1000);
 		}
 
 	}
@@ -480,7 +518,6 @@ class ConsumerBehaviour extends ContractNetInitiator {
 
 	Double energyNeed = 0.0;
 	Hashtable<Integer, Double> uncommitedEnergy = new Hashtable<Integer, Double>();
-	private final String REGISTER_TRANSACTION_URI = "http://localhost:8000/api/v1/grid/";
 	int AcceptedOffersWithoutResponse = 0;
 	JSONObject data = null;
 
@@ -488,26 +525,6 @@ class ConsumerBehaviour extends ContractNetInitiator {
 		super(agent, message);
 		this.energyNeed = energyNeed;
 		this.data = data;
-	}
-
-	public void registerTransaction(Integer grid_id, String sender, String receiver, Double energy)
-			throws URISyntaxException, ClientProtocolException, IOException {
-		String finalURL = this.REGISTER_TRANSACTION_URI + this.data.getInt("grid_id") + "/transaction";
-		URIBuilder uriBuilder = new URIBuilder(finalURL);
-		uriBuilder.addParameter("sender_name", sender);
-		uriBuilder.addParameter("receiver_name", receiver);
-		uriBuilder.addParameter("energy", energy.toString());
-		URI requestURI = uriBuilder.build();
-		HttpPost httpPost = new HttpPost(requestURI);
-
-		CloseableHttpClient httpClient = HttpClients.createDefault();
-		CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
-		if (httpResponse.getStatusLine().getStatusCode() != 201) {
-			System.out.println("Transaction could not be registered");
-		}
-		InputStream responseStream = httpResponse.getEntity().getContent();
-		httpClient.close();
-
 	}
 
 	protected void handlePropose(ACLMessage propose, Vector v) {
@@ -541,7 +558,7 @@ class ConsumerBehaviour extends ContractNetInitiator {
 		try {
 			System.out.println(this.myAgent.getLocalName()); // dbg
 			System.out.println(inform.getSender().getLocalName()); // dbg
-			registerTransaction(this.data.getInt("grid_id"), inform.getSender().getLocalName(),
+			BuildingAgent.registerTransaction(this.data.getInt("grid_id"), inform.getSender().getLocalName(),
 					this.myAgent.getLocalName(), energyTaken);
 		} catch (URISyntaxException | IOException e1) {
 			e1.printStackTrace();

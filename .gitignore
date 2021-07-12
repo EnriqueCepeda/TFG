@@ -320,6 +320,7 @@ thumb
 sketch
 
 ### VisualStudioCode ###
+.vscode
 .vscode/*
 *.code-workspace
 

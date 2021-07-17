@@ -341,3 +341,6 @@ MTPs-Main-Container.txt
 backend/api/local.db
 backend/api/tests/test.db
 inputFiles.lst
+!/multiagent/lib/
+!/multiagent/lib/*/*.jar
+!/multiagent/lib/jade.jar

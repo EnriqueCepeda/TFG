@@ -344,3 +344,4 @@ inputFiles.lst
 !/multiagent/lib/
 !/multiagent/lib/*/*.jar
 !/multiagent/lib/jade.jar
+!/backend/lib

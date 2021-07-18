@@ -1,4 +1,4 @@
-import { getBuildings, getBuilding, getConsumerBuildings, getBuildingConsumption, getConsumedEnergy, getGeneratedEnergy, getProducerBuildings } from "./buildingSelectors.js"
+import { getBuildings, getBuilding, getConsumerBuildings, getBuildingConsumption, getConsumedEnergy, getGeneratedEnergy, getProducerBuildings, getGridConsumedEnergy, getGridGeneratedEnergy } from "./buildingSelectors.js"
 import { getGridId } from "./gridSelectors.js"
 
 export {
@@ -9,6 +9,8 @@ export {
     getGridId,
     getConsumedEnergy,
     getGeneratedEnergy,
-    getProducerBuildings
+    getProducerBuildings,
+    getGridConsumedEnergy,
+    getGridGeneratedEnergy
 
 }

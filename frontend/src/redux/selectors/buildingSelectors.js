@@ -108,6 +108,48 @@ export const getGeneratedEnergy = (state, building_id) => {
     return _.sum(values);
 }
 
+export const getGridConsumedEnergy = (state) => {
+    const selectedBuilding = state.buildings["grid agent"];
+
+    if (selectedBuilding === undefined) {
+        return 0;
+    }
+    if (!Object.values(selectedBuilding.transactions).length) {
+        return 0;
+    }
+
+    var values = [];
+    Object.values(selectedBuilding.transactions).forEach((hourTransactions) => (
+        hourTransactions.forEach((transaction) => {
+            if (transaction[1] > 0) {
+                values.push(transaction[1]);
+            }
+        })));
+    return _.sum(values);
+}
+
+export const getGridGeneratedEnergy = (state) => {
+    const selectedBuilding = state.buildings["grid agent"];
+
+    if (selectedBuilding === undefined) {
+        return 0;
+    }
+    if (!Object.values(selectedBuilding.transactions).length) {
+        return 0;
+    }
+
+    var values = [];
+    Object.values(selectedBuilding.transactions).forEach((hourTransactions) => (
+        hourTransactions.forEach((transaction) => {
+            if (transaction[1] < 0) {
+                values.push(-transaction[1]);
+            }
+        })));
+    return _.sum(values);
+}
+
+
+
 
 export const getLastHourConsumedEnergy = (state, building_id) => {
     const selectedBuilding = getBuilding(state, building_id);

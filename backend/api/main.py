@@ -9,6 +9,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+import time
 
 from . import config
 from . import grid_operations
@@ -17,7 +18,24 @@ from .database import SessionLocal, engine
 
 from .energy_inferer.energy_inferer import infere_energy_production, get_panels_configuration, infere_energy_production_without_real_weather
 
-app = FastAPI()
+tags_metadata = [
+  {
+    "name": "Building",
+    "description": "Operations related with a concrete building on the Smart Grid."
+
+  },
+  {
+    "name": "Grid",
+    "description": "Operations related with the whole Smart Grid."
+  }
+
+]
+
+app = FastAPI(title="Smart Grid Builder",
+              description="Smart Grid Builder API to comunicate the Frontend application with the multiagent system among other functions",
+              version="1.0.0",
+              openapi_tags=tags_metadata)
+
 origins = [
     "*",
 ]
@@ -31,6 +49,7 @@ if not settings.test:
   subprocess.Popen(["java", "jade.Boot", "-name", "SmartGrid"])
 
 models.Base.metadata.create_all(bind=engine)
+infere_energy_production_without_real_weather(38.98588920007077, -3.9280376043217236, 635.1846923828125, 1, 1)
 
 app.add_middleware(
     CORSMiddleware,
@@ -54,25 +73,25 @@ ACTIVE_GRID = None
 async def validation_exception_handler(request, exc):
   return PlainTextResponse(str(exc), status_code=400)
 
-@app.post(f"{_API_ROOT_}/building/configuration", status_code=200)
+@app.post(f"{_API_ROOT_}/building/configuration", status_code=200, tags=["Building"])
 def get_building_module_configuration(polygon_coordinates: List, latitude:float):
   '''
-  It returns the rows of solar modules and the solar modules per row of a building using the geometry vertices of its roof
+  Returns the rows of solar modules and the solar modules per row of a building using the geometry vertices of its roof
   '''
   return get_panels_configuration(polygon_coordinates, latitude)
 
-@app.post(f"{_API_ROOT_}/building/production")
-def infere_building_energy(latitude:float, longitude:float, altitude: float, modules_per_string:int, strings_per_inverter:int ):
+@app.get(f"{_API_ROOT_}/building/production", status_code=200, tags=["Building"])
+def infere_building_energy_production(latitude:float, longitude:float, altitude: float, modules_per_string:int, strings_per_inverter:int ):
     '''
     Returns the energy produced by a building in an hour on a certain location using a the building panel configuration
     '''
     return {"production": infere_energy_production(latitude, longitude, altitude, modules_per_string, strings_per_inverter)}
 
 
-@app.get(f"{_API_ROOT_}/building/address", status_code=200)
+@app.get(f"{_API_ROOT_}/building/address", status_code=200, tags=["Building"])
 async def get_building_address(latitude: float, longitude: float):
   '''
-  It returns the street address of a certain location 
+  Returns the street address of a certain geographic location 
   '''
   maps_api_key = os.getenv('GOOGLE_MAPS_APIKEY', '')
   base_url = 'https://maps.googleapis.com/maps/api/geocode/json'
@@ -92,7 +111,7 @@ async def get_building_address(latitude: float, longitude: float):
       except Exception:
           raise HTTPException(status_code=500, detail="Server error")
 
-@app.get(f"{_API_ROOT_}/building/altitude", status_code=200)
+@app.get(f"{_API_ROOT_}/building/altitude", status_code=200, tags=["Building"])
 async def get_building_altitude(latitude: float, longitude: float):
   maps_api_key = os.getenv('GOOGLE_MAPS_APIKEY', '')
   base_url = 'https://maps.googleapis.com/maps/api/elevation/json?'
@@ -110,9 +129,12 @@ async def get_building_altitude(latitude: float, longitude: float):
       except Exception:
           raise HTTPException(status_code=500, detail="Server error")
 
-@app.post(_API_ROOT_ + "/grid/{grid_id}/transaction", status_code=201)
-def new_transaction(grid_id: int, sender_name: str, receiver_name: str, energy: float, db: Session = Depends(get_db)
-):
+@app.post(_API_ROOT_ + "/grid/{grid_id}/transaction", status_code=201, tags=["Grid"])
+def new_transaction(grid_id: int, sender_name: str, receiver_name: str, energy: float, 
+                    db: Session = Depends(get_db)):
+  '''
+  Registers a new energy transaction which have occurred on a certain grid
+  '''
   sender_name = sender_name.replace("_", " ")
   receiver_name = receiver_name.replace("_", " ")
   transaction = grid_operations.create_transaction(db, grid_id, sender_name, receiver_name, energy)
@@ -122,15 +144,15 @@ def new_transaction(grid_id: int, sender_name: str, receiver_name: str, energy: 
     raise HTTPException(status_code=404, detail="Server error")
 
 
-@app.get(_API_ROOT_ + "/grid/{grid_id}/transactions/{timestamp}", status_code=200)
+@app.get(_API_ROOT_ + "/grid/{grid_id}/transactions/{timestamp}", status_code=200, tags=["Grid"])
 def get_non_fetched_transactions(grid_id: int, timestamp: float, db: Session = Depends(get_db)):
   transactions = grid_operations.get_non_fetched_transactions(db, grid_id, timestamp)
   return [transaction.to_dict() for transaction in transactions]
 
-@app.post(f"{_API_ROOT_}/grid/launch", status_code=201)
+@app.post(f"{_API_ROOT_}/grid/launch", status_code=201, tags=["Grid"])
 async def launch_grid(building_data: Dict , db: Session = Depends(get_db), settings: config.Settings = Depends(get_settings)):
     '''
-    It launches the multiagent grid using the frontend data
+    Launches a multiagent system to simulate the behaviour of a Smart Grid configuration using the data from the Frontend Application
     '''
     
     building_roles = {}
@@ -156,11 +178,14 @@ async def launch_grid(building_data: Dict , db: Session = Depends(get_db), setti
       agents_str += ";"
     command_list.append(agents_str)
     if not settings.test:
-      subprocess.Popen(command_list, start_new_session=True)
+      child_id = subprocess.Popen(command_list)
     return {"id": grid.id}
 
-@app.get(_API_ROOT_ + "/grid/{grid_id}/buildings/", status_code=200)
+@app.get(_API_ROOT_ + "/grid/{grid_id}/buildings/", status_code=200, tags=["Grid"])
 def get_buildings(grid_id: int, db: Session = Depends(get_db)):
+  '''
+  Returns the building components of a Smart Grid
+  '''
   response = {}
   buildings = grid_operations.get_grid_buildings(db, grid_id)
   for building in buildings:

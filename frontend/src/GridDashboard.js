@@ -11,7 +11,7 @@ import CountUp from 'react-countup';
 import _ from "lodash";
 import { Typography } from '@material-ui/core';
 import { Card } from '@material-ui/core';
-import { getTotalConsumedEnergy, getTotalGeneratedEnergy, getConsumedEnergy, getGeneratedEnergy, getTotalLastHourConsumedEnergy, getTotalLastHourGeneratedEnergy } from 'redux/selectors/buildingSelectors';
+import { getTotalConsumedEnergy, getTotalGeneratedEnergy, getConsumedEnergy, getGeneratedEnergy, getTotalLastHourConsumedEnergy, getTotalLastHourGeneratedEnergy, getGridConsumedEnergy, getGridGeneratedEnergy } from 'redux/selectors/buildingSelectors';
 import { useSelector } from 'react-redux';
 
 
@@ -51,8 +51,8 @@ const GridStatistics = () => {
     const classes = useStatisticsStyles();
     const totalConsumedEnergy = useSelector(state => getTotalConsumedEnergy(state));
     const totalGeneratedEnergy = useSelector(state => getTotalGeneratedEnergy(state));
-    const gridAgentConsumedEnergy = useSelector(state => getConsumedEnergy(state, "grid_agent"));
-    const gridAgentGeneratedEnergy = useSelector(state => getGeneratedEnergy(state, "grid_agent"));
+    const gridAgentConsumedEnergy = useSelector(state => getGridConsumedEnergy(state));
+    const gridAgentGeneratedEnergy = useSelector(state => getGridGeneratedEnergy(state));
     const totalLastHourEnergyProduction = useSelector(state => getTotalLastHourGeneratedEnergy(state));
     const totalLastHourEnergyConsumption = useSelector(state => getTotalLastHourConsumedEnergy(state));;
 

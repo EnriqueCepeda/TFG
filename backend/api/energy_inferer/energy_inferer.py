@@ -19,7 +19,6 @@ def get_module(latitude):
     module['m_width'] = 1.056
     module["m_projected_length"] = module["m_length"]
     module["m_projected_width"] = cos(surface_tilt) * module["m_width"] #module of projection vector
-    print(module)
     return module
 
 def convert_to_pvwatts(module):
@@ -90,7 +89,6 @@ def infere_energy_production(latitude, longitude, altitude, modules_per_string, 
 
     
     #Is the maximum power with the current metheorological conditions
-    print(real_dc_data_scaled)
     pdc = real_dc_data_scaled.iloc[0]["p_mp"]
 
     module_pvwatts = convert_to_pvwatts(module)
@@ -99,7 +97,6 @@ def infere_energy_production(latitude, longitude, altitude, modules_per_string, 
                                         current=strings_per_inverter)
 
     #Is the hypothetical maximum power, which is used as the inverter limit to avoid inverter clipping
-    print(hypothetical_data_scaled)
     pdc0 = hypothetical_data_scaled.iloc[0]["p_mp"]
     ac_data = pvlib.inverter.pvwatts(pdc, pdc0) 
     ac_data = ac_data / 1000 #Wh to kWh
@@ -132,9 +129,9 @@ def infere_energy_production_without_real_weather(latitude, longitude, altitude,
     am_abs = pvlib.atmosphere.get_absolute_airmass(airmass, pressure)
     tl = pvlib.clearsky.lookup_linke_turbidity(times, latitude, longitude)
     cs = pvlib.clearsky.ineichen(solpos['apparent_zenith'], am_abs, tl,
-                                 dni_extra=dni_extra, altitude=altitude)
+                                dni_extra=dni_extra, altitude=altitude)
     angle_of_incidence = pvlib.irradiance.aoi(system['surface_tilt'], system['surface_azimuth'],
-                               solpos['apparent_zenith'], solpos['azimuth'])
+                            solpos['apparent_zenith'], solpos['azimuth'])
     total_irrad = pvlib.irradiance.get_total_irradiance(system['surface_tilt'],
                                                         system['surface_azimuth'],
                                                         solpos['apparent_zenith'],
@@ -150,12 +147,11 @@ def infere_energy_production_without_real_weather(latitude, longitude, altitude,
         am_abs, angle_of_incidence, system["module"])
     real_dc_data = pvlib.pvsystem.sapm(effective_irradiance, tcell, system["module"])
     real_dc_data_scaled = pvlib.pvsystem.scale_voltage_current_power(real_dc_data,
-                                           voltage=modules_per_string,
-                                           current=strings_per_inverter)
+                                        voltage=modules_per_string,
+                                        current=strings_per_inverter)
 
     
     #Is the maximum power with the current metheorological conditions
-    print(real_dc_data_scaled)
     pdc = real_dc_data_scaled.iloc[0]["p_mp"]
 
     module_pvwatts = convert_to_pvwatts(module)
@@ -164,7 +160,6 @@ def infere_energy_production_without_real_weather(latitude, longitude, altitude,
                                         current=strings_per_inverter)
 
     #Is the hypothetical maximum power, which is used as the inverter limit to avoid inverter clipping
-    print(hypothetical_data_scaled)
     pdc0 = hypothetical_data_scaled.iloc[0]["p_mp"]
     ac_data = pvlib.inverter.pvwatts(pdc, pdc0) 
     ac_data = ac_data / 1000 #Wh to kWh

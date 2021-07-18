@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.lang.Math;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.util.Collection;
@@ -32,12 +33,17 @@ import jade.lang.acl.ACLMessage;
 import jade.lang.acl.MessageTemplate;
 import jade.proto.ContractNetInitiator;
 import jade.proto.ContractNetResponder;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -50,8 +56,6 @@ public class BuildingAgent extends Agent {
 			throws URISyntaxException, ClientProtocolException, IOException {
 		String finalURL = BuildingAgent.REGISTER_TRANSACTION_URI + grid_id + "/transaction";
 		URIBuilder uriBuilder = new URIBuilder(finalURL);
-		System.out.println(sender);
-		System.out.println(receiver);
 		uriBuilder.addParameter("sender_name", getRealBuildingId(sender));
 		uriBuilder.addParameter("receiver_name", getRealBuildingId(receiver));
 		uriBuilder.addParameter("energy", energy.toString());
@@ -141,27 +145,33 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 	public Double getBuildingProduction(Double latitude, Double longitude, Double altitude, Integer modules_per_string,
 			Integer strings_per_inverter) throws URISyntaxException, ClientProtocolException, IOException, Exception {
 
-		/*
-		 * URIBuilder uriBuilder = new URIBuilder(BuildingAgent.ENERGY_CONSUMPTION_URI);
-		 * uriBuilder.addParameter("latitude", latitude.toString());
-		 * uriBuilder.addParameter("longitude", longitude.toString());
-		 * uriBuilder.addParameter("altitude", altitude.toString());
-		 * uriBuilder.addParameter("strings_per_inverter",
-		 * strings_per_inverter.toString());
-		 * uriBuilder.addParameter("modules_per_string", modules_per_string.toString());
-		 * 
-		 * URI requestURI = uriBuilder.build(); HttpPost httpPost = new
-		 * HttpPost(requestURI); CloseableHttpClient httpClient =
-		 * HttpClients.createDefault(); CloseableHttpResponse httpResponse =
-		 * httpClient.execute(httpPost); if
-		 * (httpResponse.getStatusLine().getStatusCode() != 200) {
-		 * System.out.println("Building production cannot be obtained, deleting agent");
-		 * } InputStream responseStream = httpResponse.getEntity().getContent();
-		 * JSONObject response = new JSONObject(IOUtils.toString(responseStream));
-		 * httpClient.close(); Double production = response.getDouble("production"); if
-		 * (production < 0) { production = 0.0; } return production;
-		 */
-		return 20.0;
+		URIBuilder uriBuilder = new URIBuilder(BuildingAgent.ENERGY_CONSUMPTION_URI);
+		uriBuilder.addParameter("latitude", latitude.toString());
+		uriBuilder.addParameter("longitude", longitude.toString());
+		uriBuilder.addParameter("altitude", altitude.toString());
+		uriBuilder.addParameter("strings_per_inverter", strings_per_inverter.toString());
+		uriBuilder.addParameter("modules_per_string", modules_per_string.toString());
+
+		URI requestURI = uriBuilder.build();
+		System.out.println(requestURI);
+		HttpGet httpGet = new HttpGet(requestURI);
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
+		if (httpResponse.getStatusLine().getStatusCode() != 200) {
+			System.out.println("Building production cannot be obtained, deleting agent");
+			return 0.0;
+		} else {
+			HttpEntity entity = httpResponse.getEntity();
+			if (entity != null) {
+				// return it as a String
+				String result = EntityUtils.toString(entity);
+				System.out.print(result);
+				JSONObject productionResult = new JSONObject(result);
+				return productionResult.getDouble("production");
+			} else {
+				return 0.0;
+			}
+		}
 	}
 
 	public Double getEstimatedEnergy(JSONObject buildingData) throws ClientProtocolException, IOException, Exception {

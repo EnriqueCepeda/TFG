@@ -9,7 +9,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-import time
+from datetime import datetime
 
 from . import config
 from . import grid_operations
@@ -146,7 +146,8 @@ def new_transaction(grid_id: int, sender_name: str, receiver_name: str, energy: 
 
 @app.get(_API_ROOT_ + "/grid/{grid_id}/transactions/{timestamp}", status_code=200, tags=["Grid"])
 def get_non_fetched_transactions(grid_id: int, timestamp: float, db: Session = Depends(get_db)):
-  transactions = grid_operations.get_non_fetched_transactions(db, grid_id, timestamp)
+  dt = datetime.utcfromtimestamp(timestamp // 1000)
+  transactions = grid_operations.get_non_fetched_transactions(db, grid_id, dt)
   return [transaction.to_dict() for transaction in transactions]
 
 @app.post(f"{_API_ROOT_}/grid/launch", status_code=201, tags=["Grid"])

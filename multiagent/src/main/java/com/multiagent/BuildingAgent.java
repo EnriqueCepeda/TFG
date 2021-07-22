@@ -134,8 +134,8 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 				data.put("modules_per_string", panels);
 				data.put("strings_per_inverter", 1);
 			} else {
-				data.put("modules_per_string", (int) panels / 10);
-				data.put("strings_per_inverter", 10);
+				data.put("modules_per_string", 10);
+				data.put("strings_per_inverter", (int) panels / 10);
 			}
 		}
 
@@ -421,6 +421,7 @@ class ConsumerRegistrationBehaviour extends OneShotBehaviour {
 			description.addOntologies("Consumer");
 		}
 		ServiceDescription service = new ServiceDescription();
+
 		service.setType("Consumer");
 		try {
 			DFService.register(this.myAgent, description);

@@ -50,19 +50,38 @@ export function PanelSelector({ building_id }) {
     }
 
     const handleSliderChange = (event, panels) => {
+        var panels = getRealValue(panels);
         setPanels(panels);
     };
 
     const handleSliderCommit = (event, panels) => {
+        var panels = getRealValue(panels);
         setPanels(panels);
         dispatch(updateBuildingPanels(building_id, panels))
     }
 
     const buttonPercentagePanelsCommit = (percentage) => {
         let finalPanels = Math.floor(maxPanels * (percentage / 100));
+        finalPanels = getRealValue(finalPanels)
         setPanels(finalPanels);
         dispatch(updateBuildingPanels(building_id, finalPanels))
 
+    }
+
+    const getMaxPanels = () => {
+        if (maxPanels < 10) {
+            return maxPanels;
+        } else {
+            return maxPanels - maxPanels % 10;
+        }
+    }
+
+    const getRealValue = (value) => {
+        if (value < 10) {
+            return value;
+        } else {
+            return value - value % 10;
+        }
     }
 
     useEffect(() => {
@@ -86,8 +105,7 @@ export function PanelSelector({ building_id }) {
                                 orientation="horizontal"
                                 defaultValue={0}
                                 min={0}
-                                step={1}
-                                max={maxPanels}
+                                max={getMaxPanels()}
                                 style={{ marginTop: 4 }}
                                 value={typeof panels === 'number' ? panels : 0}
                                 onChange={handleSliderChange}

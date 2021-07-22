@@ -267,14 +267,16 @@ class CheckFinishedConsumersBehaviour extends TickerBehaviour {
 		}
 
 		if (consumers != null && consumers.length == 0) {
-			try {
-				BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
-						"grid_agent", this.producerBehaviour.remainingEnergy);
-			} catch (JSONException | URISyntaxException | IOException e1) {
-				e1.printStackTrace();
-				System.out.println("Problems registering final transaction producer");
+			if (this.producerBehaviour.remainingEnergy > 0) {
+				try {
+					BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
+							"grid_agent", this.producerBehaviour.remainingEnergy);
+				} catch (JSONException | URISyntaxException | IOException e1) {
+					e1.printStackTrace();
+					System.out.println("Problems registering final transaction producer");
+				}
 			}
-			System.out.println(this.producerBehaviour.remainingEnergy);
+
 			System.out.println("Agent " + this.myAgent.getLocalName() + ": Unregistering from DF");
 			this.myAgent.removeBehaviour(this.producerBehaviour);
 			try {
@@ -355,7 +357,7 @@ class ProducerBehaviour extends ContractNetResponder {
 			this.myAgent.addBehaviour(new CheckFinishedConsumersBehaviour(this.myAgent, this.data, this));
 		}
 		System.out.println("Agent " + this.myAgent.getLocalName() + ": CFP received from "
-				+ cfp.getSender().getLocalName() + ". of " + cfp.getContent() + " Kwh");
+				+ cfp.getSender().getLocalName() + " of " + cfp.getContent() + " Kwh");
 
 		if (this.remainingEnergy > 0) {
 			Double proposal = Double.parseDouble(cfp.getContent());
@@ -464,7 +466,6 @@ class ConsumerInitiatorBehaviour extends Behaviour {
 
 		Collection<String> roles = (Collection<String>) (new Gson()
 				.fromJson(this.data.getJSONObject("buildingRoles").toString(), Map.class).values());
-
 		for (String role : roles) {
 			if (role.equals("Prosumer") || role.equals("Producer")) {
 				producersAndProsumersRoles++;
@@ -476,6 +477,7 @@ class ConsumerInitiatorBehaviour extends Behaviour {
 			// which produces, as they have a service.
 			ServiceDescription service = new ServiceDescription();
 			service.setType(this.producerType);
+			System.out.println(this.producerType);
 			description.addServices(service);
 
 			DFAgentDescription[] dfProducersOrGrid = null;
@@ -554,9 +556,10 @@ class ConsumerBehaviour extends ContractNetInitiator {
 		System.out.println("Agent " + this.myAgent.getLocalName() + ": Agent " + failure.getSender().getName()
 				+ " failed providing the energy");
 		if (this.AcceptedOffersWithoutResponse == 0 && this.energyNeed > 0) {
-			System.out.println("Asking for more energy as some accepted requests have failed");
-			this.myAgent
-					.addBehaviour(new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, "Producer", this.data));
+			System.out.println(
+					"Agent " + this.myAgent.getLocalName() + ": Asking grid agent for: " + this.energyNeed + " Kwh");
+			this.myAgent.addBehaviour(
+					new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, "Grid agent", this.data));
 			this.myAgent.removeBehaviour(this);
 		}
 
@@ -587,9 +590,10 @@ class ConsumerBehaviour extends ContractNetInitiator {
 			this.myAgent.addBehaviour(new RefreshDataBehaviour(this.myAgent, time, this.data));
 			this.myAgent.removeBehaviour(this);
 		} else if (this.AcceptedOffersWithoutResponse == 0 && this.energyNeed > 0) {
-			System.out.println("Asking for more energy as some accepted requests have failed");
-			this.myAgent
-					.addBehaviour(new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, "Producer", this.data));
+			System.out.println(
+					"Agent " + this.myAgent.getLocalName() + ": Asking grid agent for: " + this.energyNeed + " Kwh");
+			this.myAgent.addBehaviour(
+					new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, "Grid agent", this.data));
 			this.myAgent.removeBehaviour(this);
 		}
 	}
@@ -617,6 +621,14 @@ class ConsumerBehaviour extends ContractNetInitiator {
 
 		messageResponses.removeAll(notProposals);
 
+		if (messageResponses.size() == 0) {
+			System.out.println("Agent " + this.myAgent.getLocalName() + ": No proposals. Asking grid agent for: "
+					+ this.energyNeed + " Kwh");
+			this.myAgent.addBehaviour(
+					new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, "Grid agent", this.data));
+			this.myAgent.removeBehaviour(this);
+		}
+
 		// Order proposals from high to low energy
 		Collections.sort(messageResponses, new ACLSorterByEnergy());
 
@@ -638,7 +650,6 @@ class ConsumerBehaviour extends ContractNetInitiator {
 				// Energy is substracted from the total, if any acceptance producer fails, the
 				// operation is undone in the handleFailure through the use of the
 				// uncommitedEnergy hash table.
-				this.AcceptedOffersWithoutResponse++;
 				this.energyNeed = this.energyNeed - energyTaken;
 				int senderHash = msg.getSender().hashCode();
 				uncommitedEnergy.put(senderHash, energyTaken);
@@ -653,17 +664,8 @@ class ConsumerBehaviour extends ContractNetInitiator {
 							+ energyTaken + " Kwh from " + msg.getSender().getName());
 				}
 			}
-
+			this.AcceptedOffersWithoutResponse++;
 			acceptances.addElement(reply);
-		}
-
-		if (this.energyNeed > 0) {
-			System.out.println(
-					"Agent " + this.myAgent.getLocalName() + ": Asking grid agent for: " + this.energyNeed + " Kwh");
-			this.myAgent.addBehaviour(
-					new ConsumerInitiatorBehaviour(this.myAgent, this.energyNeed, "Grid agent", this.data));
-			this.myAgent.removeBehaviour(this);
-
 		}
 
 	}

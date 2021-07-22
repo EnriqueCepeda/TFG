@@ -6,12 +6,15 @@ import pandas as pd
 
 Base = declarative_base()
 
+
+#Grid model
 class Grid(Base):
     __tablename__ = "grids"
 
     id = Column(Integer, primary_key=True, index=True)
     buildings = relationship("Building", back_populates="grid")
 
+#Energy transaction model
 class EnergyTransaction(Base):
     __tablename__ = "energytransactions"
 
@@ -21,11 +24,17 @@ class EnergyTransaction(Base):
     receiver_id = Column(Integer, ForeignKey('buildings.id'))
     receiver = relationship("Building", foreign_keys=[receiver_id], back_populates="received_transactions")
     energy = Column(Float)
+    #exact timestamp when the transaction occurs
     timestamp = Column(TIMESTAMP, nullable=False, default=func.now())
+    #hour in which the transaction occurs in the smart grid
     grid_timestamp = Column(TIMESTAMP, nullable=True)
 
 
     def to_dict(self):
+        '''
+        Returns a dictionary which represents the energy transaction
+        '''
+
         return {
             'sender': self.sender.name,
             'receiver': self.receiver.name,
@@ -34,6 +43,7 @@ class EnergyTransaction(Base):
             'grid_timestamp': self.grid_timestamp
         }
 
+#Building model
 class Building(Base):
     __tablename__ = "buildings"
 
@@ -48,6 +58,9 @@ class Building(Base):
 
 
     def to_dict(self):
+        '''
+        Returns a dictionary which represents the building model
+        '''
         return {
             'name': self.name,
             'direction': self.direction,

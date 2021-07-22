@@ -61,27 +61,27 @@ const GridStatistics = () => {
     return (
         <Card className={classes.root} variant="outlined">
             <div>
-                <Typography variant="h6" display="inline" align="center" > Last hour energy production </ Typography >
+                <Typography variant="h6" display="inline" align="center" > Last hour production </ Typography >
                 <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={totalLastHourEnergyProduction} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
             <div>
-                <Typography variant="h6" display="inline" align="center" > Last hour energy consumption  </ Typography >
+                <Typography variant="h6" display="inline" align="center" > Last hour consumption </ Typography >
                 <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={totalLastHourEnergyConsumption} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
             <div>
-                <Typography variant="h6" display="inline" align="center" > Grid produced energy  </ Typography >
+                <Typography variant="h6" display="inline" align="center" > Overall grid production </Typography >
                 <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={totalGeneratedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
             <div>
-                <Typography variant="h6" display="inline" align="center" > Grid consumed energy  </ Typography >
+                <Typography variant="h6" display="inline" align="center" > Overall grid consumption </Typography >
                 <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={totalConsumedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
             <div>
-                <Typography variant="h6" display="inline" align="center" > Energy from grid supplier  </ Typography >
+                <Typography variant="h6" display="inline" align="center" > Energy from the supplier </ Typography >
                 <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={gridAgentGeneratedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
             <div>
-                <Typography variant="h6" display="inline" align="center" > Energy given to grid supplier </ Typography >
+                <Typography variant="h6" display="inline" align="center" > Shared energy with the supplier </ Typography >
                 <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={gridAgentConsumedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
             </div>
 

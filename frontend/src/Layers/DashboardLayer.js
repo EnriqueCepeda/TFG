@@ -122,6 +122,57 @@ const Popup = ({ buildingId, popupRef, closeHandler, overallConsumedEnergy, over
         }
     }
 
+    const getBuildingStatistics = (lastHourConsumedEnergy, lastHourGeneratedEnergy, overallGeneratedEnergy, overallConsumedEnergy) => {
+        if (selectedBuilding.type === "Prosumer") {
+            return (
+                <React.Fragment>
+                    <div>
+                        <Typography variant="h6" display="inline" align="center" > Last hour generation </ Typography >
+                        <PurpleTypography variant="h5" align="center"> <CountUp start={0} decimals={2} end={lastHourGeneratedEnergy} suffix="Kwh" /> </PurpleTypography>
+                    </div>
+
+                    <div>
+                        <Typography variant="h6" display="inline" align="center" > Generation  </ Typography >
+                        <PurpleTypography variant="h5" align="center"> <CountUp start={0} decimals={2} end={overallGeneratedEnergy} suffix="Kwh" /> </PurpleTypography>
+                    </div>
+                    <div>
+                        <Typography variant="h6" display="inline" align="center" > Last hour consumption </ Typography >
+                        <PurpleTypography variant="h5" align="center"> <CountUp start={0} decimals={2} end={lastHourConsumedEnergy} suffix="Kwh" /> </PurpleTypography>
+                    </div>
+                    <div>
+                        <Typography variant="h6" display="inline" align="center" > Consumption  </ Typography >
+                        <PurpleTypography variant="h5" align="center"> <CountUp start={0} decimals={2} end={overallConsumedEnergy} suffix="Kwh" /> </PurpleTypography>
+                    </div>
+                </React.Fragment>
+            )
+        } else if (selectedBuilding.type === "Producer") {
+            return (<React.Fragment>
+                <div>
+                    <Typography variant="h6" display="inline" align="center" > Last hour generation </ Typography >
+                    <PurpleTypography variant="h5" align="center"> <CountUp start={0} decimals={2} end={lastHourGeneratedEnergy} suffix="Kwh" /> </PurpleTypography>
+                </div>
+
+                <div>
+                    <Typography variant="h6" display="inline" align="center" > Generation  </ Typography >
+                    <PurpleTypography variant="h5" align="center"> <CountUp start={0} decimals={2} end={overallGeneratedEnergy} suffix="Kwh" /> </PurpleTypography>
+                </div>
+            </React.Fragment>)
+        } else {
+            return (
+                <React.Fragment>
+                    <div>
+                        <Typography variant="h6" display="inline" align="center" > Last hour consumption </ Typography >
+                        <PurpleTypography variant="h5" align="center"> <CountUp start={0} decimals={2} end={lastHourConsumedEnergy} suffix="Kwh" /> </PurpleTypography>
+                    </div>
+                    <div>
+                        <Typography variant="h6" display="inline" align="center" > Consumption  </ Typography >
+                        <PurpleTypography variant="h5" align="center"> <CountUp start={0} decimals={2} end={overallConsumedEnergy} suffix="Kwh" /> </PurpleTypography>
+                    </div>
+                </React.Fragment>)
+
+        }
+    }
+
 
     return (
         <Card id="popup" ref={popupRef} className={classes.root} style={{ display: buildingId ? 'block' : 'none' }}>
@@ -141,24 +192,7 @@ const Popup = ({ buildingId, popupRef, closeHandler, overallConsumedEnergy, over
                     <Divider variant="middle" />
                     <CardContent>
                         <div className={classes.quantities}>
-                            <div>
-                                <Typography variant="h6" display="inline" align="center" > Last hour generation </ Typography >
-                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={lastHourGeneratedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
-                            </div>
-
-                            <div>
-                                <Typography variant="h6" display="inline" align="center" > Generation  </ Typography >
-                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={overallGeneratedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
-                            </div>
-                            <div>
-                                <Typography variant="h6" display="inline" align="center" > Last hour consumption </ Typography >
-                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} decimals={2} end={lastHourConsumedEnergy} suffix="Kwh" /> </PurpleTypography>
-                            </div>
-                            <div>
-                                <Typography variant="h6" display="inline" align="center" > Consumption  </ Typography >
-                                <PurpleTypography variant="h5" align="center"> <CountUp start={0} end={overallConsumedEnergy} decimals={2} suffix="Kwh" /> </PurpleTypography>
-                            </div>
-
+                            {getBuildingStatistics(lastHourConsumedEnergy, lastHourGeneratedEnergy, overallGeneratedEnergy, overallConsumedEnergy)}
 
                         </div>
                     </CardContent>

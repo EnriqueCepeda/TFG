@@ -9,6 +9,19 @@ let realInitialState = {
     },
 }
 
+function convertUTCDateToLocalDate(datestr) {
+    var date = new Date(datestr);
+    var newDate = new Date(date.getTime() - date.getTimezoneOffset() * 60 * 1000);
+    return newDate.toLocaleDateString(undefined,
+        {
+            weekday: 'short', // long, short, narrow
+            day: 'numeric', // numeric, 2-digit
+            year: 'numeric', // numeric, 2-digit
+            month: 'long', // numeric, 2-digit, long, short, narrow
+            hour: 'numeric', // numeric, 2-digit
+        });
+}
+
 let testInitialState = {
     "Building 556053480": {
         "latitude": 38.985879300067154,
@@ -581,16 +594,17 @@ const reducer = (state = initialState, action) => {
         }
         case ADD_TRANSACTION: {
             let stateCloned = _.cloneDeep(state);
-            if (action.grid_timestamp in stateCloned[action.sender].transactions) {
-                stateCloned[action.sender].transactions[action.grid_timestamp].push([action.receiver, -action.energy]);
+            var timestamp = convertUTCDateToLocalDate(action.grid_timestamp);
+            if (timestamp in stateCloned[action.sender].transactions) {
+                stateCloned[action.sender].transactions[timestamp].push([action.receiver, -action.energy]);
             } else {
-                stateCloned[action.sender].transactions[action.grid_timestamp] = [[action.receiver, -action.energy]];
+                stateCloned[action.sender].transactions[timestamp] = [[action.receiver, -action.energy]];
             }
 
-            if (action.grid_timestamp in stateCloned[action.receiver].transactions) {
-                stateCloned[action.receiver].transactions[action.grid_timestamp].push([action.sender, +action.energy]);
+            if (timestamp in stateCloned[action.receiver].transactions) {
+                stateCloned[action.receiver].transactions[timestamp].push([action.sender, +action.energy]);
             } else {
-                stateCloned[action.receiver].transactions[action.grid_timestamp] = [[action.sender, +action.energy]];
+                stateCloned[action.receiver].transactions[timestamp] = [[action.sender, +action.energy]];
             }
             return stateCloned;
         }

@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState, useRef } from "react";
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector, useDispatch, useStore } from 'react-redux';
 import axios from 'axios';
 
 import OLVectorLayer from "ol/layer/Vector";
@@ -9,9 +9,9 @@ import GeoJSON from 'ol/format/GeoJSON';
 import Overlay from 'ol/Overlay';
 
 import { useInterval } from '../Common'
-import { getBuilding, getBuildings, getGridId } from '../redux/selectors';
+import { getBuilding, getBuildings } from '../redux/selectors';
 import { addGrid } from '../redux/actions/gridActions';
-import { addTransaction } from '../redux/actions/buildingActions';
+import { addTransaction, removeGridData } from '../redux/actions/buildingActions';
 import MapContext from "../Map/MapContext";
 
 
@@ -25,7 +25,7 @@ import PurpleTypography from "Common/PurpleTypography";
 
 import CountUp from "react-countup"
 import clsx from 'clsx';
-import { getGeneratedEnergy, getConsumedEnergy, getLastHourConsumedEnergy, getLastHourGeneratedEnergy, getBuildingConsumption } from "redux/selectors/buildingSelectors";
+import { getGeneratedEnergy, getConsumedEnergy, getLastHourConsumedEnergy, getLastHourGeneratedEnergy, } from "redux/selectors/buildingSelectors";
 import _ from "lodash"
 
 
@@ -246,7 +246,7 @@ const DashboardLayer = () => {
     const [isActive, setActive] = useState(false);
 
     const buildings = useSelector(getBuildings);
-    const gridId = useSelector(getGridId);
+    const store = useStore();
     const dispatch = useDispatch();
 
     const ms_delay = 5000;
@@ -343,6 +343,7 @@ const DashboardLayer = () => {
         setActive(true);
         return () => {
             setActive(false);
+            dispatch(removeGrid());
         }
     }, []);
 
@@ -353,7 +354,7 @@ const DashboardLayer = () => {
 
     const launchGrid = () => (
         () => {
-            let request_url = "http://localhost:8000/api/v1/grid/launch";
+            let request_url = "http://localhost:8000/api/v1/grid/";
             axios.post(request_url, buildings).then(res => res.data.id).then(grid_id => { dispatch(addGrid(grid_id)) });
             setLastEpochCheck(Date.now())
 
@@ -362,6 +363,7 @@ const DashboardLayer = () => {
 
     const askForNonFetchedTransactions = () => (
         () => {
+            var gridId = store.getState().grid.id
             let request_url = `http://localhost:8000/api/v1/grid/${gridId}/transactions/${lastEpochCheck}`;
             axios.get(request_url).then(res => res.data).then(transactions => transactions.map((transaction) => {
                 dispatch(addTransaction(transaction.sender, transaction.receiver, transaction.energy, transaction.timestamp, transaction.grid_timestamp))
@@ -371,10 +373,16 @@ const DashboardLayer = () => {
     )
 
 
-    function removeGrid() {
-        let request_url = "http://localhost:8000/api/v1/grid/stop";
-        axios.post(request_url).then(console.log("Grid stopped"))
-    }
+    const removeGrid = () => (
+
+        () => {
+            var gridId = store.getState().grid.id
+            let request_url = `http://localhost:8000/api/v1/grid/${gridId}/`;
+            axios.delete(request_url).then(console.log("Grid " + gridId + " removed"));
+            dispatch(removeGridData())
+        }
+    )
+
 
 
     const getEnergyBalance = (selectedBuilding) => {

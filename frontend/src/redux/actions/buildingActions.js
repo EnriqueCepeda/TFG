@@ -2,7 +2,7 @@
 import {
     UPDATE_BUILDING_TYPE, UPDATE_BUILDING_ADDRESS,
     UPDATE_BUILDING_CONSUMPTION, ADD_BUILDING,
-    REMOVE_BUILDING, ADD_TRANSACTION,
+    REMOVE_BUILDING, REMOVE_GRID_DATA, ADD_TRANSACTION,
     UPDATE_BUILDING_MAX_PANELS, UPDATE_BUILDING_PANELS,
     UPDATE_BUILDING_ALTITUDE
 } from './types';
@@ -75,6 +75,10 @@ export const addBuilding = (id, latitude, longitude, address, area, coordinates,
 export const removeBuilding = (id) => ({
     type: REMOVE_BUILDING,
     building_id: id
+});
+
+export const removeGridData = () => ({
+    type: REMOVE_GRID_DATA
 });
 
 export const addTransaction = (sender, receiver, energy, timestamp, grid_timestamp) => ({

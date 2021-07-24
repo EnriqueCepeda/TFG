@@ -86,6 +86,12 @@ public class BuildingAgent extends Agent {
 
 	protected void takeDown() {
 		System.out.println("Agent " + getLocalName() + ": Freeing resources");
+		try {
+			DFService.deregister(this);
+			System.out.println("Agent " + getLocalName() + " has been unregistered from the DF");
+		} catch (FIPAException e) {
+			System.out.println("Agent " + getLocalName() + " was already unregistered from the DF");
+		}
 	}
 
 }
@@ -116,6 +122,43 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		JSONArray jsonCoordinates = new JSONArray(coordinates);
 		JSONArray jsonConsumption = new JSONArray(consumption);
 		JSONObject jsonBuildingRoles = new JSONObject(buildingRoles);
+		JSONObject data = new JSONObject();
+		data.put("latitude", latitude);
+		data.put("longitude", longitude);
+		data.put("altitude", altitude);
+		data.put("type", type);
+		data.put("coordinates", jsonCoordinates);
+		data.put("consumption", jsonConsumption);
+		data.put("buildingRoles", jsonBuildingRoles);
+		data.put("grid_id", grid_id);
+		data.put("panels", panels);
+
+		if (BuildingType.PRODUCER.name().equalsIgnoreCase(type)
+				|| BuildingType.PROSUMER.name().equalsIgnoreCase(type)) {
+
+			if (panels < 10) {
+				data.put("modules_per_string", panels);
+				data.put("strings_per_inverter", 1);
+			} else {
+				data.put("modules_per_string", 10);
+				data.put("strings_per_inverter", (int) panels / 10);
+			}
+		}
+
+		return data;
+	}
+
+	public JSONObject getBuildingDataAPI(Object[] args)
+			throws ClientProtocolException, IOException, URISyntaxException, Exception {
+		Double latitude = (Double) args[0];
+		Double longitude = (Double) args[1];
+		String type = (String) args[2];
+		JSONArray jsonCoordinates = (JSONArray) args[3];
+		JSONArray jsonConsumption = (JSONArray) args[4];
+		JSONObject jsonBuildingRoles = (JSONObject) args[5];
+		Integer grid_id = (Integer) args[6];
+		Integer panels = (Integer) args[7];
+		Double altitude = (Double) args[8];
 		JSONObject data = new JSONObject();
 		data.put("latitude", latitude);
 		data.put("longitude", longitude);
@@ -202,7 +245,7 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		if (args != null && args.length > 0) {
 			try {
 				if (this.data == null) {
-					this.data = getBuildingData(args);
+					this.data = getBuildingDataAPI(args);
 				}
 				Double estimatedConsumedEnergy;
 				estimatedConsumedEnergy = getEstimatedEnergy(this.data);
@@ -441,7 +484,6 @@ class ConsumerInitiatorBehaviour extends Behaviour {
 	JSONObject data = null;
 	String producerType = null;
 	Boolean finish = false;
-	int previousDfProsumerAndProducerLength = 0;
 
 	public ConsumerInitiatorBehaviour(Agent agent, Double energyNeed, String producerType, JSONObject data) {
 		super(agent);

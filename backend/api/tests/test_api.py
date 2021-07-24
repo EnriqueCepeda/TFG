@@ -111,6 +111,8 @@ def test_get_non_fetched_transactions():
     assert isinstance(transactions_response_dict, list)
     assert len(transactions_response_dict) == 2
 
+
+
 def test_get_building_address():
     grid_data = get_grid_fixture()
     building_data = grid_data[list(grid_data.keys())[1]]

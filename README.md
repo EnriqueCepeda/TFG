@@ -69,6 +69,15 @@ _P.S: The way in which the environment variables are introduced may vary dependi
 
 ---
 
+## Run the multiagent system server
+
+To use the application, first is necessary to run the Spring server.
+To run it, the user must navigate to the multiagent folder and execute the following command:
+
+```
+mvn spring-boot:run
+```
+
 ## Run the backend server
 
 To use the application, first is necessary to run the backend server, which uses uvicorn ASGI server.

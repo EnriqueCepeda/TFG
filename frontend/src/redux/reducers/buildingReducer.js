@@ -1,5 +1,9 @@
 
-import { ADD_BUILDING, REMOVE_BUILDING, UPDATE_BUILDING_TYPE, UPDATE_BUILDING_CONSUMPTION, ADD_TRANSACTION, UPDATE_BUILDING_ADDRESS, UPDATE_BUILDING_MAX_PANELS, UPDATE_BUILDING_PANELS, UPDATE_BUILDING_ALTITUDE } from '../actions/types';
+import {
+    ADD_BUILDING, REMOVE_BUILDING, UPDATE_BUILDING_TYPE, UPDATE_BUILDING_CONSUMPTION,
+    ADD_TRANSACTION, UPDATE_BUILDING_ADDRESS, UPDATE_BUILDING_MAX_PANELS,
+    UPDATE_BUILDING_PANELS, UPDATE_BUILDING_ALTITUDE, REMOVE_GRID_DATA
+} from '../actions/types';
 import _ from "lodash";
 
 
@@ -617,6 +621,13 @@ const reducer = (state = initialState, action) => {
             let stateCloned = _.cloneDeep(state);
             stateCloned[action.building_id].panels = action.panels
             return stateCloned
+        }
+        case REMOVE_GRID_DATA: {
+            let stateCloned = _.cloneDeep(state);
+            Object.keys(stateCloned).forEach((buildingId) => {
+                stateCloned[buildingId].transactions = {}
+            })
+            return stateCloned;
         }
         default:
             return state;

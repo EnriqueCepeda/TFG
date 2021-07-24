@@ -31,6 +31,11 @@ def create_grid(db: Session):
     db.refresh(db_grid)
     return db_grid
 
+def delete_grid(db: Session, grid_id):
+    db.query(models.Grid).filter(models.Grid.id == grid_id).delete()
+    db.query(models.Building).filter(models.Building.grid_id == grid_id).delete()
+    db.commit()
+
 def get_building_by_name_grid(db: Session, grid_id, building_name):
     return db.query(models.Building).filter(models.Building.grid_id == grid_id, models.Building.name == building_name).one_or_none()
 

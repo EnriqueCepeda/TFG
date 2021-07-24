@@ -4,12 +4,15 @@ import os
 import subprocess
 from functools import lru_cache
 from typing import Dict, List, Tuple
-from fastapi import FastAPI, HTTPException, Depends, Request
+from fastapi import FastAPI, HTTPException, Depends, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from datetime import datetime
+import requests
+
+
 
 from . import config
 from . import grid_operations
@@ -46,7 +49,7 @@ def get_settings():
 
 settings = get_settings()
 if not settings.test:
-  subprocess.Popen(["java", "jade.Boot", "-name", "SmartGrid"])
+  subprocess.Popen(["java", "jade.Boot", "-name", "SmartGrid", "-gui"])
 
 models.Base.metadata.create_all(bind=engine)
 infere_energy_production_without_real_weather(38.98588920007077, -3.9280376043217236, 635.1846923828125, 1, 1)
@@ -67,7 +70,8 @@ def get_db():
         db.close()
 
 _API_ROOT_ = "/api/v1"
-ACTIVE_GRID = None
+MULTIAGENT_API_DIRECTION = "http://localhost:8080"
+MULTIAGENT_API_URI = MULTIAGENT_API_DIRECTION + "/api/v1/grid/"
 
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request, exc):
@@ -160,8 +164,8 @@ async def launch_grid(building_data: Dict , db: Session = Depends(get_db), setti
     for building_id in building_data:
       building_roles[building_id] = building_data[building_id]["type"]
     command_list = ["java", "jade.Boot", "-container", "-agents" ]
-    agents_str = 'grid_agent:com.multiagent.GridAgent;'
     grid = grid_operations.create_grid(db)
+    agents_str = f'Grid{grid.id}-grid_agent:com.multiagent.GridAgent;'
     grid_operations.create_building(db, "grid agent", "", "Producer", grid.id)
     for building_id in building_data:
       building = building_data[building_id]
@@ -181,6 +185,42 @@ async def launch_grid(building_data: Dict , db: Session = Depends(get_db), setti
     if not settings.test:
       child_id = subprocess.Popen(command_list)
     return {"id": grid.id}
+
+@app.post(f"{_API_ROOT_}/grid/", status_code=201, tags=["Grid"])
+async def launch_grid(building_data: Dict , response: Response, db: Session = Depends(get_db)):
+    '''
+    Launches a multiagent system to simulate the behaviour of a Smart Grid configuration using the data from the Frontend Application
+    '''
+    print(building_data)
+    
+    grid = grid_operations.create_grid(db)
+    grid_id = grid.id
+    grid_operations.create_building(db, "grid agent", "", "Producer", grid_id)
+    for building_id, building in building_data.items():
+      btype = building["type"]
+      address = building["address"]
+      grid_operations.create_building(db, building_id, address, btype, grid_id)
+    
+    try:
+      response_api = requests.post(f"{MULTIAGENT_API_URI}{grid_id}/", json=building_data)
+      if response_api.status_code != 201:
+        grid_operations.delete_grid(db, grid_id)
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+      return response_api.json()
+    except requests.exceptions.RequestException:
+      grid_operations.delete_grid(db, grid_id)
+      response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+      return {"error": "Multiagent API is not active"}
+    
+
+@app.delete(_API_ROOT_ + "/grid/{grid_id}/", status_code=200, tags=["Grid"])
+async def delete_grid(grid_id: int, response: Response):
+    response_api = requests.delete(f"{MULTIAGENT_API_URI}{grid_id}/")
+    if response_api.status_code != 200:
+      response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    return response_api.json()
+
+
 
 @app.get(_API_ROOT_ + "/grid/{grid_id}/buildings/", status_code=200, tags=["Grid"])
 def get_buildings(grid_id: int, db: Session = Depends(get_db)):

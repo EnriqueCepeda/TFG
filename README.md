@@ -69,10 +69,16 @@ _P.S: The way in which the environment variables are introduced may vary dependi
 
 ---
 
-## Run the multiagent system server
+## Run the multiagent system server and JADE Agent Platform
 
-To use the application, first is necessary to run the Spring server.
-To run it, the user must navigate to the multiagent folder and execute the following command:
+To use the application, first is necessary to activate the JADE Agent Platform and the Spring-boot server.
+To activate the Agent Platform, the user must run the following command:
+
+```
+java jade.Boot -name -SmartGrid -gui
+```
+
+To run the Spring-boot server, the user must navigate to the multiagent folder and execute the following command:
 
 ```
 mvn spring-boot:run

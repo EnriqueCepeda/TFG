@@ -128,9 +128,8 @@ def infere_energy_production_without_real_weather(latitude, longitude, altitude,
     airmass = pvlib.atmosphere.get_relative_airmass(solpos['apparent_zenith'])
     pressure = pvlib.atmosphere.alt2pres(altitude)
     am_abs = pvlib.atmosphere.get_absolute_airmass(airmass, pressure)
-    tl = pvlib.clearsky.lookup_linke_turbidity(times, latitude, longitude)
-    cs = pvlib.clearsky.ineichen(solpos['apparent_zenith'], am_abs, tl,
-                                dni_extra=dni_extra, altitude=altitude)
+    tl = pvlib.clearsky.lookup_linke_turbidity(times, latitude, longitude) #!
+    cs = pvlib.clearsky.ineichen(solpos['apparent_zenith'], am_abs, tl, dni_extra=dni_extra, altitude=altitude) #!
     angle_of_incidence = pvlib.irradiance.aoi(system['surface_tilt'], system['surface_azimuth'],
                             solpos['apparent_zenith'], solpos['azimuth'])
     total_irrad = pvlib.irradiance.get_total_irradiance(system['surface_tilt'],

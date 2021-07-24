@@ -1,9 +1,8 @@
 from urllib.parse import urlencode
 import aiohttp
 import os
-import subprocess
 from functools import lru_cache
-from typing import Dict, List, Tuple
+from typing import Dict, List
 from fastapi import FastAPI, HTTPException, Depends, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
@@ -48,11 +47,8 @@ def get_settings():
   return config.Settings()
 
 settings = get_settings()
-if not settings.test:
-  subprocess.Popen(["java", "jade.Boot", "-name", "SmartGrid", "-gui"])
 
 models.Base.metadata.create_all(bind=engine)
-infere_energy_production_without_real_weather(38.98588920007077, -3.9280376043217236, 635.1846923828125, 1, 1)
 
 app.add_middleware(
     CORSMiddleware,
@@ -154,45 +150,11 @@ def get_non_fetched_transactions(grid_id: int, timestamp: float, db: Session = D
   transactions = grid_operations.get_non_fetched_transactions(db, grid_id, dt)
   return [transaction.to_dict() for transaction in transactions]
 
-@app.post(f"{_API_ROOT_}/grid/launch", status_code=201, tags=["Grid"])
-async def launch_grid(building_data: Dict , db: Session = Depends(get_db), settings: config.Settings = Depends(get_settings)):
-    '''
-    Launches a multiagent system to simulate the behaviour of a Smart Grid configuration using the data from the Frontend Application
-    '''
-    
-    building_roles = {}
-    for building_id in building_data:
-      building_roles[building_id] = building_data[building_id]["type"]
-    command_list = ["java", "jade.Boot", "-container", "-agents" ]
-    grid = grid_operations.create_grid(db)
-    agents_str = f'Grid{grid.id}-grid_agent:com.multiagent.GridAgent;'
-    grid_operations.create_building(db, "grid agent", "", "Producer", grid.id)
-    for building_id in building_data:
-      building = building_data[building_id]
-      latitude = building["latitude"]
-      longitude = building["longitude"]
-      btype = building["type"]
-      address = building["address"]
-      altitude = building["altitude"]
-      panels = building["panels"]
-      grid_operations.create_building(db, building_id, address, btype, grid.id)
-      building_roles_str = str(building_roles).replace(",", "?")
-      coordinates = str(building["coordinates"]).replace(",", "?")
-      consumption = str(building["consumption"]).replace(",", "?")
-      agents_str += f'Grid{grid.id}-{building_id.replace(" ", "_")}:com.multiagent.BuildingAgent({latitude}, {longitude}, {btype}, {coordinates}, {consumption}, {building_roles_str}, {grid.id}, {panels}, {altitude})'
-      agents_str += ";"
-    command_list.append(agents_str)
-    if not settings.test:
-      child_id = subprocess.Popen(command_list)
-    return {"id": grid.id}
-
 @app.post(f"{_API_ROOT_}/grid/", status_code=201, tags=["Grid"])
 async def launch_grid(building_data: Dict , response: Response, db: Session = Depends(get_db)):
     '''
     Launches a multiagent system to simulate the behaviour of a Smart Grid configuration using the data from the Frontend Application
-    '''
-    print(building_data)
-    
+    '''  
     grid = grid_operations.create_grid(db)
     grid_id = grid.id
     grid_operations.create_building(db, "grid agent", "", "Producer", grid_id)

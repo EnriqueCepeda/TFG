@@ -9,8 +9,17 @@ public class GridAgent extends Agent {
 
     Double totalEnergy = Double.MAX_VALUE;
 
+    public Integer getData(Object[] args) {
+        return (Integer) args[0];
+
+    }
+
     protected void setup() {
-        this.addBehaviour(new ProducerInitiatiorBehaviour(this, totalEnergy));
+        Object[] args = getArguments();
+        if (args != null && args.length > 0) {
+            Integer grid_id = this.getData(args);
+            this.addBehaviour(new ProducerInitiatiorBehaviour(this, totalEnergy, grid_id));
+        }
     }
 
     protected void takeDown() {

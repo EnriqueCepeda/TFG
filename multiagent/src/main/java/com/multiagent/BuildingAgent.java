@@ -108,46 +108,6 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		this.data = data;
 	}
 
-	public JSONObject getBuildingData(Object[] args)
-			throws ClientProtocolException, IOException, URISyntaxException, Exception {
-		Double latitude = Double.parseDouble((String) args[0]);
-		Double longitude = Double.parseDouble((String) args[1]);
-		String type = ((String) args[2]);
-		String coordinates = ((String) args[3]).replace("?", ",");
-		String consumption = ((String) args[4]).replace("?", ",");
-		String buildingRoles = ((String) args[5]).replace("?", ",");
-		Integer grid_id = Integer.parseInt((String) args[6]);
-		Integer panels = Integer.parseInt((String) args[7]);
-		Double altitude = Double.parseDouble((String) args[8]);
-		JSONArray jsonCoordinates = new JSONArray(coordinates);
-		JSONArray jsonConsumption = new JSONArray(consumption);
-		JSONObject jsonBuildingRoles = new JSONObject(buildingRoles);
-		JSONObject data = new JSONObject();
-		data.put("latitude", latitude);
-		data.put("longitude", longitude);
-		data.put("altitude", altitude);
-		data.put("type", type);
-		data.put("coordinates", jsonCoordinates);
-		data.put("consumption", jsonConsumption);
-		data.put("buildingRoles", jsonBuildingRoles);
-		data.put("grid_id", grid_id);
-		data.put("panels", panels);
-
-		if (BuildingType.PRODUCER.name().equalsIgnoreCase(type)
-				|| BuildingType.PROSUMER.name().equalsIgnoreCase(type)) {
-
-			if (panels < 10) {
-				data.put("modules_per_string", panels);
-				data.put("strings_per_inverter", 1);
-			} else {
-				data.put("modules_per_string", 10);
-				data.put("strings_per_inverter", (int) panels / 10);
-			}
-		}
-
-		return data;
-	}
-
 	public JSONObject getBuildingDataAPI(Object[] args)
 			throws ClientProtocolException, IOException, URISyntaxException, Exception {
 		Double latitude = (Double) args[0];
@@ -298,9 +258,13 @@ class CheckFinishedConsumersBehaviour extends TickerBehaviour {
 	protected void onTick() {
 		DFAgentDescription description = new DFAgentDescription();
 		ServiceDescription service = new ServiceDescription();
+		service.setName("type service");
 		service.setType("Consumer");
 		description.addServices(service);
-
+		ServiceDescription gridservice = new ServiceDescription();
+		gridservice.setName("grid service");
+		gridservice.setType(String.valueOf(data.getInt("grid_id")));
+		description.addServices(gridservice);
 		DFAgentDescription[] consumers = null;
 
 		try {
@@ -341,6 +305,7 @@ class ProducerInitiatiorBehaviour extends OneShotBehaviour {
 	Double estimation = 0.0;
 	JSONObject data = null;
 	String producerType = null;
+	Integer grid_id = null;
 
 	public ProducerInitiatiorBehaviour(Agent agent, Double estimation, JSONObject data) {
 		super(agent);
@@ -349,10 +314,11 @@ class ProducerInitiatiorBehaviour extends OneShotBehaviour {
 		this.data = data;
 	}
 
-	public ProducerInitiatiorBehaviour(Agent agent, Double estimation) {
+	public ProducerInitiatiorBehaviour(Agent agent, Double estimation, Integer grid_id) {
 		super(agent);
 		this.estimation = estimation;
 		this.producerType = "Grid agent";
+		this.grid_id = grid_id;
 	}
 
 	public void action() {
@@ -364,8 +330,19 @@ class ProducerInitiatiorBehaviour extends OneShotBehaviour {
 		ServiceDescription service = new ServiceDescription();
 		// Producer or grid agent, to identify the true role of the agent
 		service.setType(this.producerType);
-		service.setName(this.myAgent.getLocalName());
+		service.setName("type service");
 		description.addServices(service);
+		if (this.producerType == "Producer") {
+			ServiceDescription gridservice = new ServiceDescription();
+			gridservice.setName("grid service");
+			gridservice.setType(String.valueOf(data.getInt("grid_id")));
+			description.addServices(gridservice);
+		} else if (this.producerType == "Grid agent") {
+			ServiceDescription gridservice = new ServiceDescription();
+			gridservice.setName("grid service");
+			gridservice.setType(this.grid_id.toString());
+			description.addServices(gridservice);
+		}
 
 		try {
 			DFService.register(this.myAgent, description);
@@ -464,8 +441,14 @@ class ConsumerRegistrationBehaviour extends OneShotBehaviour {
 			description.addOntologies("Consumer");
 		}
 		ServiceDescription service = new ServiceDescription();
-
+		service.setName("type service");
 		service.setType("Consumer");
+		description.addServices(service);
+
+		ServiceDescription gridservice = new ServiceDescription();
+		gridservice.setName("grid service");
+		gridservice.setType(String.valueOf(data.getInt("grid_id")));
+		description.addServices(gridservice);
 		try {
 			DFService.register(this.myAgent, description);
 		} catch (FIPAException e) {
@@ -498,6 +481,10 @@ class ConsumerInitiatorBehaviour extends Behaviour {
 		description.addOntologies("FProducer");
 
 		DFAgentDescription[] dfProducersAndProsumers = null;
+		ServiceDescription gridservice = new ServiceDescription();
+		gridservice.setName("grid service");
+		gridservice.setType(String.valueOf(this.data.getInt("grid_id")));
+		description.addServices(gridservice);
 
 		try {
 			dfProducersAndProsumers = DFService.search(this.myAgent, description);
@@ -519,8 +506,8 @@ class ConsumerInitiatorBehaviour extends Behaviour {
 			// The description + the service finds the real producers and the prosumers
 			// which produces, as they have a service.
 			ServiceDescription service = new ServiceDescription();
+			service.setName("type service");
 			service.setType(this.producerType);
-			System.out.println(this.producerType);
 			description.addServices(service);
 
 			DFAgentDescription[] dfProducersOrGrid = null;

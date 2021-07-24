@@ -65,7 +65,7 @@ public class GridManager {
         }
 
         AgentController agl = container.createNewAgent("Grid" + grid_id + "-" + "grid_agent",
-                "com.multiagent.GridAgent", new Object[] {});
+                "com.multiagent.GridAgent", new Object[] { grid_id });
         agList.add(agl);
 
         for (AgentController ag : agList) {

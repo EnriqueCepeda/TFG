@@ -76,16 +76,16 @@ async def validation_exception_handler(request, exc):
 @app.post(f"{_API_ROOT_}/building/configuration", status_code=200, tags=["Building"])
 def get_building_module_configuration(polygon_coordinates: List, latitude:float):
   '''
-  Returns the rows of solar modules and the solar modules per row of a building using the geometry vertices of its roof
+  Returns the rows of solar modules and the solar modules per row of a building using the geometry vertices of its roof-top
   '''
   return get_panels_configuration(polygon_coordinates, latitude)
 
 @app.get(f"{_API_ROOT_}/building/production", status_code=200, tags=["Building"])
-def infere_building_energy_production(latitude:float, longitude:float, altitude: float, modules_per_string:int, strings_per_inverter:int ):
+def infere_building_energy_production(latitude:float, longitude:float, altitude: float, modules_per_string:int, strings_per_inverter:int, timestamp:float ):
     '''
-    Returns the energy produced by a building in an hour on a certain location using a the building panel configuration
+    Returns the energy produced by a building during the hour of the timestamp on a certain location using a building panel configuration
     '''
-    return {"production": infere_energy_production(latitude, longitude, altitude, modules_per_string, strings_per_inverter)}
+    return {"production": infere_energy_production(latitude, longitude, altitude, modules_per_string, strings_per_inverter, timestamp)}
 
 
 @app.get(f"{_API_ROOT_}/building/address", status_code=200, tags=["Building"])
@@ -151,36 +151,40 @@ def get_non_fetched_transactions(grid_id: int, timestamp: float, db: Session = D
   return [transaction.to_dict() for transaction in transactions]
 
 @app.post(f"{_API_ROOT_}/grid/", status_code=201, tags=["Grid"])
-async def launch_grid(building_data: Dict , response: Response, db: Session = Depends(get_db)):
-    '''
-    Launches a multiagent system to simulate the behaviour of a Smart Grid configuration using the data from the Frontend Application
-    '''  
-    grid = grid_operations.create_grid(db)
-    grid_id = grid.id
-    grid_operations.create_building(db, "grid agent", "", "Producer", grid_id)
-    for building_id, building in building_data.items():
-      btype = building["type"]
-      address = building["address"]
-      grid_operations.create_building(db, building_id, address, btype, grid_id)
-    
-    try:
-      response_api = requests.post(f"{MULTIAGENT_API_URI}{grid_id}/", json=building_data)
-      if response_api.status_code != 201:
-        grid_operations.delete_grid(db, grid_id)
-        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-      return response_api.json()
-    except requests.exceptions.RequestException:
+async def launch_grid(body_json: Dict , response: Response, db: Session = Depends(get_db)):
+  '''
+  Launches a multiagent system to simulate the behaviour of a Smart Grid configuration using the data from the Frontend Application
+  '''  
+  grid = grid_operations.create_grid(db)
+  grid_id = grid.id
+  grid_operations.create_building(db, "grid agent", "", "Producer", grid_id)
+  building_data = body_json["buildings"]
+  for building_id, building in building_data.items():
+    btype = building["type"]
+    address = building["address"]
+    grid_operations.create_building(db, building_id, address, btype, grid_id)
+  
+  try:
+    response_api = requests.post(f"{MULTIAGENT_API_URI}{grid_id}/", json=body_json)
+    if response_api.status_code != 201:
       grid_operations.delete_grid(db, grid_id)
       response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-      return {"error": "Multiagent API is not active"}
+    return response_api.json()
+  except requests.exceptions.RequestException:
+    grid_operations.delete_grid(db, grid_id)
+    response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+    return {"error": "Multiagent API is not active"}
     
 
 @app.delete(_API_ROOT_ + "/grid/{grid_id}/", status_code=200, tags=["Grid"])
 async def delete_grid(grid_id: int, response: Response):
-    response_api = requests.delete(f"{MULTIAGENT_API_URI}{grid_id}/")
-    if response_api.status_code != 200:
-      response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-    return response_api.json()
+  '''
+  Kills the container of a certain active grid
+  '''
+  response_api = requests.delete(f"{MULTIAGENT_API_URI}{grid_id}/")
+  if response_api.status_code != 200:
+    response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+  return response_api.json()
 
 
 

@@ -34,7 +34,7 @@ def get_panels_configuration(building_coordinates, latitude):
     return {"panels" : panels}
 
 
-def infere_energy_production(latitude, longitude, altitude, modules_per_string, strings_per_inverter):
+def infere_energy_production(latitude, longitude, altitude, modules_per_string, strings_per_inverter, timestamp):
     frequency = "1h"
     timezone = "UTC"
     temperature_model_parameters = TEMPERATURE_MODEL_PARAMETERS['sapm']['open_rack_glass_glass']
@@ -46,20 +46,20 @@ def infere_energy_production(latitude, longitude, altitude, modules_per_string, 
     system["surface_azimuth"] = surface_azimuth
 
     #time series with only the current hour
-    time_now = pd.Timestamp.now(tz=timezone).round('60min')
-    start= time_now
-    end= time_now
+    time_timestamp = pd.Timestamp(timestamp, tz=timezone, unit='ms').round('60min')
+    start= time_timestamp
+    end= time_timestamp
     times= pd.date_range(start, end, freq=frequency).tz_convert(timezone)
 
 
     #Gets real irradiance of the current hour
-    start = time_now - pd.Timedelta(hours=3)
+    start = time_timestamp - pd.Timedelta(hours=3)
     end = start + pd.Timedelta(hours=6) 
     forecast_model = GFS()
     data = forecast_model.get_processed_data(latitude, longitude, start, end)
     print(data)
     weather = data.resample(frequency).interpolate()
-    weather = weather.loc[time_now,:]
+    weather = weather.loc[time_timestamp,:]
 
 
 
@@ -103,7 +103,7 @@ def infere_energy_production(latitude, longitude, altitude, modules_per_string, 
     ac_data = ac_data / 1000 #Wh to kWh
     return ac_data 
 
-def infere_energy_production_without_real_weather(latitude, longitude, altitude, modules_per_string, strings_per_inverter):
+def infere_energy_production_without_real_weather(latitude, longitude, altitude, modules_per_string, strings_per_inverter, timestamp):
 
     frequency = "1h"
     timezone = "UTC"
@@ -118,9 +118,9 @@ def infere_energy_production_without_real_weather(latitude, longitude, altitude,
     wind_speed = 0
 
     #time series with only the current hour
-    time_now = pd.Timestamp.now(tz=timezone).round('60min')
-    start= time_now
-    end= time_now
+    time_timestamp = pd.Timestamp(timestamp, tz=timezone, unit='ms').round('60min')
+    start= time_timestamp
+    end= time_timestamp
     times= pd.date_range(start, end, freq=frequency).tz_convert(timezone)
 
     solpos = pvlib.solarposition.get_solarposition(times, latitude, longitude)

@@ -354,8 +354,13 @@ const DashboardLayer = () => {
 
     const launchGrid = () => (
         () => {
+            let userTimeZone = Intl.DateTimeFormat().resolvedOptions().timeZone
+            let requestBody = {
+                'userTimeZone': userTimeZone,
+                'buildings': buildings
+            }
             let request_url = "http://localhost:8000/api/v1/grid/";
-            axios.post(request_url, buildings).then(res => res.data.id).then(grid_id => { dispatch(addGrid(grid_id)) });
+            axios.post(request_url, requestBody).then(res => res.data.id).then(grid_id => { dispatch(addGrid(grid_id)) });
             setLastEpochCheck(Date.now())
 
         }

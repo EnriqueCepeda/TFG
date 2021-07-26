@@ -8,7 +8,6 @@ import jade.wrapper.StaleProxyException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -36,12 +35,14 @@ public class GridManager {
         profile.setParameter(Profile.MAIN_HOST, "localhost");
         ContainerController container = runtime.createAgentContainer(profile);
         JSONObject data = new JSONObject(payload);
-        JSONArray keys = data.names();
+        String userTimeZone = data.getString("userTimeZone");
+        JSONObject building_data = data.getJSONObject("buildings");
+        JSONArray keys = building_data.names();
 
         JSONObject buildingRoles = new JSONObject();
         for (Object key : keys) {
             String buildingId = key.toString();
-            String buildingRole = (data.getJSONObject(buildingId)).getString("type");
+            String buildingRole = (building_data.getJSONObject(buildingId)).getString("type");
             buildingRoles.put(buildingId, buildingRole);
         }
         ArrayList<AgentController> agList = new ArrayList<AgentController>();
@@ -49,7 +50,7 @@ public class GridManager {
 
         for (Object key : keys) {
             String buildingId = key.toString();
-            JSONObject building = data.getJSONObject(buildingId);
+            JSONObject building = building_data.getJSONObject(buildingId);
             Double latitude = (Double) building.getDouble("latitude");
             Double longitude = (Double) building.getDouble("longitude");
             String type = (String) building.getString("type");
@@ -58,8 +59,9 @@ public class GridManager {
             JSONArray coordinates = building.getJSONArray("coordinates");
             JSONArray consumption = building.getJSONArray("consumption");
             String agentName = "Grid" + grid_id + "-" + buildingId.replace(" ", "_");
-            AgentController ag = container.createNewAgent(agentName, "com.multiagent.BuildingAgent", new Object[] {
-                    latitude, longitude, type, coordinates, consumption, buildingRoles, grid_id, panels, altitude });// arguments
+            AgentController ag = container.createNewAgent(agentName, "com.multiagent.BuildingAgent",
+                    new Object[] { latitude, longitude, type, coordinates, consumption, buildingRoles, grid_id, panels,
+                            altitude, userTimeZone });// arguments
 
             agList.add(ag);
         }

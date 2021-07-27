@@ -3,6 +3,7 @@ package com.multiagent;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.Math;
+import java.math.BigInteger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Timestamp;
@@ -47,19 +48,52 @@ import org.json.JSONObject;
 import org.json.JSONArray;
 import org.json.JSONException;
 
+class GridTime {
+
+	private static GridTime gridtime = null;
+	static final int demoNexTimeMs = 3600000;
+	Long demoActualTime = 1627395353882L;
+
+	private GridTime() {
+	}
+
+	public synchronized static GridTime getInstance() {
+
+		if (gridtime == null)
+			gridtime = new GridTime();
+		return gridtime;
+	}
+
+	public synchronized void updateTime() {
+		this.demoActualTime += demoNexTimeMs;
+	}
+
+}
+
 public class BuildingAgent extends Agent {
 	static final String REGISTER_TRANSACTION_URI = "http://localhost:8000/api/v1/grid/";
 	static final String ENERGY_CONSUMPTION_URI = "http://localhost:8000/api/v1/building/production";
 	// static final int iterationTimeMs = 3600000; // 1 hour in ms
-	static final int iterationTimeMs = 1200000; // 20 minutes in ms
+	static final int iterationTimeMs = 30000; // 1 hour in ms
+
+	// static final int iterationTimeMs = 60000; // 20 minutes in ms
+	static final boolean DEMO_MODE = false;
 
 	public static void registerTransaction(Integer grid_id, String sender, String receiver, Double energy)
 			throws URISyntaxException, ClientProtocolException, IOException {
 		String finalURL = BuildingAgent.REGISTER_TRANSACTION_URI + grid_id + "/transaction";
 		URIBuilder uriBuilder = new URIBuilder(finalURL);
+
 		uriBuilder.addParameter("sender_name", getRealBuildingId(sender));
 		uriBuilder.addParameter("receiver_name", getRealBuildingId(receiver));
 		uriBuilder.addParameter("energy", energy.toString());
+
+		if (BuildingAgent.DEMO_MODE) {
+			Timestamp ts = new Timestamp(GridTime.getInstance().demoActualTime);
+			String transactionTimestamp = Long.toString(ts.getTime());
+			uriBuilder.addParameter("grid_timestamp", transactionTimestamp);
+		}
+
 		URI requestURI = uriBuilder.build();
 		HttpPost httpPost = new HttpPost(requestURI);
 
@@ -109,7 +143,7 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		this.data = data;
 	}
 
-	public JSONObject getBuildingDataAPI(Object[] args)
+	public JSONObject getBuildingData(Object[] args)
 			throws ClientProtocolException, IOException, URISyntaxException, Exception {
 		Double latitude = (Double) args[0];
 		Double longitude = (Double) args[1];
@@ -151,7 +185,14 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 	public Double getBuildingProduction(Double latitude, Double longitude, Double altitude, Integer modules_per_string,
 			Integer strings_per_inverter) throws URISyntaxException, ClientProtocolException, IOException, Exception {
 
-		Timestamp ts = Timestamp.from(Instant.now().atZone(ZoneOffset.UTC).toInstant());
+		Timestamp ts = null;
+		if (BuildingAgent.DEMO_MODE) {
+			System.out.println("demo mode");
+			ts = new Timestamp(GridTime.getInstance().demoActualTime);
+		} else {
+			System.out.println(":(");
+			ts = Timestamp.from(Instant.now().atZone(ZoneOffset.UTC).toInstant());
+		}
 		String transactionTimestamp = Long.toString(ts.getTime());
 
 		URIBuilder uriBuilder = new URIBuilder(BuildingAgent.ENERGY_CONSUMPTION_URI);
@@ -188,7 +229,12 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		System.out.println("Agent " + this.myAgent.getLocalName() + ": Getting energy balance");
 		Double hourProduction = 0.0;
 		ZoneId userTimeZone = ZoneId.of(buildingData.getString("userTimeZone"));
-		int hour = Instant.now().atZone(userTimeZone).getHour();
+		int hour = 0;
+		if (BuildingAgent.DEMO_MODE) {
+			hour = Instant.ofEpochMilli(GridTime.getInstance().demoActualTime).atZone(userTimeZone).getHour();
+		} else {
+			hour = Instant.now().atZone(userTimeZone).getHour();
+		}
 		Double hourConsumption = ((JSONArray) (buildingData.get("consumption"))).getDouble(hour);
 		if (BuildingType.CONSUMER.name().equalsIgnoreCase(buildingData.getString("type"))) {
 			hourProduction = -hourConsumption;
@@ -211,11 +257,12 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 	}
 
 	public void action() {
+
 		Object[] args = this.myAgent.getArguments();
 		if (args != null && args.length > 0) {
 			try {
 				if (this.data == null) {
-					this.data = getBuildingDataAPI(args);
+					this.data = getBuildingData(args);
 				}
 				Double estimatedConsumedEnergy;
 				estimatedConsumedEnergy = getEstimatedEnergy(this.data);

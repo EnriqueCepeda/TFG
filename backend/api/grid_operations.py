@@ -5,11 +5,11 @@ import datetime
 
 from . import models
 
-def create_transaction(db: Session, grid_id, sender_name, receiver_name, energy):
+def create_transaction(db: Session, grid_id, sender_name, receiver_name, energy, grid_timestamp):
     sender = get_building_by_name_grid(db, grid_id, sender_name)
     receiver = get_building_by_name_grid(db, grid_id, receiver_name)
     if sender is not None and receiver is not None:
-        db_transaction = models.EnergyTransaction(sender_id=sender.id, receiver_id=receiver.id, energy=energy, timestamp = datetime.datetime.now(timezone.utc), grid_timestamp=pd.Timestamp.now('UTC').round('60min'))
+        db_transaction = models.EnergyTransaction(sender_id=sender.id, receiver_id=receiver.id, energy=energy, timestamp = datetime.datetime.now(timezone.utc), grid_timestamp = grid_timestamp)
         db.add(db_transaction)
         db.commit()
         db.refresh(db_transaction)

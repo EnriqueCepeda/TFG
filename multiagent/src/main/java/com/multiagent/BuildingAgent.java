@@ -50,6 +50,8 @@ import org.json.JSONException;
 public class BuildingAgent extends Agent {
 	static final String REGISTER_TRANSACTION_URI = "http://localhost:8000/api/v1/grid/";
 	static final String ENERGY_CONSUMPTION_URI = "http://localhost:8000/api/v1/building/production";
+	// static final int iterationTimeMs = 3600000; // 1 hour in ms
+	static final int iterationTimeMs = 1200000; // 20 minutes in ms
 
 	public static void registerTransaction(Integer grid_id, String sender, String receiver, Double energy)
 			throws URISyntaxException, ClientProtocolException, IOException {
@@ -201,6 +203,8 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 
 			if (BuildingType.PROSUMER.name().equalsIgnoreCase(buildingData.getString("type"))) {
 				hourProduction = hourProduction - hourConsumption;
+				BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
+						this.myAgent.getLocalName(), hourConsumption);
 			}
 		}
 		return hourProduction;
@@ -298,7 +302,7 @@ class CheckFinishedConsumersBehaviour extends TickerBehaviour {
 				e.printStackTrace();
 			}
 
-			this.myAgent.addBehaviour(new RefreshDataBehaviour(this.myAgent, 54000, this.data));
+			this.myAgent.addBehaviour(new RefreshDataBehaviour(this.myAgent, BuildingAgent.iterationTimeMs, this.data));
 			this.myAgent.removeBehaviour(this);
 
 		}
@@ -621,7 +625,7 @@ class ConsumerBehaviour extends ContractNetInitiator {
 			// Initializes the BuildingAgentInitiatorBehaviour in an hour
 			int time = 54000;
 			System.out.println("Agent " + this.myAgent.getLocalName() + ": Unregistering from DF");
-			this.myAgent.addBehaviour(new RefreshDataBehaviour(this.myAgent, time, this.data));
+			this.myAgent.addBehaviour(new RefreshDataBehaviour(this.myAgent, BuildingAgent.iterationTimeMs, this.data));
 			this.myAgent.removeBehaviour(this);
 		} else if (this.offersWithoutResponse == 0 && this.agreedEnergy > 0) {
 			System.out.println(

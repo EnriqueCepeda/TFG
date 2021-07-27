@@ -2,7 +2,7 @@ from urllib.parse import urlencode
 import aiohttp
 import os
 from functools import lru_cache
-from typing import Dict, List
+from typing import Dict, List, Optional
 from fastapi import FastAPI, HTTPException, Depends, Response, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import PlainTextResponse
@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 from datetime import datetime
 import requests
+import pandas as pd
 
 
 
@@ -130,14 +131,19 @@ async def get_building_altitude(latitude: float, longitude: float):
           raise HTTPException(status_code=500, detail="Server error")
 
 @app.post(_API_ROOT_ + "/grid/{grid_id}/transaction", status_code=201, tags=["Grid"])
-def new_transaction(grid_id: int, sender_name: str, receiver_name: str, energy: float, 
-                    db: Session = Depends(get_db)):
+def new_transaction(grid_id: int, sender_name: str, receiver_name: str, energy: float,
+                    grid_timestamp : Optional[float] = None, db: Session = Depends(get_db)):
   '''
   Registers a new energy transaction which have occurred on a certain grid
   '''
+
+  if grid_timestamp:
+    timestamp = pd.Timestamp(grid_timestamp, tz='UTC', unit='ms')
+  else:
+    timestamp = pd.Timestamp.now('UTC').round('60min')
   sender_name = sender_name.replace("_", " ")
   receiver_name = receiver_name.replace("_", " ")
-  transaction = grid_operations.create_transaction(db, grid_id, sender_name, receiver_name, energy)
+  transaction = grid_operations.create_transaction(db, grid_id, sender_name, receiver_name, energy, grid_timestamp = timestamp)
   if transaction is not None:
     return {"id": transaction.id}
   else:

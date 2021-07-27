@@ -598,17 +598,18 @@ const reducer = (state = initialState, action) => {
         }
         case ADD_TRANSACTION: {
             let stateCloned = _.cloneDeep(state);
-            var timestamp = convertUTCDateToLocalDate(action.grid_timestamp);
-            if (timestamp in stateCloned[action.sender].transactions) {
-                stateCloned[action.sender].transactions[timestamp].push([action.receiver, -action.energy]);
-            } else {
-                stateCloned[action.sender].transactions[timestamp] = [[action.receiver, -action.energy]];
-            }
 
+            var timestamp = convertUTCDateToLocalDate(action.grid_timestamp);
             if (timestamp in stateCloned[action.receiver].transactions) {
                 stateCloned[action.receiver].transactions[timestamp].push([action.sender, +action.energy]);
             } else {
                 stateCloned[action.receiver].transactions[timestamp] = [[action.sender, +action.energy]];
+            }
+
+            if (timestamp in stateCloned[action.sender].transactions) {
+                stateCloned[action.sender].transactions[timestamp].push([action.receiver, -action.energy]);
+            } else {
+                stateCloned[action.sender].transactions[timestamp] = [[action.receiver, -action.energy]];
             }
             return stateCloned;
         }

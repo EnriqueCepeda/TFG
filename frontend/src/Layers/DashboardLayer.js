@@ -105,20 +105,43 @@ const Popup = ({ buildingId, popupRef, closeHandler, overallConsumedEnergy, over
     };
 
     const getBuildingTransactions = (timestamp, transaction) => {
-        if (transaction[1] < 0) {
-            return (<React.Fragment>
-                <Typography display="inline"> {timestamp + " | "}  </Typography>
-                <PurpleTypography display="inline"> {(-transaction[1].toFixed(2)) + " Kwh"} </PurpleTypography>
-                <Typography display="inline"> {"to "}  </Typography>
-                <PurpleTypography display="inline" > {transaction[0]} </PurpleTypography>
-            </React.Fragment>)
+        if (transaction[1] > 0) {
+            if (transaction[0] === buildingId) {
+                return (<React.Fragment>
+                    <Typography display="inline"> {timestamp + " | "}  </Typography>
+                    <PurpleTypography display="inline"> {transaction[1].toFixed(2) + " Kwh"} </PurpleTypography>
+                    <Typography display="inline"> {"from "}  </Typography>
+                    <PurpleTypography display="inline"> {"itself"} </PurpleTypography>
+                </React.Fragment>);
+
+            } else {
+                return (<React.Fragment>
+                    <Typography display="inline"> {timestamp + " | "}  </Typography>
+                    <PurpleTypography display="inline"> {transaction[1].toFixed(2) + " Kwh"} </PurpleTypography>
+                    <Typography display="inline"> {"from "}  </Typography>
+                    <PurpleTypography display="inline"> {transaction[0]} </PurpleTypography>
+                </React.Fragment>);
+            }
+
         } else {
-            return (<React.Fragment>
-                <Typography display="inline"> {timestamp + " | "}  </Typography>
-                <PurpleTypography display="inline"> {transaction[1].toFixed(2) + " Kwh"} </PurpleTypography>
-                <Typography display="inline"> {"from "}  </Typography>
-                <PurpleTypography display="inline"> {transaction[0]} </PurpleTypography>
-            </React.Fragment>)
+            if (transaction[0] === buildingId) {
+                return (<React.Fragment>
+                    <Typography display="inline"> {timestamp + " | "}  </Typography>
+                    <PurpleTypography display="inline"> {(-(transaction[1])).toFixed(2) + " Kwh"} </PurpleTypography>
+                    <Typography display="inline"> {"to "}  </Typography>
+                    <PurpleTypography display="inline" > {"itself"} </PurpleTypography>
+                </React.Fragment>);
+
+            } else {
+                return (<React.Fragment>
+                    <Typography display="inline"> {timestamp + " | "}  </Typography>
+                    <PurpleTypography display="inline"> {(-(transaction[1])).toFixed(2) + " Kwh"} </PurpleTypography>
+                    <Typography display="inline"> {"to "}  </Typography>
+                    <PurpleTypography display="inline" > {transaction[0]} </PurpleTypography>
+                </React.Fragment>);
+
+            }
+
         }
     }
 

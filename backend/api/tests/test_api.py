@@ -39,7 +39,7 @@ def get_grid_fixture():
     return grid
 
 def create_grid(grid_data):
-    uri = f"{_API_ROOT_}/grid/launch"
+    uri = f"{_API_ROOT_}/grid/"
     response = client.post(uri, headers={"Content-Type": "application/json"}, json = grid_data)
     return response
 
@@ -115,14 +115,14 @@ def test_get_non_fetched_transactions():
 
 def test_get_building_address():
     grid_data = get_grid_fixture()
-    building_data = grid_data[list(grid_data.keys())[1]]
+    building_data = grid_data["buildings"][list(grid_data["buildings"].keys())[1]]
     latitude, longitude = building_data["latitude"], building_data["longitude"]
     response = get_building_address(latitude, longitude)
     assert response.status_code == 200
 
 def test_get_buildings_altitude():
     grid_data = get_grid_fixture()
-    building_data =  list(grid_data.values())[0]
+    building_data =  list(grid_data["buildings"].values())[0]
     latitude, longitude, = building_data["latitude"], building_data["longitude"]
     response = get_buildings_altitude(latitude, longitude)
     assert response.status_code == 200

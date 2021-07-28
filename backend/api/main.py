@@ -157,7 +157,7 @@ def get_non_fetched_transactions(grid_id: int, timestamp: float, db: Session = D
   return [transaction.to_dict() for transaction in transactions]
 
 @app.post(f"{_API_ROOT_}/grid/", status_code=201, tags=["Grid"])
-async def launch_grid(body_json: Dict , response: Response, db: Session = Depends(get_db)):
+async def launch_grid(body_json: Dict , response: Response, db: Session = Depends(get_db), settings: config.Settings = Depends(get_settings)):
   '''
   Launches a multiagent system to simulate the behaviour of a Smart Grid configuration using the data from the Frontend Application
   '''  
@@ -171,6 +171,8 @@ async def launch_grid(body_json: Dict , response: Response, db: Session = Depend
     grid_operations.create_building(db, building_id, address, btype, grid_id)
   
   try:
+    if settings.test:
+      return {'id': grid_id}
     response_api = requests.post(f"{MULTIAGENT_API_URI}{grid_id}/", json=body_json)
     if response_api.status_code != 201:
       grid_operations.delete_grid(db, grid_id)

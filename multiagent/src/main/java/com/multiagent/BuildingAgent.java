@@ -45,6 +45,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
+import org.springframework.boot.autoconfigure.h2.H2ConsoleProperties.Settings;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -73,10 +74,9 @@ class GridTime {
 public class BuildingAgent extends Agent {
 	static final String REGISTER_TRANSACTION_URI = "http://localhost:8000/api/v1/grid/";
 	static final String ENERGY_CONSUMPTION_URI = "http://localhost:8000/api/v1/building/production";
-	// static final int iterationTimeMs = 3600000; // 1 hour in ms
-	static final int iterationTimeMs = 30000; // 1 hour in ms
+	static final int iterationTimeMs = 3600000; // 1 hour in ms
 
-	// static final int iterationTimeMs = 60000; // 20 minutes in ms
+	// static final int iterationTimeMs = 60000; // 10 minutes in ms
 	static final boolean DEMO_MODE = false;
 
 	public static void registerTransaction(Integer grid_id, String sender, String receiver, Double energy)
@@ -116,6 +116,11 @@ public class BuildingAgent extends Agent {
 	}
 
 	protected void setup() {
+		if (BuildingAgent.DEMO_MODE) {
+			System.out.println("DEMO MODE");
+		} else {
+			System.out.println("NORMAL MODE");
+		}
 		addBehaviour(new BuildingAgentInitiator(this));
 	}
 
@@ -187,10 +192,8 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 
 		Timestamp ts = null;
 		if (BuildingAgent.DEMO_MODE) {
-			System.out.println("demo mode");
 			ts = new Timestamp(GridTime.getInstance().demoActualTime);
 		} else {
-			System.out.println(":(");
 			ts = Timestamp.from(Instant.now().atZone(ZoneOffset.UTC).toInstant());
 		}
 		String transactionTimestamp = Long.toString(ts.getTime());

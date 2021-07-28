@@ -93,6 +93,12 @@ To run it, the user must navigate to the [backend folder](./backend) and execute
 uvicorn api.main:app --port 8000
 ```
 
+To run the API test suite, the user must execute the following command on the [backend folder](./backend):
+
+```bash
+pytest api
+```
+
 Lastly, to watch the backend documentation, the user must open a web browser and navigate to http://localhost:8000/docs.
 
 ## Run the frontend server

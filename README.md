@@ -8,7 +8,7 @@ The project is organized into the following directories:
 
 - **Frontend.** Web application constructed with React, which lets the user design and visualize the Smart Grid behavior and the energy transactions between the grid buildings.
 - **Backend.** Backend API responsible for the roof-top PV panel fitting algorithm, for the PV energy inference module and for the data persistence among other things.
-- **Multiagent.** Multiagent system which simulates the energy distribution between the buildings which conforms the Smart Grid.
+- **Multiagent.** REST API which launches the multiagent systems that simulate the energy distribution between the buildings which conforms a Smart Grid.
 
 ---
 
@@ -69,16 +69,16 @@ _P.S: The way in which the environment variables are introduced may vary dependi
 
 ---
 
-## Run the multiagent system server and JADE Agent Platform
+## Run the multiagent system server and the JADE Agent Platform
 
-To use the application, first is necessary to activate the JADE Agent Platform and the Spring-boot server.
-To activate the Agent Platform, the user must run the following command:
+To use the application, first is necessary to activate the _JADE Agent Platform_ and the _Spring-boot_ server.
+To activate the _Agent Platform_, the user must navigate to the [multiagent folder](./multiagent) and run the following command:
 
 ```
 java jade.Boot -name -SmartGrid -gui
 ```
 
-To run the Spring-boot server, the user must navigate to the multiagent folder and execute the following command:
+To run the _Spring-boot_ server, the user must also be in the [multiagent folder](./multiagent) and execute the following command:
 
 ```
 mvn spring-boot:run
@@ -86,18 +86,18 @@ mvn spring-boot:run
 
 ## Run the backend server
 
-To use the application, first is necessary to run the backend server, which uses uvicorn ASGI server.
-To run it, the user must navigate to the backend folder and execute the following command:
+To use the application, first is necessary to run the backend server, which uses _uvicorn ASGI server_.
+To run it, the user must navigate to the [backend folder](./backend) and execute the following command:
 
 ```
 uvicorn api.main:app --port 8000
 ```
 
-Lastly, to watch the backend documentation, the user must open a web browser and navigate http://localhost:8000/docs.
+Lastly, to watch the backend documentation, the user must open a web browser and navigate to http://localhost:8000/docs.
 
 ## Run the frontend server
 
-To run the application in the browser, the application needs to be constructed. For that, the user must navigate to the frontend directory and must run the following command:
+To run the application in the browser, the application needs to be constructed and minified. For that, the user must navigate to the [frontend directory](./frontend) and must run the following command:
 
 ```
 npm run build

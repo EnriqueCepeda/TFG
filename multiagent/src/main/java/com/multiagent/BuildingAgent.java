@@ -209,7 +209,6 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		uriBuilder.addParameter("timestamp", transactionTimestamp);
 
 		URI requestURI = uriBuilder.build();
-		System.out.println(requestURI);
 		HttpGet httpGet = new HttpGet(requestURI);
 		CloseableHttpClient httpClient = HttpClients.createDefault();
 		CloseableHttpResponse httpResponse = httpClient.execute(httpGet);
@@ -221,7 +220,7 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 			if (entity != null) {
 				// return it as a String
 				String result = EntityUtils.toString(entity);
-				System.out.print(result);
+				System.out.print("Agent " + this.myAgent.getLocalName() + ": " + result);
 				JSONObject productionResult = new JSONObject(result);
 				return productionResult.getDouble("production");
 			} else {

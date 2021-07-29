@@ -159,7 +159,6 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 			var selIndex = keys.indexOf(buildingOlId);
 			centerSetter(toLonLat(map.getView().getCenter()));
 			if (selIndex < 0) {
-				debugger;
 				var interiorCoordinates = feature.getGeometry().getInteriorPoint().getCoordinates();
 				var lonLatCoordinates = toLonLat([interiorCoordinates[0], interiorCoordinates[1]]);
 				var latitude = lonLatCoordinates[1];

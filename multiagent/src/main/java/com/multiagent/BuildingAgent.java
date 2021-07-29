@@ -10,6 +10,8 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Date;
@@ -228,15 +230,28 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		}
 	}
 
+	public int getNearestHour(ZonedDateTime dt) {
+		int minutes = dt.getMinute();
+		if (minutes >= 30) {
+			dt = dt.plusHours(1);
+		}
+
+		// Round down
+		dt = dt.truncatedTo(ChronoUnit.HOURS);
+		return dt.getHour();
+	}
+
 	public Double getEstimatedEnergy(JSONObject buildingData) throws ClientProtocolException, IOException, Exception {
 		System.out.println("Agent " + this.myAgent.getLocalName() + ": Getting energy balance");
 		Double hourProduction = 0.0;
 		ZoneId userTimeZone = ZoneId.of(buildingData.getString("userTimeZone"));
 		int hour = 0;
 		if (BuildingAgent.DEMO_MODE) {
-			hour = Instant.ofEpochMilli(GridTime.getInstance().demoActualTime).atZone(userTimeZone).getHour();
+			ZonedDateTime dt = Instant.ofEpochMilli(GridTime.getInstance().demoActualTime).atZone(userTimeZone);
+			hour = getNearestHour(dt);
 		} else {
-			hour = Instant.now().atZone(userTimeZone).getHour();
+			ZonedDateTime dt = Instant.now().atZone(userTimeZone);
+			hour = getNearestHour(dt);
 		}
 		Double hourConsumption = ((JSONArray) (buildingData.get("consumption"))).getDouble(hour);
 		if (BuildingType.CONSUMER.name().equalsIgnoreCase(buildingData.getString("type"))) {
@@ -251,9 +266,9 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 					strings_per_inverter);
 
 			if (BuildingType.PROSUMER.name().equalsIgnoreCase(buildingData.getString("type"))) {
-				hourProduction = hourProduction - hourConsumption;
 				BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
-						this.myAgent.getLocalName(), hourConsumption);
+						this.myAgent.getLocalName(), Math.min(hourProduction, hourConsumption));
+				hourProduction = hourProduction - hourConsumption;
 			}
 		}
 		return hourProduction;

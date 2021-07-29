@@ -57,7 +57,6 @@ def infere_energy_production(latitude, longitude, altitude, modules_per_string, 
     end = start + pd.Timedelta(hours=6) 
     forecast_model = GFS()
     data = forecast_model.get_processed_data(latitude, longitude, start, end)
-    print(data)
     weather = data.resample(frequency).interpolate()
     weather = weather.loc[time_timestamp,:]
 

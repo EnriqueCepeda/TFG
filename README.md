@@ -20,7 +20,6 @@ The project is organized into the following directories:
 - Npm, 6.14.8
 - Java 8, 1.8 (OpenJDK 8 or JAVA SE 8)
 - Apache Maven 3.6.3
-- JADE 4, 4.0
 
 ---
 

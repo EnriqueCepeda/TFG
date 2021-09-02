@@ -55,7 +55,7 @@ def infere_energy_production(latitude, longitude, altitude, modules_per_string, 
     #Gets real irradiance of the current hour
     start = time_timestamp - pd.Timedelta(hours=3)
     end = start + pd.Timedelta(hours=6) 
-    forecast_model = GFS()
+    forecast_model = GFS(resolution='quarter')
     data = forecast_model.get_processed_data(latitude, longitude, start, end)
     weather = data.resample(frequency).interpolate()
     weather = weather.loc[time_timestamp,:]

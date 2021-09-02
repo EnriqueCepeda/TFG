@@ -47,7 +47,6 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import org.json.JSONObject;
-import org.springframework.boot.autoconfigure.h2.H2ConsoleProperties.Settings;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -76,7 +75,7 @@ class GridTime {
 public class BuildingAgent extends Agent {
 	static final String REGISTER_TRANSACTION_URI = "http://localhost:8000/api/v1/grid/";
 	static final String ENERGY_CONSUMPTION_URI = "http://localhost:8000/api/v1/building/production";
-	static final int iterationTimeMs = 3600000; // 1 hour in ms
+	static final int iterationTimeMs = 60000; // 1 hour in ms
 
 	// static final int iterationTimeMs = 60000; // 10 minutes in ms
 	static final boolean DEMO_MODE = false;
@@ -265,8 +264,10 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 					strings_per_inverter);
 
 			if (BuildingType.PROSUMER.name().equalsIgnoreCase(buildingData.getString("type"))) {
-				BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
-						this.myAgent.getLocalName(), Math.min(hourProduction, hourConsumption));
+				if (hourProduction > 0){
+					BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
+							this.myAgent.getLocalName(), Math.min(hourProduction, hourConsumption));
+				}
 				hourProduction = hourProduction - hourConsumption;
 			}
 		}

@@ -57,12 +57,17 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 			format: new OSMXML(),
 			loader: function (extent, resolution, projection) {
 				let epsg4326Extent = transformExtent(extent, projection, 'EPSG:4326');
+				let axiosConfig = {
+					headers: {
+						"Access-Control-Allow-Origin": "*",
+					}
+				};
 				let request_url = 'https://overpass.kumi.systems/api/interpreter';
 				let extended_load_percentage = 0.01;
 				let stringExtent = (epsg4326Extent[1] - epsg4326Extent[1] * extended_load_percentage) + ',' + (epsg4326Extent[0] * extended_load_percentage + epsg4326Extent[0]) + ',' +
 					(epsg4326Extent[3] * extended_load_percentage + epsg4326Extent[3]) + ',' + (epsg4326Extent[2] - epsg4326Extent[2] * extended_load_percentage);
 				let query = "(way[building](" + stringExtent + ");); out meta; >; out meta qt;"
-				axios.post(request_url, query).then(response => {
+				axios.post(request_url, query, axiosConfig).then(response => {
 					var features = new OSMXML().readFeatures(response.data, {
 						featureProjection: map.getView().getProjection(),
 					});

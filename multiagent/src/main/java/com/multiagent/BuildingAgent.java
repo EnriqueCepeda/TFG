@@ -52,22 +52,19 @@ import org.json.JSONException;
 
 class GridTime {
 
-	private static GridTime gridtime = null;
 	static final int demoNexTimeMs = 3600000;
-	Long demoActualTime = 1627395353882L;
-
-	private GridTime() {
+	Long demoActualTime = 1631088000000L;
+	
+	public GridTime() {
+	
 	}
 
-	public synchronized static GridTime getInstance() {
-
-		if (gridtime == null)
-			gridtime = new GridTime();
-		return gridtime;
-	}
-
-	public synchronized void updateTime() {
+	public void updateTime() {
 		this.demoActualTime += demoNexTimeMs;
+	}
+
+	public Long getTime(){
+		return this.demoActualTime;
 	}
 
 }
@@ -75,10 +72,9 @@ class GridTime {
 public class BuildingAgent extends Agent {
 	static final String REGISTER_TRANSACTION_URI = "http://localhost:8000/api/v1/grid/";
 	static final String ENERGY_CONSUMPTION_URI = "http://localhost:8000/api/v1/building/production";
-	static final int iterationTimeMs = 60000; // 1 hour in ms
-
-	// static final int iterationTimeMs = 60000; // 10 minutes in ms
-	static final boolean DEMO_MODE = false;
+	static final int iterationTimeMs = 20000;
+	static final boolean DEMO_MODE = true;
+	public GridTime gridTime = new GridTime();
 
 	public static void registerTransaction(Integer grid_id, String sender, String receiver, Double energy)
 			throws URISyntaxException, ClientProtocolException, IOException {
@@ -89,11 +85,35 @@ public class BuildingAgent extends Agent {
 		uriBuilder.addParameter("receiver_name", getRealBuildingId(receiver));
 		uriBuilder.addParameter("energy", energy.toString());
 
-		if (BuildingAgent.DEMO_MODE) {
-			Timestamp ts = new Timestamp(GridTime.getInstance().demoActualTime);
-			String transactionTimestamp = Long.toString(ts.getTime());
-			uriBuilder.addParameter("grid_timestamp", transactionTimestamp);
+		URI requestURI = uriBuilder.build();
+		HttpPost httpPost = new HttpPost(requestURI);
+
+		CloseableHttpClient httpClient = HttpClients.createDefault();
+		CloseableHttpResponse httpResponse = httpClient.execute(httpPost);
+		if (httpResponse.getStatusLine().getStatusCode() != 201) {
+			System.out.println("Transaction could not be registered");
 		}
+		InputStream responseStream = httpResponse.getEntity().getContent();
+		httpClient.close();
+
+	}
+
+	public GridTime getGridTime(){
+		return this.gridTime;
+	}
+
+	public static void registerTransaction(Integer grid_id, String sender, String receiver, Double energy, Long timestamp)
+			throws URISyntaxException, ClientProtocolException, IOException {
+		String finalURL = BuildingAgent.REGISTER_TRANSACTION_URI + grid_id + "/transaction";
+		URIBuilder uriBuilder = new URIBuilder(finalURL);
+
+		uriBuilder.addParameter("sender_name", getRealBuildingId(sender));
+		uriBuilder.addParameter("receiver_name", getRealBuildingId(receiver));
+		uriBuilder.addParameter("energy", energy.toString());
+
+		Timestamp ts = new Timestamp(timestamp);
+		String transactionTimestamp = Long.toString(ts.getTime());
+		uriBuilder.addParameter("grid_timestamp", transactionTimestamp);
 
 		URI requestURI = uriBuilder.build();
 		HttpPost httpPost = new HttpPost(requestURI);
@@ -193,7 +213,7 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 
 		Timestamp ts = null;
 		if (BuildingAgent.DEMO_MODE) {
-			ts = new Timestamp(GridTime.getInstance().demoActualTime);
+			ts = new Timestamp(((BuildingAgent) this.myAgent).gridTime.getTime());
 		} else {
 			ts = Timestamp.from(Instant.now().atZone(ZoneOffset.UTC).toInstant());
 		}
@@ -245,7 +265,7 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 		ZoneId userTimeZone = ZoneId.of(buildingData.getString("userTimeZone"));
 		int hour = 0;
 		if (BuildingAgent.DEMO_MODE) {
-			ZonedDateTime dt = Instant.ofEpochMilli(GridTime.getInstance().demoActualTime).atZone(userTimeZone);
+			ZonedDateTime dt = Instant.ofEpochMilli(((BuildingAgent)this.myAgent).gridTime.getTime()).atZone(userTimeZone);
 			hour = getNearestHour(dt);
 		} else {
 			ZonedDateTime dt = Instant.now().atZone(userTimeZone);
@@ -264,9 +284,15 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 					strings_per_inverter);
 
 			if (BuildingType.PROSUMER.name().equalsIgnoreCase(buildingData.getString("type"))) {
-				if (hourProduction > 0){
-					BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
-							this.myAgent.getLocalName(), Math.min(hourProduction, hourConsumption));
+				if (hourProduction > 0) {
+					if (BuildingAgent.DEMO_MODE){
+						BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
+								this.myAgent.getLocalName(), Math.min(hourProduction, hourConsumption), 
+								((BuildingAgent) this.myAgent).gridTime.getTime());
+					}else{
+						BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
+								this.myAgent.getLocalName(), Math.min(hourProduction, hourConsumption));
+					}
 				}
 				hourProduction = hourProduction - hourConsumption;
 			}
@@ -313,6 +339,7 @@ class RefreshDataBehaviour extends TickerBehaviour {
 
 	protected void onTick() {
 		this.myAgent.addBehaviour(new BuildingAgentInitiator(this.myAgent, this.data));
+		((BuildingAgent) this.myAgent).gridTime.updateTime();
 		this.myAgent.removeBehaviour(this);
 
 	}
@@ -351,8 +378,14 @@ class CheckFinishedConsumersBehaviour extends TickerBehaviour {
 		if (consumers != null && consumers.length == 0) {
 			if (this.producerBehaviour.remainingEnergy > 0) {
 				try {
+					if (BuildingAgent.DEMO_MODE){
+						BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
+								"grid_agent", this.producerBehaviour.remainingEnergy, 
+								((BuildingAgent) this.myAgent).gridTime.getTime());
+					}else{
 					BuildingAgent.registerTransaction(this.data.getInt("grid_id"), this.myAgent.getLocalName(),
 							"grid_agent", this.producerBehaviour.remainingEnergy);
+					}
 				} catch (JSONException | URISyntaxException | IOException e1) {
 					e1.printStackTrace();
 					System.out.println("Problems registering final transaction producer");
@@ -674,8 +707,13 @@ class ConsumerBehaviour extends ContractNetInitiator {
 		try {
 			System.out.println(this.myAgent.getLocalName()); // dbg
 			System.out.println(inform.getSender().getLocalName()); // dbg
+			if (BuildingAgent.DEMO_MODE){
+				BuildingAgent.registerTransaction(this.data.getInt("grid_id"), inform.getSender().getLocalName(),
+						this.myAgent.getLocalName(), energyTaken, ((BuildingAgent) this.myAgent).gridTime.getTime());
+			}else{
 			BuildingAgent.registerTransaction(this.data.getInt("grid_id"), inform.getSender().getLocalName(),
 					this.myAgent.getLocalName(), energyTaken);
+			}
 		} catch (URISyntaxException | IOException e1) {
 			e1.printStackTrace();
 		}
@@ -688,7 +726,6 @@ class ConsumerBehaviour extends ContractNetInitiator {
 				e.printStackTrace();
 			}
 			// Initializes the BuildingAgentInitiatorBehaviour in an hour
-			int time = 54000;
 			System.out.println("Agent " + this.myAgent.getLocalName() + ": Unregistering from DF");
 			this.myAgent.addBehaviour(new RefreshDataBehaviour(this.myAgent, BuildingAgent.iterationTimeMs, this.data));
 			this.myAgent.removeBehaviour(this);

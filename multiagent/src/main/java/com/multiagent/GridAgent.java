@@ -20,9 +20,6 @@ public class GridAgent extends Agent {
         if (args != null && args.length > 0) {
             Integer grid_id = this.getData(args);
             this.addBehaviour(new ProducerInitiatiorBehaviour(this, totalEnergy, grid_id));
-            if (BuildingAgent.DEMO_MODE) {
-                this.addBehaviour(new UpdateDemoTimeBehaviour(this));
-            }
         }
     }
 
@@ -36,16 +33,4 @@ public class GridAgent extends Agent {
         }
     }
 
-}
-
-class UpdateDemoTimeBehaviour extends TickerBehaviour {
-
-    public UpdateDemoTimeBehaviour(Agent agent) {
-        super(agent, BuildingAgent.iterationTimeMs + 5000);
-    }
-
-    protected void onTick() {
-        GridTime.getInstance().updateTime();
-
-    }
 }

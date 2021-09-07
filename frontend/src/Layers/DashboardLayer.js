@@ -362,6 +362,7 @@ const DashboardLayer = () => {
 
 
     useEffect(() => {
+        console.log(JSON.stringify(buildings));
         dispatch(launchGrid());
         setActive(true);
         return () => {

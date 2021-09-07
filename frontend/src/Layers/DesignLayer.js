@@ -15,6 +15,7 @@ import { Fill, Stroke, Style } from 'ol/style';
 import MapContext from "../Map/MapContext";
 import { addBuilding, removeBuilding, updateBuildingAddress, updateBuildingMaxPanels, updateBuildingAltitude } from '../redux/actions/buildingActions';
 import { getBuildings } from '../redux/selectors';
+import store from "redux/store";
 
 
 let styles = {
@@ -42,9 +43,7 @@ let styles = {
 
 const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 	const { map } = useContext(MapContext);
-	const buildings = useSelector(getBuildings);
 	const dispatch = useDispatch();
-	const [firstMounted, setFirstMounted] = useState(true);
 
 	let defaultStyle = styles.default;
 	let highlightStyle = styles.highlight;
@@ -52,7 +51,6 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 	useEffect(() => {
 		if (!map) return;
 
-		setFirstMounted(false);
 		let source = new VectorSource({
 			format: new OSMXML(),
 			loader: function (extent, resolution, projection) {
@@ -72,9 +70,7 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 						featureProjection: map.getView().getProjection(),
 					});
 					source.addFeatures(features);
-					if (firstMounted) {
-						reloadSelectedItems(source);
-					}
+					reloadSelectedItems(source);
 				})
 			},
 			strategy: bboxStrategy,
@@ -87,6 +83,7 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 			minZoom: renderZoom
 		});
 		map.addLayer(vectorLayer);
+		map.addEventListener('singleclick', modifyBuildingListListener);
 		vectorLayer.setZIndex(zIndex);
 
 
@@ -97,19 +94,9 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 		};
 	}, [map]);
 
-
-	useEffect(() => {
-		if (!map) return;
-		map.addEventListener('singleclick', modifyBuildingListListener);
-		return () => {
-			if (map) {
-				map.removeEventListener('singleclick', modifyBuildingListListener);
-			}
-		};
-	}, [map, buildings]);
-
 	function reloadSelectedItems(source) {
-		Object.keys(buildings).map((dictkey) => {
+		var new_buildings = store.getState().buildings
+		Object.keys(new_buildings).map((dictkey) => {
 			var feature = source.getFeatureById(getOriginalId(dictkey));
 			if (feature !== null) {
 				feature.setStyle(highlightStyle);
@@ -159,7 +146,8 @@ const DesignLayer = ({ renderZoom, centerSetter, zIndex = 1 }) => {
 
 	function modifyBuildingListListener(e) {
 		map.forEachFeatureAtPixel(e.pixel, function (feature) {
-			var keys = Object.keys(buildings);
+			var new_buildings = store.getState().buildings
+			var keys = Object.keys(new_buildings);
 			var buildingOlId = "Building " + feature.getId();
 			var selIndex = keys.indexOf(buildingOlId);
 			centerSetter(toLonLat(map.getView().getCenter()));

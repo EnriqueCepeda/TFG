@@ -53,7 +53,8 @@ import org.json.JSONException;
 class GridTime {
 
 	static final int demoNexTimeMs = 3600000;
-	Long demoActualTime = 1631088000000L;
+	Long demoActualTime = 1631088000000L; //10 AM
+	// Long demoActualTime = Instant.now().toEpochMilli();
 	
 	public GridTime() {
 	
@@ -72,7 +73,7 @@ class GridTime {
 public class BuildingAgent extends Agent {
 	static final String REGISTER_TRANSACTION_URI = "http://localhost:8000/api/v1/grid/";
 	static final String ENERGY_CONSUMPTION_URI = "http://localhost:8000/api/v1/building/production";
-	static final int iterationTimeMs = 20000;
+	static final int iterationTimeMs = 35000;
 	static final boolean DEMO_MODE = true;
 	public GridTime gridTime = new GridTime();
 
@@ -137,11 +138,6 @@ public class BuildingAgent extends Agent {
 	}
 
 	protected void setup() {
-		if (BuildingAgent.DEMO_MODE) {
-			System.out.println("DEMO MODE");
-		} else {
-			System.out.println("NORMAL MODE");
-		}
 		addBehaviour(new BuildingAgentInitiator(this));
 	}
 
@@ -239,8 +235,9 @@ class BuildingAgentInitiator extends OneShotBehaviour {
 			if (entity != null) {
 				// return it as a String
 				String result = EntityUtils.toString(entity);
-				System.out.print("Agent " + this.myAgent.getLocalName() + ": " + result);
 				JSONObject productionResult = new JSONObject(result);
+				System.out.println("Agent " + this.myAgent.getLocalName() + ": " + productionResult
+						.getDouble("production") + " Kwh");
 				return productionResult.getDouble("production");
 			} else {
 				return 0.0;
@@ -705,8 +702,6 @@ class ConsumerBehaviour extends ContractNetInitiator {
 		Double energyTaken = Double.parseDouble(inform.getContent());
 		this.agreedEnergy -= energyTaken;
 		try {
-			System.out.println(this.myAgent.getLocalName()); // dbg
-			System.out.println(inform.getSender().getLocalName()); // dbg
 			if (BuildingAgent.DEMO_MODE){
 				BuildingAgent.registerTransaction(this.data.getInt("grid_id"), inform.getSender().getLocalName(),
 						this.myAgent.getLocalName(), energyTaken, ((BuildingAgent) this.myAgent).gridTime.getTime());
